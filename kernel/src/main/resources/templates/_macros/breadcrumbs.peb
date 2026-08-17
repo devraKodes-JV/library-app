@@ -1,0 +1,16 @@
+{#- breadcrumbs.peb - Macro for breadcrumb navigation #}
+{% macro render(items) %}
+{% if items is defined and items is not empty %}
+<nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb mb-0">
+        {% for item in items %}
+        {% if item.url is defined and item.url is not empty %}
+        <li class="breadcrumb-item"><a href="{{ item.url }}">{{ item.label }}</a></li>
+        {% else %}
+        <li class="breadcrumb-item active" aria-current="page">{{ item.label }}</li>
+        {% endif %}
+        {% endfor %}
+    </ol>
+</nav>
+{% endif %}
+{% endmacro %}

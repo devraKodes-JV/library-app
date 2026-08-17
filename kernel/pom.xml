@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Kernel module - cross-cutting "capability" contracts shared by all features.
+
+    This module holds ONLY generic, technology-agnostic interfaces that
+    describe what a persistence repository can do (read, write, find by a
+    natural key). It has ZERO dependencies on Hibernate, Javalin, Pebble or any
+    concrete framework, so it can be reused by every future feature
+    (catalog, reservations, reports, ...) without coupling them to a specific
+    persistence technology.
+
+    Each capability is a small, single-purpose interface (ISP - Interface
+    Segregation Principle). Concrete repositories compose the capabilities
+    they need via generic interfaces that remain open (T, ID) until a concrete
+    Hibernate implementation fixes the actual entity types.
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <!-- Inherits the shared build configuration from the root parent. -->
+    <parent>
+        <groupId>com.library</groupId>
+        <artifactId>library-ultimate</artifactId>
+        <version>1.0.0</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>kernel</artifactId>
+    <name>Kernel</name>
+    <description>
+        Cross-cutting capability contracts (generic repository interfaces)
+        shared by all features. Technology-agnostic; no framework dependencies.
+    </description>
+
+    <dependencies>
+        <!-- Javalin HTTP abstractions for cross-module web utilities. -->
+        <dependency>
+            <groupId>io.javalin</groupId>
+            <artifactId>javalin</artifactId>
+        </dependency>
+
+        <!-- SLF4J API for logging (optional logging in base implementations). -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+
+        <!-- JUnit 5 for unit tests. -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+</project>

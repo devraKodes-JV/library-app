@@ -1,0 +1,523 @@
+/* =========================================================================
+   app.base.css - Dark theme custom styles
+   Bootstrap 5 remains untouched. We rely on Bootstrap utility classes
+   and only add custom CSS for things Bootstrap doesn't cover.
+   ========================================================================= */
+
+/* --- CSS custom properties ------------------------------------------------ */
+:root {
+    --bs-body-color: #e2e8f0;
+    --bs-body-bg: #0f172a;
+    --bs-body-bg-secondary: #1e293b;
+    --bs-body-bg-tertiary: #334155;
+    --bs-border-color: #334155;
+    --bs-heading-color: #f1f5f9;
+    --bs-link-color: #38bdf8;
+    --bs-link-hover-color: #7dd3fc;
+    --bs-highlight-bg: #1e293b;
+}
+
+/* --- Global text/bg overrides --------------------------------------------- */
+body {
+    background-color: var(--bs-body-bg) !important;
+    color: var(--bs-body-color) !important;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    color: var(--bs-heading-color) !important;
+}
+
+a {
+    color: var(--bs-link-color) !important;
+}
+
+a:hover {
+    color: var(--bs-link-hover-color) !important;
+}
+
+/* --- Layout shell ---------------------------------------------------------- */
+.app-shell {
+    display: flex;
+    min-height: 100vh;
+}
+
+.app-aside {
+    width: 240px;
+    flex-shrink: 0;
+    background: var(--bs-body-bg-secondary) !important;
+    color: var(--bs-body-color) !important;
+    display: flex;
+    flex-direction: column;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+}
+
+.app-aside .brand {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1rem 1.25rem;
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #fff !important;
+    border-bottom: 1px solid var(--bs-border-color);
+}
+
+.app-aside .brand i {
+    color: #38bdf8;
+}
+
+.app-aside nav {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0.75rem 0;
+}
+
+.nav-section {
+    margin-bottom: 0.5rem;
+}
+
+.nav-section-title {
+    padding: 0.5rem 1.25rem;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #94a3b8 !important;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.nav-section-title:hover {
+    background-color: rgba(255,255,255,0.05);
+    color: rgba(255,255,255,0.85);
+}
+
+.nav-section-title .chevron {
+    margin-left: auto;
+    font-size: 0.75rem;
+    transition: transform 0.2s ease;
+}
+
+.nav-section.open > .nav-section-title .chevron {
+    transform: rotate(180deg);
+}
+
+.nav-section.open > .nav-section-title {
+    color: rgba(255,255,255,0.9);
+    background-color: rgba(255,255,255,0.05);
+}
+
+.nav-section-items {
+    display: none;
+    padding: 0;
+    list-style: none;
+}
+
+.nav-section.open > .nav-section-items {
+    display: block;
+}
+
+.nav-section-items .nav-link {
+    display: block;
+    width: 100%;
+    padding: 0.5rem 1rem;
+    color: rgba(255,255,255,0.75);
+    text-decoration: none;
+    font-size: 0.9rem;
+    box-sizing: border-box;
+}
+
+.nav-section-items .nav-link:hover {
+    color: #fff;
+    background-color: rgba(255,255,255,0.05);
+}
+
+.aside-footer {
+    padding: 1rem 1.25rem;
+    border-top: 1px solid var(--bs-border-color);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+}
+
+.user-chip {
+    font-size: 0.85rem;
+    font-weight: 500;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.app-main {
+    flex: 1;
+    padding: 2rem;
+    background: var(--bs-body-bg) !important;
+}
+
+/* --- Page header ----------------------------------------------------------- */
+.page-header {
+    margin-bottom: 1.5rem;
+}
+
+.page-header h1 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+}
+
+/* --- Stat cards ------------------------------------------------------------ */
+.stat-card {
+    border: 1px solid var(--bs-border-color) !important;
+    background-color: var(--bs-body-bg-secondary) !important;
+}
+
+.stat-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+}
+
+/* --- Module cards ---------------------------------------------------------- */
+.module-card {
+    border: 1px solid var(--bs-border-color) !important;
+    background-color: var(--bs-body-bg-secondary) !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.module-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+.module-card .card-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1rem;
+}
+
+.module-card .list-unstyled li {
+    margin-bottom: 0.35rem;
+}
+
+.module-card .list-unstyled a {
+    color: #94a3b8 !important;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.9rem;
+}
+
+.module-card .list-unstyled a:hover {
+    color: #38bdf8 !important;
+}
+
+/* --- Login page ------------------------------------------------------------ */
+.login-page {
+    background: linear-gradient(135deg, #020617 0%, #1e293b 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+}
+
+.login-card {
+    width: 100%;
+    max-width: 380px;
+    background: var(--bs-body-bg-secondary) !important;
+    border: 1px solid var(--bs-border-color) !important;
+    border-radius: 16px;
+    padding: 2rem;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+}
+
+.login-brand {
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+
+.login-brand i {
+    font-size: 2.5rem;
+    color: #38bdf8;
+}
+
+.login-brand h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-top: 0.5rem;
+    color: #f1f5f9 !important;
+}
+
+.login-brand p {
+    color: #94a3b8 !important;
+    margin-bottom: 0;
+}
+
+/* --- Flash messages -------------------------------------------------------- */
+.flash-container {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    z-index: 1080;
+    max-width: 400px;
+    width: 100%;
+}
+
+.flash-container .alert {
+    margin-bottom: 0.5rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    animation: slideInRight 0.3s ease-out;
+}
+
+@keyframes slideInRight {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+/* --- Modals ---------------------------------------------------------------- */
+.modal-backdrop.show {
+    opacity: 0.85;
+}
+
+/* --- Toast container -------------------------------------------------------- */
+#notificationToast {
+    z-index: 1050;
+}
+
+/* --- DataTables dark overrides --------------------------------------------- */
+table.dataTable {
+    color: var(--bs-body-color) !important;
+}
+
+table.dataTable thead th {
+    color: #f1f5f9 !important;
+    background-color: var(--bs-body-bg-secondary) !important;
+    border-bottom: 1px solid var(--bs-border-color) !important;
+}
+
+table.dataTable tbody tr {
+    background-color: transparent !important;
+}
+
+table.dataTable tbody td {
+    color: var(--bs-body-color) !important;
+    border-bottom: 1px solid var(--bs-border-color) !important;
+}
+
+.dataTables_wrapper .dataTables_length,
+.dataTables_wrapper .dataTables_filter,
+.dataTables_wrapper .dataTables_info,
+.dataTables_wrapper .dataTables_processing {
+    color: var(--bs-body-color) !important;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button {
+    color: var(--bs-body-color) !important;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button.current,
+.dataTables_wrapper .dataTables_paginate .paginate_button.current:hover {
+    background: var(--bs-body-bg-tertiary) !important;
+    color: #fff !important;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+    background: var(--bs-body-bg-tertiary) !important;
+    color: #fff !important;
+}
+
+/* --- DataTables card-like rows --------------------------------------------- */
+#worksTable_wrapper {
+    padding-top: 0.5rem;
+}
+
+#worksTable {
+    border-collapse: separate !important;
+    border-spacing: 0 0.75rem !important;
+    width: 100% !important;
+}
+
+#worksTable thead th {
+    border-bottom: 1px solid var(--bs-border-color) !important;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+}
+
+#worksTable tbody tr {
+    background-color: var(--bs-body-bg-secondary) !important;
+    border: 1px solid var(--bs-border-color) !important;
+    border-radius: 0.5rem !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+#worksTable tbody td {
+    background-color: var(--bs-body-bg-secondary) !important;
+    border: none !important;
+    padding: 1rem !important;
+    vertical-align: middle;
+}
+
+#worksTable tbody tr:hover td {
+    background-color: var(--bs-body-bg-tertiary) !important;
+}
+
+#worksTable .dataTables_empty {
+    background-color: var(--bs-body-bg-secondary) !important;
+    border: 1px solid var(--bs-border-color);
+    border-radius: 0.5rem;
+    color: var(--bs-body-color) !important;
+    padding: 1.5rem;
+    text-align: center;
+}
+
+/* --- Form controls --------------------------------------------------------- */
+.form-control,
+.form-select {
+    background-color: var(--bs-body-bg-secondary) !important;
+    border-color: var(--bs-border-color) !important;
+    color: var(--bs-body-color) !important;
+}
+
+.form-control:focus,
+.form-select:focus {
+    background-color: var(--bs-body-bg-secondary) !important;
+    border-color: #38bdf8 !important;
+    color: var(--bs-body-color) !important;
+}
+
+.form-control::placeholder {
+    color: #64748b !important;
+}
+
+.form-label {
+    color: #cbd5e1 !important;
+}
+
+.form-check-input {
+    background-color: var(--bs-body-bg-tertiary) !important;
+    border-color: var(--bs-border-color) !important;
+}
+
+.form-check-input:checked {
+    background-color: #38bdf8 !important;
+    border-color: #38bdf8 !important;
+}
+
+/* --- Cards ----------------------------------------------------------------- */
+.card {
+    background-color: var(--bs-body-bg-secondary) !important;
+    border: 1px solid var(--bs-border-color) !important;
+}
+
+.card-header {
+    background-color: var(--bs-body-bg-tertiary) !important;
+    border-bottom: 1px solid var(--bs-border-color) !important;
+    color: #f1f5f9 !important;
+}
+
+/* --- Tables ----------------------------------------------------------------- */
+.table {
+    color: var(--bs-body-color) !important;
+}
+
+.table > :not(caption) > * > * {
+    border-bottom-color: var(--bs-border-color) !important;
+}
+
+.table-hover > tbody > tr:hover {
+    background-color: var(--bs-body-bg-tertiary) !important;
+}
+
+/* --- Buttons --------------------------------------------------------------- */
+.btn-primary {
+    background-color: #0ea5e9;
+    border-color: #0ea5e9;
+}
+
+.btn-primary:hover {
+    background-color: #38bdf8;
+    border-color: #38bdf8;
+}
+
+.btn-outline-secondary {
+    color: #cbd5e1;
+    border-color: #475569;
+}
+
+.btn-outline-secondary:hover {
+    background-color: var(--bs-body-bg-tertiary);
+    color: #fff;
+}
+
+/* --- Dropdowns ------------------------------------------------------------- */
+.dropdown-menu {
+    background-color: var(--bs-body-bg-secondary) !important;
+    border: 1px solid var(--bs-border-color) !important;
+}
+
+.dropdown-item {
+    color: var(--bs-body-color) !important;
+}
+
+.dropdown-item:hover {
+    background-color: var(--bs-body-bg-tertiary) !important;
+    color: #fff !important;
+}
+
+/* --- Badges ---------------------------------------------------------------- */
+.badge {
+    background-color: var(--bs-body-bg-tertiary) !important;
+    color: #e2e8f0 !important;
+}
+
+/* --- Text muted override --------------------------------------------------- */
+.text-muted {
+    color: #94a3b8 !important;
+}
+
+/* --- Work cards ------------------------------------------------------------- */
+.work-card {
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.work-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+.book-cover-placeholder {
+    width: 48px;
+    height: 64px;
+    background: var(--bs-body-bg-tertiary);
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #94a3b8;
+    font-size: 1.5rem;
+    flex-shrink: 0;
+}
+
+.card-title-link {
+    color: #e2e8f0;
+    text-decoration: none;
+}
+
+.card-title-link:hover {
+    color: #fff;
+    text-decoration: underline;
+}
+
+
