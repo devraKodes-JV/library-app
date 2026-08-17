@@ -1,0 +1,74 @@
+package com.library.books.infrastructure.web.controller.author;
+
+import java.util.List;
+import java.util.Map;
+
+import com.library.books.application.dto.command.author.UpdateAuthorCommand;
+import com.library.books.application.dto.response.author.AuthorResponseDTO;
+import com.library.books.application.service.author.UpdateAuthorUseCase;
+import com.library.books.application.service.author.GetAuthorUseCase;
+import com.library.books.domain.exception.ValidationException;
+import com.library.kernel.web.WebControllerContext;
+import com.library.kernel.web.WebHelper;
+
+import io.javalin.http.Context;
+
+public class UpdateAuthorController {
+
+    private final UpdateAuthorUseCase updateAuthorUseCase;
+    private final GetAuthorUseCase getAuthorUseCase;
+    private final WebControllerContext webContext;
+
+    public UpdateAuthorController(UpdateAuthorUseCase updateAuthorUseCase, GetAuthorUseCase getAuthorUseCase, WebControllerContext webContext) {
+        this.updateAuthorUseCase = updateAuthorUseCase;
+        this.getAuthorUseCase = getAuthorUseCase;
+        this.webContext = webContext;
+    }
+
+    public void showEditForm(Context ctx) {
+        requireCan(ctx, "authors.update");
+        long id = ctx.pathParamAsClass("id", Long.class).get();
+        AuthorResponseDTO author = getAuthorUseCase.execute(id);
+        ctx.render("books/authors/form", buildEditModel(ctx, Map.of("author", author)));
+    }
+
+    public void updateAuthor(Context ctx) {
+        requireCan(ctx, "authors.update");
+        UpdateAuthorCommand command = new UpdateAuthorCommand(
+                ctx.pathParamAsClass("id", Long.class).get(),
+                ctx.formParam("firstName"),
+                ctx.formParam("lastName"),
+                ctx.formParam("biography"),
+                ctx.formParam("birthDate"),
+                ctx.formParam("deathDate"));
+
+        try {
+            updateAuthorUseCase.execute(command);
+            WebHelper.flashSuccess(ctx, "Author updated successfully.");
+            ctx.redirect("/books/authors");
+        } catch (ValidationException e) {
+            AuthorResponseDTO author = getAuthorUseCase.execute(command.id());
+            Map<String, Object> model = buildEditModel(ctx, Map.of("author", author));
+            model.putAll(e.getFieldErrors());
+            ctx.render("books/authors/form", model);
+            return;
+        }
+    }
+
+    private Map<String, Object> buildEditModel(Context ctx, Map<String, Object> extra) {
+        var current = webContext.currentUser(ctx);
+        List<?> navSections = webContext.navSections(ctx);
+        Map<String, Object> model = new java.util.LinkedHashMap<>();
+        model.put("mode", "edit");
+        model.put("user", current);
+        model.put("navSections", navSections);
+        model.putAll(extra);
+        return model;
+    }
+
+    private void requireCan(Context ctx, String permCode) {
+        if (!webContext.hasPermission(ctx, permCode)) {
+            throw new io.javalin.http.ForbiddenResponse();
+        }
+    }
+}
