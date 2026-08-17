@@ -1,0 +1,89 @@
+{%- extends "layout" -%}
+
+{% block title %}Works - Library{% endblock %}
+
+{% block content %}
+{% import "_macros/csrf" as csrf %}
+<div class="page-header d-flex justify-content-between align-items-center">
+    <div>
+        <h1 class="mb-0">Works</h1>
+        <p class="text-muted">Manage bibliographic works.</p>
+    </div>
+    {% if canCreate %}
+    <a href="/books/works/new" class="btn btn-primary text-white">
+        <i class="bi bi-plus-lg"></i> New Work
+    </a>
+    {% endif %}
+</div>
+
+<div class="mt-3">
+    <input type="text" id="workSearch" class="form-control bg-dark border-secondary text-light mb-3" placeholder="Search works by title, language or category...">
+    <div id="worksGrid" class="row g-3">
+        {% for work in works %}
+        <div class="col-md-6 col-xl-4 work-card" data-title="{{ work.title | lower }}" data-subtitle="{{ work.subtitle | default("") | lower }}" data-language="{{ work.originalLanguageName | default("") | lower }}" data-category="{{ work.categoryName | default("") | lower }}">
+            <div class="card h-100 bg-dark border-secondary work-card-item">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <a href="/books/works/{{ work.id }}" class="text-decoration-none text-light fw-semibold">
+                                {{ work.title }}
+                            </a>
+                            {% if work.subtitle is not empty %}
+                            <p class="text-muted small mb-2">{{ work.subtitle }}</p>
+                            {% endif %}
+                        </div>
+                        <div class="book-cover-placeholder">
+                            <i class="bi bi-book-half"></i>
+                        </div>
+                    </div>
+                    <div class="d-flex gap-3 text-muted small mb-3">
+                        <span><i class="bi bi-translate me-1"></i>{{ work.originalLanguageName | default("N/A") }}</span>
+                        <span><i class="bi bi-folder me-1"></i>{{ work.categoryName | default("N/A") }}</span>
+                    </div>
+                </div>
+                <div class="card-footer bg-transparent border-secondary d-flex justify-content-end gap-2">
+                    {% if canUpdate %}
+                    <a href="/books/works/{{ work.id }}/edit" class="btn btn-sm btn-outline-secondary" aria-label="Edit {{ work.title }}">
+                        <i class="bi bi-pencil"></i> Edit
+                    </a>
+                    {% endif %}
+                    {% if canDelete %}
+                    <form method="post" action="/books/works/{{ work.id }}/delete" class="d-inline delete-form"
+                          data-confirm-title="Delete Work"
+                          data-confirm-message="Delete work <strong>{{ work.title }}</strong>? This action can be undone.">
+                        {{ csrf.token(csrfToken) }}
+                        <button type="submit" class="btn btn-sm btn-outline-danger" aria-label="Delete {{ work.title }}">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </form>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    <div id="noWorksResults" class="alert alert-warning bg-dark border-secondary text-light mt-3 d-none">No works match your search.</div>
+    {% if workPage.totalPages > 1 %}
+    <nav aria-label="Works pagination" class="mt-3">
+        <ul class="pagination justify-content-center">
+            <li class="page-item {% if not workPage.hasPrevious() %}disabled{% endif %}">
+                <a class="page-link bg-dark border-secondary text-light" href="?page={{ workPage.previousPage }}&size={{ workPage.pageSize }}" aria-label="Previous">«</a>
+            </li>
+            {% for i in range(0, workPage.totalPages) %}
+            <li class="page-item {% if i == workPage.pageNumber %}active{% endif %}">
+                <a class="page-link bg-dark border-secondary text-light" href="?page={{ i }}&size={{ workPage.pageSize }}">{{ i + 1 }}</a>
+            </li>
+            {% endfor %}
+            <li class="page-item {% if not workPage.hasNext() %}disabled{% endif %}">
+                <a class="page-link bg-dark border-secondary text-light" href="?page={{ workPage.nextPage }}&size={{ workPage.pageSize }}" aria-label="Next">»</a>
+            </li>
+        </ul>
+    </nav>
+    {% endif %}
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script src="/js/works-cards.js" nonce="{{ securityNonce }}"></script>
+{% endblock %}

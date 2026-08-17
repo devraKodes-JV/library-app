@@ -1,0 +1,173 @@
+{%- extends "layout" -%}
+
+{% block title %}{% if mode == 'edit' %}Edit Author{% else %}New Author{% endif %} - Library{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="mb-0">
+        {% if mode == 'edit' %}Edit Author{% else %}New Author{% endif %}
+    </h1>
+    <p class="text-muted">Author information.</p>
+</div>
+
+<form method="post"
+      action="{% if mode == 'edit' %}/books/authors/{{ author.id }}{% else %}/books/authors{% endif %}"
+      class="text-light" novalidate>
+    {% import "_macros/csrf" as csrf %}
+    {{ csrf.token(csrfToken) }}
+    <div class="card mt-3 bg-dark border-secondary">
+        <div class="card-body bg-dark">
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label" for="firstName">First Name</label>
+                    <input type="text" id="firstName" name="firstName" class="form-control bg-dark border-secondary text-light {% if firstName is defined and firstName %}is-invalid{% else %}{% if author is not null %}is-valid{% endif %}{% endif %}" required
+                           value="{% if author is not null %}{{ author.firstName }}{% endif %}">
+                    {% if firstName is defined and firstName %}
+                    <div class="invalid-feedback">{{ firstName }}</div>
+                    {% endif %}
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label" for="lastName">Last Name</label>
+                    <input type="text" id="lastName" name="lastName" class="form-control bg-dark border-secondary text-light {% if lastName is defined and lastName %}is-invalid{% else %}{% if author is not null %}is-valid{% endif %}{% endif %}" required
+                           value="{% if author is not null %}{{ author.lastName }}{% endif %}">
+                    {% if lastName is defined and lastName %}
+                    <div class="invalid-feedback">{{ lastName }}</div>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="row g-3 mt-0">
+                <div class="col-md-6">
+                    <label class="form-label" for="birthDate">Birth Date</label>
+                    <input type="date" id="birthDate" name="birthDate" class="form-control bg-dark border-secondary text-light {% if birthDate is defined and birthDate %}is-invalid{% else %}{% if author is not null and author.birthDate is not empty %}is-valid{% endif %}{% endif %}"
+                           value="{% if author is not null %}{{ author.birthDate }}{% endif %}">
+                    {% if birthDate is defined and birthDate %}
+                    <div class="invalid-feedback">{{ birthDate }}</div>
+                    {% endif %}
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label" for="deathDate">Death Date</label>
+                    <input type="date" id="deathDate" name="deathDate" class="form-control bg-dark border-secondary text-light {% if deathDate is defined and deathDate %}is-invalid{% else %}{% if author is not null and author.deathDate is not empty %}is-valid{% endif %}{% endif %}"
+                           value="{% if author is not null %}{{ author.deathDate }}{% endif %}">
+                    {% if deathDate is defined and deathDate %}
+                    <div class="invalid-feedback">{{ deathDate }}</div>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="row g-3 mt-0">
+                <div class="col-12">
+                    <label class="form-label" for="biography">Biography</label>
+                    <textarea id="biography" name="biography" rows="3" class="form-control bg-dark border-secondary text-light {% if biography is defined and biography %}is-invalid{% else %}{% if author is not null and author.biography is not empty %}is-valid{% endif %}{% endif %}">{% if author is not null %}{{ author.biography }}{% endif %}</textarea>
+                    {% if biography is defined and biography %}
+                    <div class="invalid-feedback">{{ biography }}</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-3">
+        <button type="submit" class="btn btn-primary">
+            <i class="bi bi-check-lg"></i> Save
+        </button>
+        <a href="/books/authors" class="btn btn-outline-secondary">Cancel</a>
+    </div>
+</form>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var form = document.querySelector('form[novalidate]');
+    if (!form) return;
+    form.addEventListener('submit', function(e) {
+        var valid = true;
+        var firstName = document.getElementById('firstName');
+        var lastName = document.getElementById('lastName');
+        var birthDate = document.getElementById('birthDate');
+        var deathDate = document.getElementById('deathDate');
+        var alphaRegex = /^[a-zA-ZÀ-ÿ\s'-]+$/;
+        var dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+        
+        if (!firstName.value.trim()) {
+            firstName.classList.add('is-invalid');
+            firstName.classList.remove('is-valid');
+            valid = false;
+        } else if (!alphaRegex.test(firstName.value.trim())) {
+            firstName.classList.add('is-invalid');
+            firstName.classList.remove('is-valid');
+            valid = false;
+        } else {
+            firstName.classList.remove('is-invalid');
+            firstName.classList.add('is-valid');
+        }
+        
+        if (!lastName.value.trim()) {
+            lastName.classList.add('is-invalid');
+            lastName.classList.remove('is-valid');
+            valid = false;
+        } else if (!alphaRegex.test(lastName.value.trim())) {
+            lastName.classList.add('is-invalid');
+            lastName.classList.remove('is-valid');
+            valid = false;
+        } else {
+            lastName.classList.remove('is-invalid');
+            lastName.classList.add('is-valid');
+        }
+        
+        if (birthDate.value.trim() && !dateRegex.test(birthDate.value.trim())) {
+            birthDate.classList.add('is-invalid');
+            birthDate.classList.remove('is-valid');
+            valid = false;
+        } else if (birthDate.value.trim()) {
+            var today = new Date();
+            var birth = new Date(birthDate.value.trim());
+            var minBirth = new Date(today.getFullYear() - 18, today.getMonth(), today.getDate());
+            if (birth > minBirth) {
+                birthDate.classList.add('is-invalid');
+                birthDate.classList.remove('is-valid');
+                birthDate.setCustomValidity('Author must be at least 18 years old.');
+                valid = false;
+            } else {
+                birthDate.classList.remove('is-invalid');
+                birthDate.classList.add('is-valid');
+                birthDate.setCustomValidity('');
+            }
+        }
+        
+        if (deathDate.value.trim() && !dateRegex.test(deathDate.value.trim())) {
+            deathDate.classList.add('is-invalid');
+            deathDate.classList.remove('is-valid');
+            valid = false;
+        } else if (deathDate.value.trim()) {
+            var today2 = new Date();
+            today2.setHours(0,0,0,0);
+            var death = new Date(deathDate.value.trim());
+            if (death > today2) {
+                deathDate.classList.add('is-invalid');
+                deathDate.classList.remove('is-valid');
+                deathDate.setCustomValidity('Death date cannot be in the future.');
+                valid = false;
+            } else if (birthDate.value.trim() && dateRegex.test(birthDate.value.trim())) {
+                var birth = new Date(birthDate.value.trim());
+                if (death < birth) {
+                    deathDate.classList.add('is-invalid');
+                    deathDate.classList.remove('is-valid');
+                    deathDate.setCustomValidity('Death date cannot be before birth date.');
+                    valid = false;
+                } else {
+                    deathDate.classList.remove('is-invalid');
+                    deathDate.classList.add('is-valid');
+                    deathDate.setCustomValidity('');
+                }
+            } else {
+                deathDate.classList.remove('is-invalid');
+                deathDate.classList.add('is-valid');
+                deathDate.setCustomValidity('');
+            }
+        }
+        
+        if (!valid) {
+            e.preventDefault();
+        }
+    });
+});
+</script>
+{% endblock %}

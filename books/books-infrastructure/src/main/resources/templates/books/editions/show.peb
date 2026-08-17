@@ -1,0 +1,116 @@
+{%- extends "layout" -%}
+
+{% block title %}Edition Details - Library{% endblock %}
+
+{% block breadcrumb %}
+{% set breadcrumbItems = [
+    {'label': 'Editions', 'url': '/books/editions'},
+    {'label': 'Edition #' ~ edition.editionNumber, 'url': null}
+] %}
+{{ parent() }}
+{% endblock %}
+
+{% block content %}
+<div class="page-header d-flex justify-content-between align-items-center">
+    <div>
+        <h1 class="mb-0">Edition #{{ edition.editionNumber }}</h1>
+        <p class="text-muted">{{ edition.workTitle | default('Unknown Work') }}</p>
+    </div>
+    <div class="d-flex gap-2">
+        {% if canUpdate %}
+        <a href="/books/editions/{{ edition.id }}/edit" class="btn btn-outline-secondary" aria-label="Edit edition #{{ edition.editionNumber }}">
+            <i class="bi bi-pencil"></i> Edit
+        </a>
+        {% endif %}
+        {% if canDelete %}
+        <form method="post" action="/books/editions/{{ edition.id }}/delete" class="d-inline delete-form"
+              data-confirm-title="Delete Edition"
+              data-confirm-message="Delete edition <strong>#{{ edition.editionNumber }}</strong>? This action can be undone.">
+            {{ csrf.token(csrfToken) }}
+            <button type="submit" class="btn btn-outline-danger" aria-label="Delete edition #{{ edition.editionNumber }}">
+                <i class="bi bi-trash"></i> Delete
+            </button>
+        </form>
+        {% endif %}
+    </div>
+</div>
+
+<div class="card mt-3 bg-dark border-secondary">
+    <div class="card-header bg-dark border-secondary">
+        <h5 class="mb-0">Edition Information</h5>
+    </div>
+    <div class="card-body bg-dark">
+        <dl class="row mb-0">
+            <dt class="col-sm-3 text-muted">Edition Number</dt>
+            <dd class="col-sm-9">{{ edition.editionNumber }}</dd>
+
+            <dt class="col-sm-3 text-muted">Work</dt>
+            <dd class="col-sm-9">{{ edition.workTitle | default("N/A") }}</dd>
+
+            <dt class="col-sm-3 text-muted">Publisher</dt>
+            <dd class="col-sm-9">{{ edition.publisherName | default("N/A") }}</dd>
+
+            <dt class="col-sm-3 text-muted">Format</dt>
+            <dd class="col-sm-9">{{ edition.formatName | default("N/A") }}</dd>
+
+            <dt class="col-sm-3 text-muted">Language</dt>
+            <dd class="col-sm-9">{{ edition.languageName | default("N/A") }}</dd>
+
+            {% if edition.isbn is not empty %}
+            <dt class="col-sm-3 text-muted">ISBN</dt>
+            <dd class="col-sm-9">{{ edition.isbn }}</dd>
+            {% endif %}
+
+            {% if edition.publicationYear is not empty %}
+            <dt class="col-sm-3 text-muted">Publication Year</dt>
+            <dd class="col-sm-9">{{ edition.publicationYear }}</dd>
+            {% endif %}
+
+            {% if edition.pages is not empty %}
+            <dt class="col-sm-3 text-muted">Pages</dt>
+            <dd class="col-sm-9">{{ edition.pages }}</dd>
+            {% endif %}
+        </dl>
+    </div>
+</div>
+
+<div class="mt-3">
+    <a href="/books/editions" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left"></i> Back to Editions
+    </a>
+</div>
+
+<div class="card mt-4 bg-dark border-secondary">
+    <div class="card-header bg-dark border-secondary">
+        <h5 class="mb-0">Related Authors</h5>
+    </div>
+    <div class="card-body bg-dark p-0">
+        <div class="table-responsive container">
+            <table class="table table-hover align-middle mb-0 data-table text-light" data-empty-message="No authors associated with this edition yet.">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Role</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for ea in editionAuthors %}
+                    <tr>
+                        <td>
+                            <a href="/books/authors/{{ ea.authorId }}" class="text-decoration-none text-light">
+                                {{ authorNames[ea.authorId] | default("Unknown") }}
+                            </a>
+                        </td>
+                        <td class="text-muted">{{ ea.role | default("N/A") }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/js/books.js" nonce="{{ securityNonce }}"></script>
+{% endblock %}

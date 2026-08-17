@@ -1,0 +1,79 @@
+{%- extends "layout" -%}
+
+{% block title %}Editions - Library{% endblock %}
+
+{% block content %}
+{% import "_macros/csrf" as csrf %}
+<div class="page-header d-flex justify-content-between align-items-center">
+    <div>
+        <h1 class="mb-0">Editions</h1>
+        <p class="text-muted">Manage published editions of works.</p>
+    </div>
+    {% if canCreate %}
+    <a href="/books/editions/new" class="btn btn-primary text-white">
+        <i class="bi bi-plus-lg"></i> New Edition
+    </a>
+    {% endif %}
+</div>
+
+{% if editions is empty %}
+<div class="alert alert-info bg-dark border-secondary text-light">No editions found.</div>
+{% else %}
+<div class="card mt-3 bg-dark border-secondary">
+    <div class="table-responsive container">
+        <table class="table table-hover align-middle mb-0 data-table text-light">
+            <thead>
+                <tr>
+                    <th>Work</th>
+                    <th>Edition</th>
+                    <th>Publisher</th>
+                    <th>ISBN</th>
+                    <th>Year</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for edition in editions %}
+                <tr>
+                    <td>
+                        <span class="badge bg-primary">{{ edition.workTitle | default("N/A") }}</span>
+                    </td>
+                    <td>
+                        <a href="/books/editions/{{ edition.id }}" class="text-decoration-none text-light">
+                            {{ edition.editionNumber }}
+                        </a>
+                    </td>
+                    <td class="text-muted">{{ edition.publisherName | default("N/A") }}</td>
+                    <td class="text-muted">{{ edition.isbn | default("N/A") }}</td>
+                    <td class="text-muted">{{ edition.publicationYear | default("N/A") }}</td>
+                    <td class="text-end">
+                        {% if canUpdate %}
+                        <a href="/books/editions/{{ edition.id }}/edit" class="btn btn-sm btn-outline-secondary" aria-label="Edit edition #{{ edition.editionNumber }}">
+                            <i class="bi bi-pencil"></i>
+                        </a>
+                        {% endif %}
+                        {% if canDelete %}
+                        <form method="post" action="/books/editions/{{ edition.id }}/delete" class="d-inline delete-form"
+                              data-confirm-title="Delete Edition"
+                              data-confirm-message="Delete edition <strong>{{ edition.editionNumber }}</strong>? This action can be undone.">
+                            {{ csrf.token(csrfToken) }}
+                            <button type="submit" class="btn btn-sm btn-outline-danger" aria-label="Delete edition #{{ edition.editionNumber }}">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </form>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+
+{% endblock %}
+
+{% block scripts %}
+<script src="/js/iam.js"></script>
+<script src="/js/books.js" nonce="{{ securityNonce }}"></script>
+{% endblock %}

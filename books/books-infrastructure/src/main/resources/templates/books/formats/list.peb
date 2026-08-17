@@ -1,0 +1,75 @@
+{%- extends "layout" -%}
+
+{% block title %}Formats - Library{% endblock %}
+
+{% block content %}
+{% import "_macros/csrf" as csrf %}
+<div class="page-header d-flex justify-content-between align-items-center">
+    <div>
+        <h1 class="mb-0">Book Formats</h1>
+        <p class="text-muted">Manage physical and digital formats.</p>
+    </div>
+    {% if canCreate %}
+    <a href="/books/formats/new" class="btn btn-primary text-white">
+        <i class="bi bi-plus-lg"></i> New Format
+    </a>
+    {% endif %}
+</div>
+
+{% if formats is empty %}
+<div class="alert alert-info bg-dark border-secondary text-light">No formats found.</div>
+{% else %}
+<div class="card mt-3 bg-dark border-secondary">
+    <div class="table-responsive container">
+        <table class="table table-hover align-middle mb-0 data-table text-light">
+            <thead>
+                <tr>
+                    <th>Code</th>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for fmt in formats %}
+                <tr>
+                    <td>
+                        <span class="badge bg-primary">{{ fmt.code }}</span>
+                    </td>
+                    <td>
+                        <a href="/books/formats/{{ fmt.id }}" class="text-decoration-none text-light">
+                            {{ fmt.name }}
+                        </a>
+                    </td>
+                    <td class="text-muted">{{ fmt.description | default("N/A") }}</td>
+                    <td class="text-end">
+                        {% if canUpdate %}
+                        <a href="/books/formats/{{ fmt.id }}/edit" class="btn btn-sm btn-outline-secondary" aria-label="Edit {{ fmt.name }}">
+                            <i class="bi bi-pencil"></i>
+                        </a>
+                        {% endif %}
+                        {% if canDelete %}
+                        <form method="post" action="/books/formats/{{ fmt.id }}/delete" class="d-inline delete-form"
+                              data-confirm-title="Delete Format"
+                              data-confirm-message="Delete format <strong>{{ fmt.name }}</strong>? This action can be undone.">
+                            {{ csrf.token(csrfToken) }}
+                            <button type="submit" class="btn btn-sm btn-outline-danger" aria-label="Delete {{ fmt.name }}">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </form>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+
+{% endblock %}
+
+{% block scripts %}
+<script src="/js/iam.js"></script>
+<script src="/js/books.js" nonce="{{ securityNonce }}"></script>
+{% endblock %}

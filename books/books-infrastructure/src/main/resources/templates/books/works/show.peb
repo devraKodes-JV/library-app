@@ -1,0 +1,156 @@
+{%- extends "layout" -%}
+
+{% block title %}Work Details - Library{% endblock %}
+
+{% block breadcrumb %}
+{% set breadcrumbItems = [
+    {'label': 'Works', 'url': '/books/works'},
+    {'label': work.title, 'url': null}
+] %}
+{{ parent() }}
+{% endblock %}
+
+{% block content %}
+<div class="page-header d-flex justify-content-between align-items-center">
+    <div>
+        <h1 class="mb-0">{{ work.title }}</h1>
+        {% if work.subtitle is not empty %}
+        <p class="text-muted">{{ work.subtitle }}</p>
+        {% endif %}
+    </div>
+    <div class="d-flex gap-2">
+        {% if canUpdate %}
+        <a href="/books/works/{{ work.id }}/edit" class="btn btn-outline-secondary" aria-label="Edit {{ work.title }}">
+            <i class="bi bi-pencil"></i> Edit
+        </a>
+        {% endif %}
+        {% if canDelete %}
+        <form method="post" action="/books/works/{{ work.id }}/delete" class="d-inline delete-form"
+              data-confirm-title="Delete Work"
+              data-confirm-message="Delete work <strong>{{ work.title }}</strong>? This action can be undone.">
+            {{ csrf.token(csrfToken) }}
+            <button type="submit" class="btn btn-outline-danger" aria-label="Delete {{ work.title }}">
+                <i class="bi bi-trash"></i> Delete
+            </button>
+        </form>
+        {% endif %}
+    </div>
+</div>
+
+<div class="card mt-3 bg-dark border-secondary">
+    <div class="card-header bg-dark border-secondary">
+        <h5 class="mb-0">Work Information</h5>
+    </div>
+    <div class="card-body bg-dark">
+        <dl class="row mb-0">
+            <dt class="col-sm-3 text-muted">Title</dt>
+            <dd class="col-sm-9">{{ work.title }}</dd>
+
+            {% if work.subtitle is not empty %}
+            <dt class="col-sm-3 text-muted">Subtitle</dt>
+            <dd class="col-sm-9">{{ work.subtitle }}</dd>
+            {% endif %}
+
+            <dt class="col-sm-3 text-muted">Original Language</dt>
+            <dd class="col-sm-9">{{ work.languageName | default("N/A") }}</dd>
+
+            <dt class="col-sm-3 text-muted">Category</dt>
+            <dd class="col-sm-9">{{ work.categoryName | default("N/A") }}</dd>
+
+            <dt class="col-sm-3 text-muted">Authors</dt>
+            <dd class="col-sm-9">
+                {% if work.authors is not empty %}
+                    {% for author in work.authors %}
+                        {{ author.displayName }}{% if not loop.last %}, {% endif %}
+                    {% endfor %}
+                {% else %}
+                    N/A
+                {% endif %}
+            </dd>
+
+            {% if work.summary is not empty %}
+            <dt class="col-sm-3 text-muted">Summary</dt>
+            <dd class="col-sm-9">{{ work.summary }}</dd>
+            {% endif %}
+        </dl>
+    </div>
+</div>
+
+<div class="mt-3">
+    <a href="/books/works" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left"></i> Back to Works
+    </a>
+</div>
+
+<div class="row g-3 mt-4">
+    <div class="col-md-6">
+        <div class="card h-100 bg-dark border-secondary">
+            <div class="card-header bg-dark border-secondary">
+                <h5 class="mb-0">Related Authors</h5>
+            </div>
+            <div class="card-body bg-dark p-0">
+                <div class="table-responsive container">
+                    <table class="table table-hover align-middle mb-0 data-table text-light compact-pagination" data-empty-message="No authors associated with this work yet.">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Role</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for author in work.authors %}
+                            <tr>
+                                <td>
+                                    <a href="/books/authors/{{ author.id }}" class="text-decoration-none text-light">
+                                        {{ author.displayName }}
+                                    </a>
+                                </td>
+                                <td class="text-muted">{{ author.role | default("N/A") }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card h-100 bg-dark border-secondary">
+            <div class="card-header bg-dark border-secondary">
+                <h5 class="mb-0">Related Editions</h5>
+            </div>
+            <div class="card-body bg-dark p-0">
+                <div class="table-responsive container">
+                    <table class="table table-hover align-middle mb-0 data-table text-light compact-pagination" data-empty-message="No editions associated with this work yet.">
+                        <thead>
+                            <tr>
+                                <th>Edition</th>
+                                <th>ISBN</th>
+                                <th>Language</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for edition in relatedEditions %}
+                            <tr>
+                                <td>
+                                    <a href="/books/editions/{{ edition.id }}" class="text-decoration-none text-light">
+                                        {{ edition.editionNumber }}
+                                    </a>
+                                </td>
+                                <td class="text-muted">{{ edition.isbn | default("N/A") }}</td>
+                                <td class="text-muted">{{ edition.languageName | default("N/A") }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/js/books.js" nonce="{{ securityNonce }}"></script>
+{% endblock %}

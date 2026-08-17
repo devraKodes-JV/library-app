@@ -1,0 +1,74 @@
+{%- extends "layout" -%}
+
+{% block title %}Authors - Library{% endblock %}
+
+{% block content %}
+{% import "_macros/csrf" as csrf %}
+<div class="page-header d-flex justify-content-between align-items-center">
+    <div>
+        <h1 class="mb-0">Authors</h1>
+        <p class="text-muted">Manage authors.</p>
+    </div>
+    {% if canCreate %}
+    <a href="/books/authors/new" class="btn btn-primary text-white">
+        <i class="bi bi-plus-lg"></i> New Author
+    </a>
+    {% endif %}
+</div>
+
+{% if authors is empty %}
+<div class="alert alert-info bg-dark border-secondary text-light">No authors found.</div>
+{% else %}
+<div class="card mt-3 bg-dark border-secondary">
+    <div class="table-responsive container">
+        <table class="table table-hover align-middle mb-0 data-table text-light">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Biography</th>
+                    <th>Dates</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for author in authors %}
+                <tr>
+                    <td>
+                        <a href="/books/authors/{{ author.id }}" class="text-decoration-none text-light">
+                            {{ author.fullName }}
+                        </a>
+                    </td>
+                    <td class="text-muted">{{ author.biography | default("N/A") }}</td>
+                    <td class="text-muted">{{ author.birthDate | default("N/A") }} - {{ author.deathDate | default("present") }}</td>
+                    <td class="text-end">
+                        {% if canUpdate %}
+                        <a href="/books/authors/{{ author.id }}/edit" class="btn btn-sm btn-outline-secondary" aria-label="Edit {{ author.fullName }}">
+                            <i class="bi bi-pencil"></i>
+                        </a>
+                        {% endif %}
+                        {% if canDelete %}
+                        <form method="post" action="/books/authors/{{ author.id }}/delete" class="d-inline delete-form"
+                              data-confirm-title="Delete Author"
+                              data-confirm-message="Delete author <strong>{{ author.fullName }}</strong>? This action can be undone.">
+                            {{ csrf.token(csrfToken) }}
+                            <button type="submit" class="btn btn-sm btn-outline-danger" aria-label="Delete {{ author.fullName }}">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </form>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+
+<div class="toast-container position-fixed top-0 end-0 p-3" id="notificationToast"></div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/js/iam.js"></script>
+<script src="/js/books.js" nonce="{{ securityNonce }}"></script>
+{% endblock %}

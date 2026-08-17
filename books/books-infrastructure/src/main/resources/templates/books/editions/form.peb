@@ -1,0 +1,174 @@
+{%- extends "layout" -%}
+
+{% block title %}{% if mode == 'edit' %}Edit Edition{% else %}New Edition{% endif %} - Library{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="mb-0">
+        {% if mode == 'edit' %}Edit Edition{% else %}New Edition{% endif %}
+    </h1>
+    <p class="text-muted">An edition is a specific published manifestation of a work.</p>
+</div>
+
+<form method="post"
+      action="{% if mode == 'edit' %}/books/editions/{{ edition.id }}{% else %}/books/editions{% endif %}"
+      class="text-light" novalidate>
+    {% import "_macros/csrf" as csrf %}
+    {{ csrf.token(csrfToken) }}
+    <div class="card mt-3 bg-dark border-secondary">
+        <div class="card-body bg-dark">
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label" for="workId">Work</label>
+                    <select id="workId" name="workId" class="form-select form-select-sm w-auto bg-dark border-secondary text-light" required>
+                        <option value="">Select work</option>
+                        {% for work in works %}
+                        <option value="{{ work.id }}" {% if edition is not null and edition.workId == work.id %}selected{% endif %}>
+                            {{ work.title }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label" for="publisherId">Publisher</label>
+                    <select id="publisherId" name="publisherId" class="form-select form-select-sm w-auto bg-dark border-secondary text-light" required>
+                        <option value="">Select publisher</option>
+                        {% for pub in publishers %}
+                        <option value="{{ pub.id }}" {% if edition is not null and edition.publisherId == pub.id %}selected{% endif %}>
+                            {{ pub.name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="row g-3 mt-0">
+                <div class="col-md-6">
+                    <label class="form-label" for="formatId">Format</label>
+                    <select id="formatId" name="formatId" class="form-select form-select-sm w-auto bg-dark border-secondary text-light" required>
+                        <option value="">Select format</option>
+                        {% for fmt in formats %}
+                        <option value="{{ fmt.id }}" {% if edition is not null and edition.formatId == fmt.id %}selected{% endif %}>
+                            {{ fmt.name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label" for="languageId">Language</label>
+                    <select id="languageId" name="languageId" class="form-select form-select-sm w-auto bg-dark border-secondary text-light" required>
+                        <option value="">Select language</option>
+                        {% for lang in languages %}
+                        <option value="{{ lang.id }}" {% if edition is not null and edition.languageId == lang.id %}selected{% endif %}>
+                            {{ lang.name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="row g-3 mt-0">
+                <div class="col-md-4">
+                    <label class="form-label" for="editionNumber">Edition Number</label>
+                    <input type="text" id="editionNumber" name="editionNumber" class="form-control bg-dark border-secondary text-light {% if editionNumber is defined and editionNumber %}is-invalid{% else %}{% if edition is not null %}is-valid{% endif %}{% endif %}" required
+                           value="{% if edition is not null %}{{ edition.editionNumber }}{% endif %}">
+                    {% if editionNumber is defined and editionNumber %}
+                    <div class="invalid-feedback">{{ editionNumber }}</div>
+                    {% endif %}
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label" for="isbn">ISBN</label>
+                    <input type="text" id="isbn" name="isbn" class="form-control bg-dark border-secondary text-light {% if isbn is defined and isbn %}is-invalid{% else %}{% if edition is not null and edition.isbn is not empty %}is-valid{% endif %}{% endif %}"
+                           value="{% if edition is not null %}{{ edition.isbn }}{% endif %}">
+                    {% if isbn is defined and isbn %}
+                    <div class="invalid-feedback">{{ isbn }}</div>
+                    {% endif %}
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label" for="publicationYear">Publication Year</label>
+                    <input type="number" id="publicationYear" name="publicationYear" class="form-control bg-dark border-secondary text-light {% if publicationYear is defined and publicationYear %}is-invalid{% else %}{% if edition is not null and edition.publicationYear is not empty %}is-valid{% endif %}{% endif %}"
+                           value="{% if edition is not null %}{{ edition.publicationYear }}{% endif %}">
+                    {% if publicationYear is defined and publicationYear %}
+                    <div class="invalid-feedback">{{ publicationYear }}</div>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="row g-3 mt-0">
+                <div class="col-md-6">
+                    <label class="form-label" for="pages">Pages</label>
+                    <input type="number" id="pages" name="pages" class="form-control bg-dark border-secondary text-light {% if pages is defined and pages %}is-invalid{% else %}{% if edition is not null and edition.pages is not empty %}is-valid{% endif %}{% endif %}"
+                           value="{% if edition is not null %}{{ edition.pages }}{% endif %}">
+                    {% if pages is defined and pages %}
+                    <div class="invalid-feedback">{{ pages }}</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-3">
+        <button type="submit" class="btn btn-primary">
+            <i class="bi bi-check-lg"></i> Save
+        </button>
+        <a href="/books/editions" class="btn btn-outline-secondary">Cancel</a>
+    </div>
+</form>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var form = document.querySelector('form[novalidate]');
+    if (!form) return;
+    form.addEventListener('submit', function(e) {
+        var valid = true;
+        var editionNumber = document.getElementById('editionNumber');
+        var isbn = document.getElementById('isbn');
+        var publicationYear = document.getElementById('publicationYear');
+        var pages = document.getElementById('pages');
+        var alphaRegex = /^[a-zA-Z0-9\s'-]+$/;
+        var isbnRegex = /^[\d-]+$/;
+        
+        if (!editionNumber.value.trim()) {
+            editionNumber.classList.add('is-invalid');
+            editionNumber.classList.remove('is-valid');
+            valid = false;
+        } else if (!alphaRegex.test(editionNumber.value.trim())) {
+            editionNumber.classList.add('is-invalid');
+            editionNumber.classList.remove('is-valid');
+            valid = false;
+        } else {
+            editionNumber.classList.remove('is-invalid');
+            editionNumber.classList.add('is-valid');
+        }
+        
+        if (isbn.value.trim() && !isbnRegex.test(isbn.value.trim())) {
+            isbn.classList.add('is-invalid');
+            isbn.classList.remove('is-valid');
+            valid = false;
+        } else if (isbn.value.trim()) {
+            isbn.classList.remove('is-invalid');
+            isbn.classList.add('is-valid');
+        }
+        
+        if (publicationYear.value.trim() && (!/^\d+$/.test(publicationYear.value.trim()) || parseInt(publicationYear.value.trim()) < 1450)) {
+            publicationYear.classList.add('is-invalid');
+            publicationYear.classList.remove('is-valid');
+            valid = false;
+        } else if (publicationYear.value.trim()) {
+            publicationYear.classList.remove('is-invalid');
+            publicationYear.classList.add('is-valid');
+        }
+        
+        if (pages.value.trim() && (!/^\d+$/.test(pages.value.trim()) || parseInt(pages.value.trim()) <= 0)) {
+            pages.classList.add('is-invalid');
+            pages.classList.remove('is-valid');
+            valid = false;
+        } else if (pages.value.trim()) {
+            pages.classList.remove('is-invalid');
+            pages.classList.add('is-valid');
+        }
+        
+        if (!valid) {
+            e.preventDefault();
+        }
+    });
+});
+</script>
+{% endblock %}

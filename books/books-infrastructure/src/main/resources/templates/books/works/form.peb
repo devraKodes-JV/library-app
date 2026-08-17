@@ -1,0 +1,121 @@
+{%- extends "layout" -%}
+
+{% block title %}{% if mode == 'edit' %}Edit Work{% else %}New Work{% endif %} - Library{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="mb-0">
+        {% if mode == 'edit' %}Edit Work{% else %}New Work{% endif %}
+    </h1>
+    <p class="text-muted">A work is an abstract bibliographic entity (title, language, category).</p>
+</div>
+
+<form method="post"
+      action="{% if mode == 'edit' %}/books/works/{{ work.id }}{% else %}/books/works{% endif %}"
+      class="text-light" novalidate>
+    {% import "_macros/csrf" as csrf %}
+    {{ csrf.token(csrfToken) }}
+    <div class="card mt-3 bg-dark border-secondary">
+        <div class="card-body bg-dark">
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label" for="title">Title</label>
+                    <input type="text" id="title" name="title" class="form-control bg-dark border-secondary text-light {% if title is defined and title %}is-invalid{% else %}{% if work is not null %}is-valid{% endif %}{% endif %}" required
+                           value="{% if work is not null %}{{ work.title }}{% endif %}">
+                    {% if title is defined and title %}
+                    <div class="invalid-feedback">{{ title }}</div>
+                    {% endif %}
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label" for="subtitle">Subtitle</label>
+                    <input type="text" id="subtitle" name="subtitle" class="form-control bg-dark border-secondary text-light {% if subtitle is defined and subtitle %}is-invalid{% else %}{% if work is not null and work.subtitle is not empty %}is-valid{% endif %}{% endif %}"
+                           value="{% if work is not null %}{{ work.subtitle }}{% endif %}">
+                    {% if subtitle is defined and subtitle %}
+                    <div class="invalid-feedback">{{ subtitle }}</div>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="row g-3 mt-0">
+                <div class="col-12">
+                    <label class="form-label">Authors <span class="text-danger">*</span></label>
+                    <div class="card bg-dark border-secondary">
+                        <div class="card-body bg-dark p-0">
+                            <div class="table-responsive container">
+                                <table class="table table-hover align-middle mb-0 data-table text-light">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 40px;"></th>
+                                            <th>Name</th>
+                                            <th>Biography</th>
+                                            <th>Dates</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for author in authors %}
+                                        <tr>
+                                            <td class="text-center">
+                                                <input type="checkbox" name="authorIds" value="{{ author.id }}" {% if work is not null %}{% for wa in work.authors %}{% if wa.authorId == author.id %}checked{% endif %}{% endfor %}{% endif %}>
+                                            </td>
+                                            <td>{{ author.fullName }}</td>
+                                            <td class="text-muted">{{ author.biography | default("N/A") }}</td>
+                                            <td class="text-muted">{{ author.birthDate | default("N/A") }} - {{ author.deathDate | default("present") }}</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    {% if authors is defined and authors %}
+                    <div class="invalid-feedback d-block">{{ authors }}</div>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="row g-3 mt-0">
+                <div class="col-md-6">
+                    <label class="form-label" for="originalLanguageId">Original Language</label>
+                    <select id="originalLanguageId" name="originalLanguageId" class="form-select form-select-sm w-auto bg-dark border-secondary text-light">
+                        <option value="">Select language</option>
+                        {% for lang in languages %}
+                        <option value="{{ lang.id }}" {% if work is not null and work.originalLanguageId == lang.id %}selected{% endif %}>
+                            {{ lang.name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label" for="categoryId">Category</label>
+                    <select id="categoryId" name="categoryId" class="form-select form-select-sm w-auto bg-dark border-secondary text-light">
+                        <option value="">Select category</option>
+                        {% for cat in categories %}
+                        <option value="{{ cat.id }}" {% if work is not null and work.categoryId == cat.id %}selected{% endif %}>
+                            {{ cat.name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="row g-3 mt-0">
+                <div class="col-12">
+                    <label class="form-label" for="summary">Summary</label>
+                    <textarea id="summary" name="summary" rows="3" class="form-control bg-dark border-secondary text-light {% if summary is defined and summary %}is-invalid{% else %}{% if work is not null and work.summary is not empty %}is-valid{% endif %}{% endif %}">{% if work is not null %}{{ work.summary }}{% endif %}</textarea>
+                    {% if summary is defined and summary %}
+                    <div class="invalid-feedback">{{ summary }}</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-3">
+        <button type="submit" class="btn btn-primary">
+            <i class="bi bi-check-lg"></i> Save
+        </button>
+        <a href="/books/works" class="btn btn-outline-secondary">Cancel</a>
+    </div>
+</form>
+
+{% block scripts %}
+<script src="/js/works-form.js" nonce="{{ securityNonce }}"></script>
+{% endblock %}
+{% endblock %}
