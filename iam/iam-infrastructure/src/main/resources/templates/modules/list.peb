@@ -1,0 +1,54 @@
+{%- extends "layout" -%}
+
+{% block title %}Modules - Library{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="mb-0">Modules</h1>
+    <p class="text-muted">Read-only view of the application modules.</p>
+</div>
+
+<div class="card mt-3 bg-dark border-secondary">
+    <div class="table-responsive container">
+<table class="table table-hover align-middle mb-0 data-table text-light">
+            <thead>
+            <tr>
+                <th>Code</th>
+                <th>Name</th>
+                <th>Menu Label</th>
+                <th>Icon</th>
+                <th>Order</th>
+                <th>Status</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for m in modules %}
+            <tr>
+                <td><span class="badge bg-light text-dark font-monospace">{{ m.code }}</span></td>
+                <td>{{ m.name }}</td>
+                <td>{{ m.menuLabel | default('-') }}</td>
+                <td><i class="bi {{ m.icon }}"></i></td>
+                <td>{{ m.sortOrder }}</td>
+                <td>
+                    {% if m.enabled %}
+                    <span class="badge bg-success">Enabled</span>
+                    {% else %}
+                    <span class="badge bg-secondary">Disabled</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+            {% if modules is empty %}
+            <tr>
+                <td colspan="6" class="text-muted text-center">No modules defined.</td>
+            </tr>
+{% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/js/iam.js"></script>
+{% endblock %}

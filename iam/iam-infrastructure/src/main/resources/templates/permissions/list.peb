@@ -1,0 +1,54 @@
+{%- extends "layout" -%}
+
+{% block title %}Permissions - Library{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="mb-0">Permissions</h1>
+    <p class="text-muted">Read-only view of all permissions by module.</p>
+</div>
+
+<div class="card mt-3 bg-dark border-secondary">
+    <div class="table-responsive container">
+<table class="table table-hover align-middle mb-0 data-table text-light">
+            <thead>
+            <tr>
+                <th>Code</th>
+                <th>Name</th>
+                <th>Module</th>
+                <th>Menu Label</th>
+                <th>URL</th>
+                <th>Order</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for p in permissions %}
+            <tr>
+                <td><span class="badge bg-light text-dark font-monospace">{{ p.code }}</span></td>
+                <td>{{ p.name }}</td>
+                <td><i class="bi {{ p.module.icon }}"></i> {{ p.module.menuLabel | default(p.module.name) }}</td>
+                <td>{{ p.menuLabel | default('-') }}</td>
+                <td>
+                    {% if p.url is not null %}
+                    <a href="{{ p.url }}" class="text-info text-decoration-none">{{ p.url }}</a>
+                    {% else %}
+                    -
+                    {% endif %}
+                </td>
+                <td>{{ p.sortOrder }}</td>
+            </tr>
+            {% endfor %}
+            {% if permissions is empty %}
+            <tr>
+                <td colspan="6" class="text-muted text-center">No permissions defined.</td>
+            </tr>
+{% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/js/iam.js"></script>
+{% endblock %}

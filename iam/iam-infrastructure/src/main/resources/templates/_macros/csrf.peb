@@ -1,0 +1,8 @@
+{#- =========================================================================
+     _macros/csrf.peb
+     Pebble macro to render a CSRF hidden input field.
+     Usage: {% import "_macros/csrf" as csrf %}{{ csrf.token(csrfToken) }}
+     ========================================================================= -#}
+{% macro token(csrfToken) %}
+    <input type="hidden" name="_csrf" value="{{ csrfToken | default('') }}">
+{% endmacro %}

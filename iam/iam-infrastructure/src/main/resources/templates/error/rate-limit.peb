@@ -1,0 +1,40 @@
+{#- =========================================================================
+     error/rate-limit.peb
+     Error page shown when the rate limit is exceeded.
+     Standalone (does not extend the layout).
+     ========================================================================= -#}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Library - Too Many Requests</title>
+<link rel="stylesheet" href="/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/css/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="/css/app.base.css">
+</head>
+<body class="login-page">
+    <div class="login-card text-bg-dark">
+        <div class="login-brand">
+            <i class="bi bi-shield-lock"></i>
+            <h1>Library</h1>
+            <p>Too Many Requests</p>
+        </div>
+
+        {% include "_partials/flash" %}
+
+        <div class="alert alert-warning" role="alert">
+            <i class="bi bi-exclamation-triangle"></i>
+            You have made too many requests. Please wait a moment and try again.
+        </div>
+
+        <p class="text-center text-muted">
+            For security reasons, login attempts are limited to 20 per minute per network and 10 per minute per account.
+        </p>
+
+        <div class="text-center mt-3">
+            <a href="/login" class="btn btn-primary">Return to Login</a>
+        </div>
+    </div>
+</body>
+</html>

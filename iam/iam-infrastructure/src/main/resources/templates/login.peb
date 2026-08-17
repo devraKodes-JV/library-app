@@ -1,0 +1,55 @@
+{#- =========================================================================
+     login.peb
+     Login page. Standalone (does not extend the layout because the layout
+     shows the sidebar which requires an authenticated user).
+     ========================================================================= -#}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Library - Login</title>
+<link rel="stylesheet" href="/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/css/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="/css/app.base.css">
+</head>
+<body class="login-page">
+    <div class="login-card text-bg-dark">
+        <div class="login-brand">
+            <i class="bi bi-book-half"></i>
+            <h1>Library</h1>
+            <p>Sign in to continue</p>
+        </div>
+
+        {% if loginError %}
+        <div class="alert alert-danger" role="alert">
+            <strong>Error</strong> {{ errorMessage | default('Invalid username or password.') }}
+        </div>
+        {% endif %}
+
+        {% if logoutMessage %}
+        <div class="alert alert-info" role="alert">
+            <strong>Info</strong> {{ successMessage | default('You have been signed out.') }}
+        </div>
+        {% endif %}
+
+        {% include "_partials/flash" %}
+
+        <form method="post" action="/login">
+            {% import "_macros/csrf" as csrf %}
+            {{ csrf.token(csrfToken) }}
+            <div class="mb-3">
+                <label for="username" class="form-label">Username</label>
+                <input type="text" class="form-control" id="username" name="username"
+                       required autofocus autocomplete="username">
+            </div>
+            <div class="mb-3">
+                <label for="password" class="form-label">Password</label>
+                <input type="password" class="form-control" id="password" name="password"
+                       required autocomplete="current-password">
+            </div>
+            <button type="submit" class="btn btn-primary w-100">Sign in</button>
+        </form>
+    </div>
+</body>
+</html>
