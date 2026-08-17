@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- security-infrastructure: adapters that connect the security domain to the outside world. -->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <!-- Inherits from the security feature aggregator. -->
+    <parent>
+        <groupId>com.library</groupId>
+        <artifactId>security</artifactId>
+        <version>1.0.0</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>security-infrastructure</artifactId>
+    <name>Security Infrastructure</name>
+    <description>
+        Infrastructure layer of the Security feature. Contains the adapters that
+        implement the domain ports: JPA persistence adapters for audit logs,
+        HTTP web filters (CSRF, security headers, rate limiting), and security
+        utilities. Depends on security-application (for use cases) and the domain
+        ports. This is the only layer that knows about concrete technologies
+        (Hibernate, Javalin, etc.).
+    </description>
+
+    <dependencies>
+        <!-- Depends on the kernel capability contracts (generic repository
+             interfaces shared by all features). -->
+        <dependency>
+            <groupId>com.library</groupId>
+            <artifactId>kernel</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <!-- Depends on the application services (use cases). -->
+        <dependency>
+            <groupId>com.library</groupId>
+            <artifactId>security-application</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <!-- Javalin: embedded HTTP server / web framework. -->
+        <dependency>
+            <groupId>io.javalin</groupId>
+            <artifactId>javalin</artifactId>
+        </dependency>
+
+        <!-- Hibernate ORM (JPA implementation) for persistence. -->
+        <dependency>
+            <groupId>org.hibernate.orm</groupId>
+            <artifactId>hibernate-core</artifactId>
+        </dependency>
+
+        <!-- H2 embedded database (runtime only). -->
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+
+        <!-- Flyway database migrations. -->
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-core</artifactId>
+        </dependency>
+
+        <!-- SLF4J API for logging. -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+
+        <!-- JUnit 5 for infrastructure tests. -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+</project>

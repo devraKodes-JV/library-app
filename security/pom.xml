@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- security feature aggregator POM (no source code, groups the hex layers). -->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <!-- Inherit the shared build configuration from the root parent. -->
+    <parent>
+        <groupId>com.library</groupId>
+        <artifactId>library-ultimate</artifactId>
+        <version>1.0.0</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>security</artifactId>
+    <packaging>pom</packaging>
+    <name>Security Feature</name>
+    <description>
+        Cross-cutting security feature. Aggregator POM that groups
+        the three hexagonal layers as separate Maven modules:
+        security-domain, security-application and security-infrastructure.
+    </description>
+
+    <!-- The three layers of the Security feature. -->
+    <modules>
+        <module>security-domain</module>
+        <module>security-application</module>
+        <module>security-infrastructure</module>
+    </modules>
+</project>
