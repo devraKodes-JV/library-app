@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    bootstrap: the ONLY runnable module. It contains the single main() method,
+    the application configuration, static resources and templates. It wires
+    together all feature modules and produces the final self-contained
+    executable JAR (double-click to run).
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <!-- Inherits from the root project so shared config applies. -->
+    <parent>
+        <groupId>com.library</groupId>
+        <artifactId>library-ultimate</artifactId>
+        <version>1.0.0</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>bootstrap</artifactId>
+    <name>Library Bootstrap</name>
+    <description>
+        Application launcher. Depends on iam-infrastructure (which transitively
+        brings iam-application and iam-domain). Contains LibraryApplication
+        (main), the application configuration, the Flyway migrations, the
+        static resources and the Pebble templates. Builds the executable JAR.
+    </description>
+
+    <dependencies>
+        <!-- Security infrastructure (cross-cutting security features). -->
+        <dependency>
+            <groupId>com.library</groupId>
+            <artifactId>security-infrastructure</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <!-- The single feature wired in: IAM infrastructure. -->
+        <dependency>
+            <groupId>com.library</groupId>
+            <artifactId>iam-infrastructure</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <!-- Books infrastructure (controllers, routes, templates). -->
+        <dependency>
+            <groupId>com.library</groupId>
+            <artifactId>books-infrastructure</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <!-- SLF4J API. -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+
+        <!-- SLF4J simple implementation: prints logs to the console. -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+
+        <!-- JUnit 5 for tests. -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <!--
+                Maven Shade: builds a single self-contained "fat" JAR with
+                all dependencies and the main class manifest. Result: a
+                double-clickable executable JAR.
+            -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.6.0</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <transformers>
+                                <!-- Declares the main class in the manifest. -->
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    <mainClass>com.library.bootstrap.LibraryApplication</mainClass>
+                                </transformer>
+                                <!-- Merges service provider files (e.g. H2, Flyway). -->
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+                            </transformers>
+                            <filters>
+                                <!-- Excludes signature files that break the fat JAR. -->
+                                <filter>
+                                    <artifact>*:*</artifact>
+                                    <excludes>
+                                        <exclude>META-INF/*.SF</exclude>
+                                        <exclude>META-INF/*.DSA</exclude>
+                                        <exclude>META-INF/*.RSA</exclude>
+                                    </excludes>
+                                </filter>
+                            </filters>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>
