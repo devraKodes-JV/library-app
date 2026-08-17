@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- iam-application: use cases and application services of the IAM feature. -->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <!-- Inherits from the iam feature aggregator. -->
+    <parent>
+        <groupId>com.library</groupId>
+        <artifactId>iam</artifactId>
+        <version>1.0.0</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>iam-application</artifactId>
+    <name>IAM Application</name>
+    <description>
+        Application layer of the IAM feature. Implements the use cases
+        declared as ports in the domain layer.
+        Depends only on iam-domain. It is framework-agnostic: it does not
+        depend on Javalin, JPA or any web framework.
+    </description>
+
+    <dependencies>
+        <!-- Application layer depends on the domain contracts. -->
+        <dependency>
+            <groupId>com.library</groupId>
+            <artifactId>iam-domain</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <!-- SLF4J API for logging (implementation bound at runtime). -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+
+        <!-- Kernel utilities (validation, etc.). -->
+        <dependency>
+            <groupId>com.library</groupId>
+            <artifactId>kernel</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <!-- JUnit 5 for application unit tests. -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+</project>

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- iam feature aggregator POM (no source code, groups the hex layers). -->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <!-- Inherit the shared build configuration from the root parent. -->
+    <parent>
+        <groupId>com.library</groupId>
+        <artifactId>library-ultimate</artifactId>
+        <version>1.0.0</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>iam</artifactId>
+    <packaging>pom</packaging>
+    <name>IAM Feature</name>
+    <description>
+        Identity &amp; Access Management feature. Aggregator POM that groups
+        the three hexagonal layers as separate Maven modules:
+        iam-domain, iam-application and iam-infrastructure.
+    </description>
+
+    <!-- The three layers of the IAM feature. -->
+    <modules>
+        <module>iam-domain</module>
+        <module>iam-application</module>
+        <module>iam-infrastructure</module>
+    </modules>
+</project>
