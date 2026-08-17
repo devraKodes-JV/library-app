@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Library Ultimate - Parent POM (aggregator, no source code). -->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <!-- Product coordinates. -->
+    <groupId>com.library</groupId>
+    <artifactId>library-ultimate</artifactId>
+    <version>1.0.0</version>
+    <packaging>pom</packaging>
+    <name>Library Ultimate</name>
+    <description>
+        Library Management System - a modular monolith built with pure Java.
+        Identity &amp; Access Management (IAM) feature responsible for users,
+        roles, permissions and modules.
+    </description>
+
+    <!--
+        Build order. Maven compiles kernel, security and iam (and their sub-modules) first, then
+        the bootstrap module which depends on infrastructure layers.
+    -->
+    <modules>
+        <module>kernel</module>
+        <module>security</module>
+        <module>iam</module>
+        <module>books</module>
+        <module>bootstrap</module>
+    </modules>
+
+    <properties>
+        <!-- Whole project compiles to Java 25 bytecode. -->
+        <maven.compiler.release>25</maven.compiler.release>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+        <!-- Version registry, centralised for easy upgrades. -->
+        <slf4j.version>2.0.17</slf4j.version>
+        <javalin.version>7.2.2</javalin.version>
+        <hibernate.version>6.6.11.Final</hibernate.version>
+        <hibernate-envers.version>6.6.11.Final</hibernate-envers.version>
+        <h2.version>2.3.232</h2.version>
+        <flyway.version>11.7.2</flyway.version>
+        <bouncycastle.version>1.80</bouncycastle.version>
+        <pebble.version>3.2.2</pebble.version>
+        <junit.version>5.13.0</junit.version>
+        <mockito.version>5.14.2</mockito.version>
+    </properties>
+
+    <!--
+        Dependency management: pins versions but does NOT add dependencies
+        to the classpath. Sub-modules opt in by declaring the same dependency
+        without a version. This avoids version conflicts across modules.
+    -->
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-api</artifactId>
+                <version>${slf4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-simple</artifactId>
+                <version>${slf4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.javalin</groupId>
+                <artifactId>javalin</artifactId>
+                <version>${javalin.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.hibernate.orm</groupId>
+                <artifactId>hibernate-core</artifactId>
+                <version>${hibernate.version}</version>
+            </dependency>
+            <!-- Hibernate Envers: audit-trail of every change to audited entities. -->
+            <dependency>
+                <groupId>org.hibernate.orm</groupId>
+                <artifactId>hibernate-envers</artifactId>
+                <version>${hibernate-envers.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.h2database</groupId>
+                <artifactId>h2</artifactId>
+                <version>${h2.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.flywaydb</groupId>
+                <artifactId>flyway-core</artifactId>
+                <version>${flyway.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.bouncycastle</groupId>
+                <artifactId>bcprov-jdk18on</artifactId>
+                <version>${bouncycastle.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.pebbletemplates</groupId>
+                <artifactId>pebble</artifactId>
+                <version>${pebble.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.junit.jupiter</groupId>
+                <artifactId>junit-jupiter</artifactId>
+                <version>${junit.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.mockito</groupId>
+                <artifactId>mockito-core</artifactId>
+                <version>${mockito.version}</version>
+                <scope>test</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <!-- Shared build configuration inherited by every sub-module. -->
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>3.14.0</version>
+                    <configuration>
+                        <release>${maven.compiler.release}</release>
+                        <parameters>true</parameters>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <version>3.5.2</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
+</project>
