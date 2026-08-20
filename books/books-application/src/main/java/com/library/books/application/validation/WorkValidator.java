@@ -30,6 +30,13 @@ public class WorkValidator implements Validator<Work> {
 
         if (work.getWorkAuthors() == null || work.getWorkAuthors().isEmpty()) {
             errors.put("authors", "At least one author is required");
+        } else {
+            for (int i = 0; i < work.getWorkAuthors().size(); i++) {
+                var wa = work.getWorkAuthors().get(i);
+                if (wa.getAuthorRoleId() == null) {
+                    errors.put("authorRole_" + i, "Role is required for author " + (i + 1));
+                }
+            }
         }
 
         if (!errors.isEmpty()) {

@@ -105,7 +105,7 @@
                                         {{ author.displayName }}
                                     </a>
                                 </td>
-                                <td class="text-muted">{{ author.role | default("N/A") }}</td>
+                                <td class="text-muted">{{ author.authorRoleName | default("N/A") }}</td>
                             </tr>
                             {% endfor %}
                         </tbody>

@@ -24,7 +24,7 @@ public class GetWorkUseCase {
         String languageName = data.languageName() != null && !data.languageName().isBlank() ? data.languageName() : "";
         String categoryName = data.categoryName() != null && !data.categoryName().isBlank() ? data.categoryName() : "";
         List<WorkAuthor> authors = data.authors() != null ? data.authors().stream()
-                .map(a -> new WorkAuthor(null, null, a.id(), a.role(), null, null))
+                .map(a -> new WorkAuthor(null, null, a.id(), a.authorRoleId(), null, null))
                 .toList()
                 : List.of();
         return new WorkResponseDTO(

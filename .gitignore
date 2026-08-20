@@ -1,0 +1,103 @@
+# --------------------------
+# Archivos Compilados
+# --------------------------
+*.class
+*.db
+*.pid
+*.txt
+*.jar
+*.war
+*.ear
+*.nar
+*.zip
+*.tar.gz
+*.rar
+hs_err_pid*
+replay_pid*
+
+# --------------------------
+# Maven
+# --------------------------
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/timing.properties
+# Descomenta la siguiente línea si usas el wrapper de Maven sin el jar binario
+# .mvn/wrapper/maven-wrapper.jar
+
+# --------------------------
+# Gradle
+# --------------------------
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+!**/src/main/**/build/
+!**/src/test/**/build/
+gradle-app.setting
+.gradletasknamecache
+
+# --------------------------
+# IntelliJ IDEA
+# --------------------------
+.idea/
+*.iws
+*.iml
+*.ipr
+out/
+!gradle/wrapper/gradle-wrapper.jar
+
+# --------------------------
+# Eclipse
+# --------------------------
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings/
+.springBeans
+.sts4-cache
+bin/
+!**/src/main/**/bin/
+!**/src/test/**/bin/
+
+# --------------------------
+# NetBeans
+# --------------------------
+/nbproject/private/
+/nbbuild/
+/nbdist/
+/.nb-gradle/
+
+# --------------------------
+# VS Code
+# --------------------------
+.lsp/
+.vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.code-workspace
+
+# --------------------------
+# Entorno y Logs
+# --------------------------
+.env
+.env.local
+*.log
+logs/
+test-output/
+surefire-reports/
+jacoco.exec
+
+# --------------------------
+# Sistema Operativo
+# --------------------------
+.DS_Store
+Thumbs.db
+*~   

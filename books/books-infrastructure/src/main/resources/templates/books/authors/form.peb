@@ -22,149 +22,235 @@
                     <label class="form-label" for="firstName">First Name</label>
                     <input type="text" id="firstName" name="firstName" class="form-control bg-dark border-secondary text-light {% if firstName is defined and firstName %}is-invalid{% else %}{% if author is not null %}is-valid{% endif %}{% endif %}" required
                            value="{% if author is not null %}{{ author.firstName }}{% endif %}">
-                    {% if firstName is defined and firstName %}
-                    <div class="invalid-feedback">{{ firstName }}</div>
-                    {% endif %}
+                    <div class="invalid-feedback" id="firstNameError">{% if firstName is defined and firstName %}{{ firstName }}{% endif %}</div>
                 </div>
                 <div class="col-md-6">
                     <label class="form-label" for="lastName">Last Name</label>
                     <input type="text" id="lastName" name="lastName" class="form-control bg-dark border-secondary text-light {% if lastName is defined and lastName %}is-invalid{% else %}{% if author is not null %}is-valid{% endif %}{% endif %}" required
                            value="{% if author is not null %}{{ author.lastName }}{% endif %}">
-                    {% if lastName is defined and lastName %}
-                    <div class="invalid-feedback">{{ lastName }}</div>
-                    {% endif %}
+                    <div class="invalid-feedback" id="lastNameError">{% if lastName is defined and lastName %}{{ lastName }}{% endif %}</div>
                 </div>
             </div>
             <div class="row g-3 mt-0">
                 <div class="col-md-6">
                     <label class="form-label" for="birthDate">Birth Date</label>
                     <input type="date" id="birthDate" name="birthDate" class="form-control bg-dark border-secondary text-light {% if birthDate is defined and birthDate %}is-invalid{% else %}{% if author is not null and author.birthDate is not empty %}is-valid{% endif %}{% endif %}"
-                           value="{% if author is not null %}{{ author.birthDate }}{% endif %}">
-                    {% if birthDate is defined and birthDate %}
-                    <div class="invalid-feedback">{{ birthDate }}</div>
-                    {% endif %}
+                           value="{% if author is not null %}{{ author.birthDate }}{% endif %}" max="2000-01-01">
+                    <div class="invalid-feedback" id="birthDateError">{% if birthDate is defined and birthDate %}{{ birthDate }}{% endif %}</div>
                 </div>
                 <div class="col-md-6">
                     <label class="form-label" for="deathDate">Death Date</label>
                     <input type="date" id="deathDate" name="deathDate" class="form-control bg-dark border-secondary text-light {% if deathDate is defined and deathDate %}is-invalid{% else %}{% if author is not null and author.deathDate is not empty %}is-valid{% endif %}{% endif %}"
                            value="{% if author is not null %}{{ author.deathDate }}{% endif %}">
-                    {% if deathDate is defined and deathDate %}
-                    <div class="invalid-feedback">{{ deathDate }}</div>
-                    {% endif %}
+                    <div class="invalid-feedback" id="deathDateError">{% if deathDate is defined and deathDate %}{{ deathDate }}{% endif %}</div>
                 </div>
             </div>
             <div class="row g-3 mt-0">
                 <div class="col-12">
                     <label class="form-label" for="biography">Biography</label>
                     <textarea id="biography" name="biography" rows="3" class="form-control bg-dark border-secondary text-light {% if biography is defined and biography %}is-invalid{% else %}{% if author is not null and author.biography is not empty %}is-valid{% endif %}{% endif %}">{% if author is not null %}{{ author.biography }}{% endif %}</textarea>
-                    {% if biography is defined and biography %}
-                    <div class="invalid-feedback">{{ biography }}</div>
-                    {% endif %}
+                    <div class="invalid-feedback" id="biographyError">{% if biography is defined and biography %}{{ biography }}{% endif %}</div>
                 </div>
             </div>
         </div>
     </div>
 
     <div class="mt-3">
-        <button type="submit" class="btn btn-primary">
+        <button type="submit" id="submitBtn" class="btn btn-primary" disabled>
             <i class="bi bi-check-lg"></i> Save
         </button>
         <a href="/books/authors" class="btn btn-outline-secondary">Cancel</a>
     </div>
 </form>
 
-<script>
+<script nonce="{{ securityNonce }}">
 document.addEventListener('DOMContentLoaded', function() {
     var form = document.querySelector('form[novalidate]');
     if (!form) return;
-    form.addEventListener('submit', function(e) {
-        var valid = true;
-        var firstName = document.getElementById('firstName');
-        var lastName = document.getElementById('lastName');
-        var birthDate = document.getElementById('birthDate');
-        var deathDate = document.getElementById('deathDate');
-        var alphaRegex = /^[a-zA-ZÀ-ÿ\s'-]+$/;
-        var dateRegex = /^\d{4}-\d{2}-\d{2}$/;
-        
-        if (!firstName.value.trim()) {
-            firstName.classList.add('is-invalid');
-            firstName.classList.remove('is-valid');
-            valid = false;
-        } else if (!alphaRegex.test(firstName.value.trim())) {
-            firstName.classList.add('is-invalid');
-            firstName.classList.remove('is-valid');
-            valid = false;
-        } else {
-            firstName.classList.remove('is-invalid');
-            firstName.classList.add('is-valid');
-        }
-        
-        if (!lastName.value.trim()) {
-            lastName.classList.add('is-invalid');
-            lastName.classList.remove('is-valid');
-            valid = false;
-        } else if (!alphaRegex.test(lastName.value.trim())) {
-            lastName.classList.add('is-invalid');
-            lastName.classList.remove('is-valid');
-            valid = false;
-        } else {
-            lastName.classList.remove('is-invalid');
-            lastName.classList.add('is-valid');
-        }
-        
-        if (birthDate.value.trim() && !dateRegex.test(birthDate.value.trim())) {
-            birthDate.classList.add('is-invalid');
-            birthDate.classList.remove('is-valid');
-            valid = false;
-        } else if (birthDate.value.trim()) {
-            var today = new Date();
-            var birth = new Date(birthDate.value.trim());
-            var minBirth = new Date(today.getFullYear() - 18, today.getMonth(), today.getDate());
-            if (birth > minBirth) {
-                birthDate.classList.add('is-invalid');
-                birthDate.classList.remove('is-valid');
-                birthDate.setCustomValidity('Author must be at least 18 years old.');
-                valid = false;
-            } else {
-                birthDate.classList.remove('is-invalid');
-                birthDate.classList.add('is-valid');
-                birthDate.setCustomValidity('');
-            }
-        }
-        
-        if (deathDate.value.trim() && !dateRegex.test(deathDate.value.trim())) {
-            deathDate.classList.add('is-invalid');
-            deathDate.classList.remove('is-valid');
-            valid = false;
-        } else if (deathDate.value.trim()) {
+    
+    var birthDateInput = document.getElementById('birthDate');
+    if (birthDateInput) {
+        var today = new Date();
+        var maxBirth = new Date(today.getFullYear() - 18, today.getMonth(), today.getDate());
+        birthDateInput.max = maxBirth.toISOString().split('T')[0];
+    }
+    
+    var submitBtn = document.getElementById('submitBtn');
+    var fields = ['firstName', 'lastName', 'birthDate', 'deathDate', 'biography'];
+    var fieldErrors = {
+        firstName: document.getElementById('firstNameError'),
+        lastName: document.getElementById('lastNameError'),
+        birthDate: document.getElementById('birthDateError'),
+        deathDate: document.getElementById('deathDateError'),
+        biography: document.getElementById('biographyError')
+    };
+    var birthDate = document.getElementById('birthDate');
+    var alphaRegex = /^[a-zA-ZÀ-ÿ\s'-]+$/;
+    var dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+    
+    function isFirstNameValid() {
+        var value = firstName.value.trim();
+        if (!value) return false;
+        if (!alphaRegex.test(value)) return false;
+        return true;
+    }
+    
+    function isLastNameValid() {
+        var value = lastName.value.trim();
+        if (!value) return false;
+        if (!alphaRegex.test(value)) return false;
+        return true;
+    }
+    
+    function isBirthDateValid() {
+        var value = birthDate.value.trim();
+        if (!value) return false;
+        if (!dateRegex.test(value)) return false;
+        var today = new Date();
+        var birth = new Date(value);
+        var minBirth = new Date(today.getFullYear() - 18, today.getMonth(), today.getDate());
+        if (birth > minBirth) return false;
+        if (birth > today) return false;
+        return true;
+    }
+    
+    function isDeathDateValid() {
+        var value = deathDate.value.trim();
+        if (!value) return true;
+        if (!dateRegex.test(value)) return false;
+        if (value) {
             var today2 = new Date();
             today2.setHours(0,0,0,0);
-            var death = new Date(deathDate.value.trim());
-            if (death > today2) {
-                deathDate.classList.add('is-invalid');
-                deathDate.classList.remove('is-valid');
-                deathDate.setCustomValidity('Death date cannot be in the future.');
-                valid = false;
-            } else if (birthDate.value.trim() && dateRegex.test(birthDate.value.trim())) {
+            var death = new Date(value);
+            if (death > today2) return false;
+            if (birthDate.value.trim() && dateRegex.test(birthDate.value.trim())) {
                 var birth = new Date(birthDate.value.trim());
-                if (death < birth) {
-                    deathDate.classList.add('is-invalid');
-                    deathDate.classList.remove('is-valid');
-                    deathDate.setCustomValidity('Death date cannot be before birth date.');
-                    valid = false;
+                if (death < birth) return false;
+            }
+        }
+        return true;
+    }
+    
+    function isBiographyValid() {
+        var value = biography.value.trim();
+        if (value && value.length > 2000) return false;
+        if (value && !/^[a-zA-ZÀ-ÿ0-9\s.,!?'"'-]*$/.test(value)) return false;
+        return true;
+    }
+    
+    function validateField(fieldName) {
+        var el = document.getElementById(fieldName);
+        var errorEl = fieldErrors[fieldName];
+        var value = el.value.trim();
+        var valid = true;
+        
+        if (fieldName === 'firstName') {
+            valid = isFirstNameValid();
+            if (!valid) {
+                errorEl.textContent = value ? 'First name must contain only letters, spaces, hyphens or apostrophes.' : 'First name is required.';
+            } else {
+                errorEl.textContent = '';
+            }
+        } else if (fieldName === 'lastName') {
+            valid = isLastNameValid();
+            if (!valid) {
+                errorEl.textContent = value ? 'Last name must contain only letters, spaces, hyphens or apostrophes.' : 'Last name is required.';
+            } else {
+                errorEl.textContent = '';
+            }
+        } else if (fieldName === 'birthDate') {
+            valid = isBirthDateValid();
+            if (!valid) {
+                if (!value) {
+                    errorEl.textContent = 'Birth date is required.';
+                } else if (!dateRegex.test(value)) {
+                    errorEl.textContent = 'Invalid birth date format. Use YYYY-MM-DD.';
                 } else {
-                    deathDate.classList.remove('is-invalid');
-                    deathDate.classList.add('is-valid');
-                    deathDate.setCustomValidity('');
+                    var today = new Date();
+                    var birth = new Date(value);
+                    var minBirth = new Date(today.getFullYear() - 18, today.getMonth(), today.getDate());
+                    if (birth > minBirth) {
+                        errorEl.textContent = 'Author must be at least 18 years old.';
+                    } else if (birth > today) {
+                        errorEl.textContent = 'Birth date cannot be in the future.';
+                    }
                 }
             } else {
-                deathDate.classList.remove('is-invalid');
-                deathDate.classList.add('is-valid');
-                deathDate.setCustomValidity('');
+                errorEl.textContent = '';
+            }
+        } else if (fieldName === 'deathDate') {
+            valid = isDeathDateValid();
+            if (!valid) {
+                if (!dateRegex.test(value)) {
+                    errorEl.textContent = 'Invalid death date format. Use YYYY-MM-DD.';
+                } else {
+                    var today2 = new Date();
+                    today2.setHours(0,0,0,0);
+                    var death = new Date(value);
+                    if (death > today2) {
+                        errorEl.textContent = 'Death date cannot be in the future.';
+                    } else if (birthDate.value.trim() && dateRegex.test(birthDate.value.trim())) {
+                        var birth = new Date(birthDate.value.trim());
+                        if (death < birth) {
+                            errorEl.textContent = 'Death date cannot be before birth date.';
+                        }
+                    }
+                }
+            } else {
+                errorEl.textContent = '';
+            }
+        } else if (fieldName === 'biography') {
+            valid = isBiographyValid();
+            if (!valid) {
+                if (value && value.length > 2000) {
+                    errorEl.textContent = 'Biography must be 2000 characters or less.';
+                } else if (value && !/^[a-zA-ZÀ-ÿ0-9\s.,!?'"'-]*$/.test(value)) {
+                    errorEl.textContent = 'Biography contains invalid characters.';
+                }
+            } else {
+                errorEl.textContent = '';
             }
         }
         
-        if (!valid) {
+        if (valid && value) {
+            el.classList.remove('is-invalid');
+            el.classList.add('is-valid');
+        } else if (!valid) {
+            el.classList.add('is-invalid');
+            el.classList.remove('is-valid');
+        } else {
+            el.classList.remove('is-invalid');
+            el.classList.remove('is-valid');
+        }
+        
+        return valid;
+    }
+    
+    function updateSubmitButton() {
+        var valid = isFirstNameValid() && isLastNameValid() && isBirthDateValid() && isDeathDateValid() && isBiographyValid();
+        submitBtn.disabled = !valid;
+        return valid;
+    }
+    
+    fields.forEach(function(fieldName) {
+        var el = document.getElementById(fieldName);
+        if (!el) return;
+        el.addEventListener('input', function() {
+            validateField(fieldName);
+            updateSubmitButton();
+        });
+        el.addEventListener('change', function() {
+            validateField(fieldName);
+            updateSubmitButton();
+        });
+        el.addEventListener('blur', function() {
+            validateField(fieldName);
+            updateSubmitButton();
+        });
+    });
+    
+    form.addEventListener('submit', function(e) {
+        if (!updateSubmitButton()) {
             e.preventDefault();
         }
     });

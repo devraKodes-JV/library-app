@@ -53,4 +53,9 @@ public class CategoryPersistenceAdapter implements CategoryRepository {
     public Map<Long, String> findNamesByIds(List<Long> ids) {
         return categoryJpaRepository.findNamesByIds(ids);
     }
+
+    @Override
+    public void nullifyParent(Long parentId) {
+        ((com.library.books.infrastructure.persistence.repository.hibernate.HibernateCategoryRepository) categoryJpaRepository).nullifyParent(parentId);
+    }
 }

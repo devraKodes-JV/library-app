@@ -24,13 +24,13 @@ public class EditionEntity extends AuditableEntity implements Serializable {
     @Column(name = "work_id", nullable = false)
     private Long workId;
 
-    @Column(name = "publisher_id")
+    @Column(name = "publisher_id", nullable = false)
     private Long publisherId;
 
-    @Column(name = "format_id")
+    @Column(name = "format_id", nullable = false)
     private Long formatId;
 
-    @Column(name = "language_id")
+    @Column(name = "language_id", nullable = false)
     private Long languageId;
 
     @Column(length = 20)

@@ -7,18 +7,18 @@ import com.library.books.application.dto.command.author.CreateAuthorCommand;
 import com.library.books.application.service.author.CreateAuthorUseCase;
 import com.library.books.domain.exception.ValidationException;
 import com.library.kernel.web.WebControllerContext;
-import com.library.kernel.web.WebHelper;
 
 import io.javalin.http.Context;
 
-public class CreateAuthorController {
+import com.library.kernel.web.BaseController;
+
+public class CreateAuthorController extends BaseController {
 
     private final CreateAuthorUseCase createAuthorUseCase;
-    private final WebControllerContext webContext;
 
     public CreateAuthorController(CreateAuthorUseCase createAuthorUseCase, WebControllerContext webContext) {
+        super(webContext);
         this.createAuthorUseCase = createAuthorUseCase;
-        this.webContext = webContext;
     }
 
     public void showCreateForm(Context ctx) {
@@ -37,7 +37,7 @@ public class CreateAuthorController {
 
         try {
             createAuthorUseCase.execute(command);
-            WebHelper.flashSuccess(ctx, "Author created successfully.");
+            flashSuccess(ctx, "Author created successfully.");
             ctx.redirect("/books/authors");
         } catch (ValidationException e) {
             Map<String, Object> model = buildCreateModel(ctx);
@@ -48,8 +48,8 @@ public class CreateAuthorController {
     }
 
     private Map<String, Object> buildCreateModel(Context ctx) {
-        var current = webContext.currentUser(ctx);
-        List<?> navSections = webContext.navSections(ctx);
+        var current = currentUser(ctx);
+        List<?> navSections = navSections(ctx);
         Map<String, Object> model = new java.util.LinkedHashMap<>();
         model.put("mode", "create");
         model.put("author", null);
@@ -58,9 +58,4 @@ public class CreateAuthorController {
         return model;
     }
 
-    private void requireCan(Context ctx, String permCode) {
-        if (!webContext.hasPermission(ctx, permCode)) {
-            throw new io.javalin.http.ForbiddenResponse();
-        }
-    }
 }

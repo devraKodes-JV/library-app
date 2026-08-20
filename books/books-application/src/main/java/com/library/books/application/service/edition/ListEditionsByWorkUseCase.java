@@ -1,11 +1,10 @@
 package com.library.books.application.service.edition;
 
-import com.library.books.domain.model.Edition;
-import com.library.books.domain.port.out.EditionRepository;
+import java.util.List;
 
 import com.library.books.application.dto.response.edition.EditionResponseDTO;
-
-import java.util.List;
+import com.library.books.domain.dto.response.edition.EditionWithNamesDTO;
+import com.library.books.domain.port.out.EditionRepository;
 
 public class ListEditionsByWorkUseCase {
 
@@ -16,8 +15,8 @@ public class ListEditionsByWorkUseCase {
     }
 
     public List<EditionResponseDTO> execute(Long workId) {
-        return editionRepository.findByWorkId(workId).stream()
-                .map(EditionResponseDTO::of)
+        return editionRepository.findByWorkIdWithDetails(workId).stream()
+                .map(EditionResponseDTO::from)
                 .toList();
     }
 }

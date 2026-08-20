@@ -16,7 +16,7 @@ public final class EditionAuthorMapper {
                 entity.getId(),
                 entity.getEditionId(),
                 entity.getAuthorId(),
-                entity.getRole(),
+                entity.getAuthorRoleId(),
                 entity.getCreatedAt(),
                 entity.getUpdatedAt()
         );
@@ -30,7 +30,7 @@ public final class EditionAuthorMapper {
         entity.setId(domain.getId());
         entity.setEditionId(domain.getEditionId());
         entity.setAuthorId(domain.getAuthorId());
-        entity.setRole(domain.getRole());
+        entity.setAuthorRoleId(domain.getAuthorRoleId());
         entity.setEnabled(true);
         return entity;
     }

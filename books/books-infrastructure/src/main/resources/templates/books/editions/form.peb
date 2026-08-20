@@ -28,6 +28,7 @@
                         </option>
                         {% endfor %}
                     </select>
+                    <div class="invalid-feedback" id="workIdError">Work is required.</div>
                 </div>
                 <div class="col-md-6">
                     <label class="form-label" for="publisherId">Publisher</label>
@@ -39,6 +40,7 @@
                         </option>
                         {% endfor %}
                     </select>
+                    <div class="invalid-feedback" id="publisherIdError">Publisher is required.</div>
                 </div>
             </div>
             <div class="row g-3 mt-0">
@@ -52,6 +54,7 @@
                         </option>
                         {% endfor %}
                     </select>
+                    <div class="invalid-feedback" id="formatIdError">Format is required.</div>
                 </div>
                 <div class="col-md-6">
                     <label class="form-label" for="languageId">Language</label>
@@ -63,6 +66,7 @@
                         </option>
                         {% endfor %}
                     </select>
+                    <div class="invalid-feedback" id="languageIdError">Language is required.</div>
                 </div>
             </div>
             <div class="row g-3 mt-0">
@@ -70,25 +74,19 @@
                     <label class="form-label" for="editionNumber">Edition Number</label>
                     <input type="text" id="editionNumber" name="editionNumber" class="form-control bg-dark border-secondary text-light {% if editionNumber is defined and editionNumber %}is-invalid{% else %}{% if edition is not null %}is-valid{% endif %}{% endif %}" required
                            value="{% if edition is not null %}{{ edition.editionNumber }}{% endif %}">
-                    {% if editionNumber is defined and editionNumber %}
-                    <div class="invalid-feedback">{{ editionNumber }}</div>
-                    {% endif %}
+                    <div class="invalid-feedback" id="editionNumberError">{% if editionNumber is defined and editionNumber %}{{ editionNumber }}{% endif %}</div>
                 </div>
                 <div class="col-md-4">
                     <label class="form-label" for="isbn">ISBN</label>
                     <input type="text" id="isbn" name="isbn" class="form-control bg-dark border-secondary text-light {% if isbn is defined and isbn %}is-invalid{% else %}{% if edition is not null and edition.isbn is not empty %}is-valid{% endif %}{% endif %}"
                            value="{% if edition is not null %}{{ edition.isbn }}{% endif %}">
-                    {% if isbn is defined and isbn %}
-                    <div class="invalid-feedback">{{ isbn }}</div>
-                    {% endif %}
+                    <div class="invalid-feedback" id="isbnError">{% if isbn is defined and isbn %}{{ isbn }}{% endif %}</div>
                 </div>
                 <div class="col-md-4">
                     <label class="form-label" for="publicationYear">Publication Year</label>
                     <input type="number" id="publicationYear" name="publicationYear" class="form-control bg-dark border-secondary text-light {% if publicationYear is defined and publicationYear %}is-invalid{% else %}{% if edition is not null and edition.publicationYear is not empty %}is-valid{% endif %}{% endif %}"
                            value="{% if edition is not null %}{{ edition.publicationYear }}{% endif %}">
-                    {% if publicationYear is defined and publicationYear %}
-                    <div class="invalid-feedback">{{ publicationYear }}</div>
-                    {% endif %}
+                    <div class="invalid-feedback" id="publicationYearError">{% if publicationYear is defined and publicationYear %}{{ publicationYear }}{% endif %}</div>
                 </div>
             </div>
             <div class="row g-3 mt-0">
@@ -96,79 +94,405 @@
                     <label class="form-label" for="pages">Pages</label>
                     <input type="number" id="pages" name="pages" class="form-control bg-dark border-secondary text-light {% if pages is defined and pages %}is-invalid{% else %}{% if edition is not null and edition.pages is not empty %}is-valid{% endif %}{% endif %}"
                            value="{% if edition is not null %}{{ edition.pages }}{% endif %}">
-                    {% if pages is defined and pages %}
-                    <div class="invalid-feedback">{{ pages }}</div>
-                    {% endif %}
+                    <div class="invalid-feedback" id="pagesError">{% if pages is defined and pages %}{{ pages }}{% endif %}</div>
+                </div>
+            </div>
+            <div class="row g-3 mt-0">
+                <div class="col-12">
+                    <label class="form-label">Authors <span class="text-danger">*</span></label>
+                    <div class="card bg-dark border-secondary" id="authorsCard">
+                        <div class="card-body bg-dark p-0">
+                            <div class="table-responsive container">
+                                <table class="table table-hover align-middle mb-0 data-table text-light">
+                                    <thead>
+                                        <tr>
+                                            <th></th>
+                                            <th>Name</th>
+                                            <th>Biography</th>
+                                            <th>Dates</th>
+                                            <th>Role</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for author in authorList %}
+                                        <tr>
+                                            <td class="text-center">
+                                                <input type="checkbox" name="authorIds" value="{{ author.id }}" {% if edition is not null %}{% for ea in edition.editionAuthors %}{% if ea.authorId == author.id %}checked{% endif %}{% endfor %}{% endif %}>
+                                            </td>
+                                            <td>{{ author.fullName }}</td>
+                                            <td class="text-muted">{{ author.biography | default("N/A") }}</td>
+                                            <td class="text-muted">{{ author.birthDate | default("N/A") }} - {{ author.deathDate | default("present") }}</td>
+                                            <td>
+                                                <select name="authorRoleId_{{ author.id }}" class="form-select form-select-sm w-auto bg-dark border-secondary text-light" {% if edition is not null %}{% for ea in edition.editionAuthors %}{% if ea.authorId == author.id %}data-selected="{{ ea.authorRoleId }}"{% endif %}{% endfor %}{% endif %}>
+                                                    <option value="">Select role</option>
+                                                    {% for role in authorRoles %}
+                                                    <option value="{{ role.id }}">{{ role.name }}</option>
+                                                    {% endfor %}
+                                                </select>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="invalid-feedback d-block" id="authorsError">{% if authors is defined and authors %}{{ authors }}{% endif %}</div>
                 </div>
             </div>
         </div>
     </div>
 
     <div class="mt-3">
-        <button type="submit" class="btn btn-primary">
+        <button type="submit" id="submitBtn" class="btn btn-primary" disabled>
             <i class="bi bi-check-lg"></i> Save
         </button>
         <a href="/books/editions" class="btn btn-outline-secondary">Cancel</a>
     </div>
 </form>
 
-<script>
+<script nonce="{{ securityNonce }}">
 document.addEventListener('DOMContentLoaded', function() {
     var form = document.querySelector('form[novalidate]');
     if (!form) return;
-    form.addEventListener('submit', function(e) {
-        var valid = true;
-        var editionNumber = document.getElementById('editionNumber');
-        var isbn = document.getElementById('isbn');
-        var publicationYear = document.getElementById('publicationYear');
-        var pages = document.getElementById('pages');
-        var alphaRegex = /^[a-zA-Z0-9\s'-]+$/;
-        var isbnRegex = /^[\d-]+$/;
-        
+    
+    var workId = document.getElementById('workId');
+    var publisherId = document.getElementById('publisherId');
+    var formatId = document.getElementById('formatId');
+    var languageId = document.getElementById('languageId');
+    var editionNumber = document.getElementById('editionNumber');
+    var isbn = document.getElementById('isbn');
+    var publicationYear = document.getElementById('publicationYear');
+    var pages = document.getElementById('pages');
+    var workIdError = document.getElementById('workIdError');
+    var publisherIdError = document.getElementById('publisherIdError');
+    var formatIdError = document.getElementById('formatIdError');
+    var languageIdError = document.getElementById('languageIdError');
+    var editionNumberError = document.getElementById('editionNumberError');
+    var isbnError = document.getElementById('isbnError');
+    var publicationYearError = document.getElementById('publicationYearError');
+    var pagesError = document.getElementById('pagesError');
+    var authorsError = document.getElementById('authorsError');
+    var submitBtn = document.getElementById('submitBtn');
+    var alphaRegex = /^[a-zA-Z0-9\s'-]+$/;
+    
+    function isWorkValid() {
+        return !!workId.value;
+    }
+    
+    function isPublisherValid() {
+        return !!publisherId.value;
+    }
+    
+    function isFormatValid() {
+        return !!formatId.value;
+    }
+    
+    function isLanguageValid() {
+        return !!languageId.value;
+    }
+    
+    function isEditionNumberValid() {
+        if (!editionNumber.value.trim()) return false;
+        if (!alphaRegex.test(editionNumber.value.trim())) return false;
+        return true;
+    }
+    
+    function isIsbnValid() {
+        if (!isbn.value.trim()) return true;
+        var cleaned = isbn.value.trim().replace(/[-\s]/g, '');
+        var isbnDigitsRegex = /^(\d{10}|\d{13}|\d{9}X)$/;
+        return isbnDigitsRegex.test(cleaned);
+    }
+    
+    function isPublicationYearValid() {
+        if (!publicationYear.value.trim()) return true;
+        var year = parseInt(publicationYear.value.trim(), 10);
+        var currentYear = new Date().getFullYear();
+        if (!/^\d+$/.test(publicationYear.value.trim()) || year < 1450) return false;
+        if (year > currentYear + 5) return false;
+        return true;
+    }
+    
+    function isPagesValid() {
+        if (!pages.value.trim()) return true;
+        var pageCount = parseInt(pages.value.trim(), 10);
+        if (!/^\d+$/.test(pages.value.trim()) || pageCount <= 0) return false;
+        if (pageCount > 9999) return false;
+        return true;
+    }
+    
+    function isAuthorsValid() {
+        var authorCheckboxes = document.querySelectorAll('input[name="authorIds"]');
+        var authorChecked = Array.from(authorCheckboxes).some(function(cb) { return cb.checked; });
+        if (!authorChecked) return false;
+        var missingRole = false;
+        authorCheckboxes.forEach(function(cb) {
+            if (cb.checked) {
+                var roleSelect = document.querySelector('select[name="authorRoleId_' + cb.value + '"]');
+                if (roleSelect && !roleSelect.value) missingRole = true;
+            }
+        });
+        if (missingRole) return false;
+        return true;
+    }
+    
+    function validateField(el, errorEl, condition, errorMsg) {
+        if (condition) {
+            errorEl.textContent = errorMsg;
+            el.classList.add('is-invalid');
+            el.classList.remove('is-valid');
+            return false;
+        }
+        errorEl.textContent = '';
+        el.classList.remove('is-invalid');
+        if (el.value.trim()) el.classList.add('is-valid');
+        return true;
+    }
+    
+    function validateWork() {
+        return validateField(workId, workIdError, !workId.value, 'Work is required.');
+    }
+    
+    function validatePublisher() {
+        return validateField(publisherId, publisherIdError, !publisherId.value, 'Publisher is required.');
+    }
+    
+    function validateFormat() {
+        return validateField(formatId, formatIdError, !formatId.value, 'Format is required.');
+    }
+    
+    function validateLanguage() {
+        return validateField(languageId, languageIdError, !languageId.value, 'Language is required.');
+    }
+    
+    function validateEditionNumber() {
         if (!editionNumber.value.trim()) {
+            editionNumberError.textContent = 'Edition number is required.';
             editionNumber.classList.add('is-invalid');
             editionNumber.classList.remove('is-valid');
-            valid = false;
+            return false;
         } else if (!alphaRegex.test(editionNumber.value.trim())) {
+            editionNumberError.textContent = 'Edition number must contain only letters, numbers, spaces, hyphens or apostrophes.';
             editionNumber.classList.add('is-invalid');
             editionNumber.classList.remove('is-valid');
-            valid = false;
-        } else {
-            editionNumber.classList.remove('is-invalid');
-            editionNumber.classList.add('is-valid');
+            return false;
+        }
+        editionNumberError.textContent = '';
+        editionNumber.classList.remove('is-invalid');
+        editionNumber.classList.add('is-valid');
+        return true;
+    }
+    
+    function validateIsbn() {
+        if (isbn.value.trim()) {
+            var cleaned = isbn.value.trim().replace(/[-\s]/g, '');
+            var isbnDigitsRegex = /^(\d{10}|\d{13}|\d{9}X)$/;
+            if (!isbnDigitsRegex.test(cleaned)) {
+                isbnError.textContent = 'ISBN must be 10 or 13 digits (optionally ending with X).';
+                isbn.classList.add('is-invalid');
+                isbn.classList.remove('is-valid');
+                return false;
+            }
+        }
+        isbnError.textContent = '';
+        isbn.classList.remove('is-invalid');
+        if (isbn.value.trim()) isbn.classList.add('is-valid');
+        return true;
+    }
+    
+    function validatePublicationYear() {
+        if (publicationYear.value.trim()) {
+            var year = parseInt(publicationYear.value.trim(), 10);
+            var currentYear = new Date().getFullYear();
+            if (!/^\d+$/.test(publicationYear.value.trim()) || year < 1450) {
+                publicationYearError.textContent = 'Publication year must be 1450 or later.';
+                publicationYear.classList.add('is-invalid');
+                publicationYear.classList.remove('is-valid');
+                return false;
+            } else if (year > currentYear + 5) {
+                publicationYearError.textContent = 'Publication year cannot be more than 5 years in the future.';
+                publicationYear.classList.add('is-invalid');
+                publicationYear.classList.remove('is-valid');
+                return false;
+            }
+        }
+        publicationYearError.textContent = '';
+        publicationYear.classList.remove('is-invalid');
+        if (publicationYear.value.trim()) publicationYear.classList.add('is-valid');
+        return true;
+    }
+    
+    function validatePages() {
+        if (pages.value.trim()) {
+            var pageCount = parseInt(pages.value.trim(), 10);
+            if (!/^\d+$/.test(pages.value.trim()) || pageCount <= 0) {
+                pagesError.textContent = 'Pages must be a positive number.';
+                pages.classList.add('is-invalid');
+                pages.classList.remove('is-valid');
+                return false;
+            } else if (pageCount > 9999) {
+                pagesError.textContent = 'Pages must be 9999 or less.';
+                pages.classList.add('is-invalid');
+                pages.classList.remove('is-valid');
+                return false;
+            }
+        }
+        pagesError.textContent = '';
+        pages.classList.remove('is-invalid');
+        if (pages.value.trim()) pages.classList.add('is-valid');
+        return true;
+    }
+    
+    function validateAuthors() {
+        var authorCheckboxes = document.querySelectorAll('input[name="authorIds"]');
+        var authorChecked = Array.from(authorCheckboxes).some(function(cb) { return cb.checked; });
+        
+        if (!authorChecked) {
+            authorsError.textContent = 'At least one author is required.';
+            var authorsCard = document.getElementById('authorsCard');
+            if (authorsCard) {
+                authorsCard.classList.add('border-danger');
+            }
+            return false;
         }
         
-        if (isbn.value.trim() && !isbnRegex.test(isbn.value.trim())) {
-            isbn.classList.add('is-invalid');
-            isbn.classList.remove('is-valid');
-            valid = false;
-        } else if (isbn.value.trim()) {
-            isbn.classList.remove('is-invalid');
-            isbn.classList.add('is-valid');
+        var authorsCard = document.getElementById('authorsCard');
+        if (authorsCard) {
+            authorsCard.classList.remove('border-danger');
         }
         
-        if (publicationYear.value.trim() && (!/^\d+$/.test(publicationYear.value.trim()) || parseInt(publicationYear.value.trim()) < 1450)) {
-            publicationYear.classList.add('is-invalid');
-            publicationYear.classList.remove('is-valid');
-            valid = false;
-        } else if (publicationYear.value.trim()) {
-            publicationYear.classList.remove('is-invalid');
-            publicationYear.classList.add('is-valid');
+        var missingRole = false;
+        authorCheckboxes.forEach(function(cb) {
+            if (cb.checked) {
+                var roleSelect = document.querySelector('select[name="authorRoleId_' + cb.value + '"]');
+                if (roleSelect && !roleSelect.value) {
+                    missingRole = true;
+                    roleSelect.classList.add('is-invalid');
+                } else if (roleSelect) {
+                    roleSelect.classList.remove('is-invalid');
+                }
+            }
+        });
+        
+        if (missingRole) {
+            authorsError.textContent = 'Role is required for each selected author.';
+            return false;
         }
         
-        if (pages.value.trim() && (!/^\d+$/.test(pages.value.trim()) || parseInt(pages.value.trim()) <= 0)) {
-            pages.classList.add('is-invalid');
-            pages.classList.remove('is-valid');
-            valid = false;
-        } else if (pages.value.trim()) {
-            pages.classList.remove('is-invalid');
-            pages.classList.add('is-valid');
-        }
-        
-        if (!valid) {
+        authorsError.textContent = '';
+        return true;
+    }
+    
+    function updateSubmitButton() {
+        var valid = isWorkValid() && isPublisherValid() && isFormatValid() && isLanguageValid() &&
+                    isEditionNumberValid() && isIsbnValid() && isPublicationYearValid() && isPagesValid() && isAuthorsValid();
+        submitBtn.disabled = !valid;
+        return valid;
+    }
+    
+    if (workId) {
+        workId.addEventListener('input', function() {
+            validateWork();
+            updateSubmitButton();
+        });
+        workId.addEventListener('change', function() {
+            validateWork();
+            updateSubmitButton();
+        });
+    }
+    if (publisherId) {
+        publisherId.addEventListener('input', function() {
+            validatePublisher();
+            updateSubmitButton();
+        });
+        publisherId.addEventListener('change', function() {
+            validatePublisher();
+            updateSubmitButton();
+        });
+    }
+    if (formatId) {
+        formatId.addEventListener('input', function() {
+            validateFormat();
+            updateSubmitButton();
+        });
+        formatId.addEventListener('change', function() {
+            validateFormat();
+            updateSubmitButton();
+        });
+    }
+    if (languageId) {
+        languageId.addEventListener('input', function() {
+            validateLanguage();
+            updateSubmitButton();
+        });
+        languageId.addEventListener('change', function() {
+            validateLanguage();
+            updateSubmitButton();
+        });
+    }
+    if (editionNumber) {
+        editionNumber.addEventListener('input', function() {
+            validateEditionNumber();
+            updateSubmitButton();
+        });
+        editionNumber.addEventListener('change', function() {
+            validateEditionNumber();
+            updateSubmitButton();
+        });
+    }
+    if (isbn) {
+        isbn.addEventListener('input', function() {
+            validateIsbn();
+            updateSubmitButton();
+        });
+        isbn.addEventListener('change', function() {
+            validateIsbn();
+            updateSubmitButton();
+        });
+    }
+    if (publicationYear) {
+        publicationYear.addEventListener('input', function() {
+            validatePublicationYear();
+            updateSubmitButton();
+        });
+        publicationYear.addEventListener('change', function() {
+            validatePublicationYear();
+            updateSubmitButton();
+        });
+    }
+    if (pages) {
+        pages.addEventListener('input', function() {
+            validatePages();
+            updateSubmitButton();
+        });
+        pages.addEventListener('change', function() {
+            validatePages();
+            updateSubmitButton();
+        });
+    }
+    
+    document.querySelectorAll('input[name="authorIds"]').forEach(function(cb) {
+        cb.addEventListener('change', function() {
+            validateAuthors();
+            updateSubmitButton();
+        });
+    });
+    
+    document.querySelectorAll('select[name^="authorRoleId_"]').forEach(function(select) {
+        select.addEventListener('change', function() {
+            validateAuthors();
+            updateSubmitButton();
+        });
+    });
+    
+    form.addEventListener('submit', function(e) {
+        if (!updateSubmitButton()) {
             e.preventDefault();
         }
     });
+    
+    updateSubmitButton();
 });
 </script>
 {% endblock %}

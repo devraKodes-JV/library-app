@@ -10,6 +10,7 @@ import org.hibernate.SessionFactory;
 import com.library.books.domain.model.Work;
 import com.library.books.infrastructure.transaction.HibernateTransactionExecutor;
 import com.library.books.infrastructure.persistence.entity.AuthorEntity;
+import com.library.books.infrastructure.persistence.entity.AuthorRoleEntity;
 import com.library.books.infrastructure.persistence.entity.CategoryEntity;
 import com.library.books.infrastructure.persistence.entity.LanguageEntity;
 import com.library.books.infrastructure.persistence.entity.WorkAuthorEntity;
@@ -48,7 +49,7 @@ public class HibernateWorkRepository extends AbstractHibernateRepository impleme
     public Optional<WorkEntity> findByCode(String code) {
         try (Session session = sessionFactory.openSession()) {
             WorkEntity work = session.createQuery(
-                    "select w from WorkEntity w where w.code = :code and w.deletedAt is null and w.enabled = true",
+                    "select w from WorkEntity w where w.code = :code and w.deletedAt is null",
                     WorkEntity.class)
                     .setParameter("code", code)
                     .uniqueResult();
@@ -60,7 +61,7 @@ public class HibernateWorkRepository extends AbstractHibernateRepository impleme
     public Optional<WorkEntity> findById(Long id) {
         try (Session session = sessionFactory.openSession()) {
             WorkEntity work = session.createQuery(
-                    "select w from WorkEntity w where w.id = :id and w.deletedAt is null and w.enabled = true",
+                    "select w from WorkEntity w where w.id = :id and w.deletedAt is null",
                     WorkEntity.class)
                     .setParameter("id", id)
                     .uniqueResult();
@@ -72,7 +73,7 @@ public class HibernateWorkRepository extends AbstractHibernateRepository impleme
     public List<WorkEntity> findAll() {
         try (Session session = sessionFactory.openSession()) {
             return session.createQuery(
-                    "select w from WorkEntity w where w.deletedAt is null and w.enabled = true order by w.title",
+                    "select w from WorkEntity w where w.deletedAt is null order by w.title",
                     WorkEntity.class)
                     .getResultList();
         }
@@ -82,7 +83,7 @@ public class HibernateWorkRepository extends AbstractHibernateRepository impleme
     public List<WorkEntity> findByCategoryId(Long categoryId) {
         try (Session session = sessionFactory.openSession()) {
             return session.createQuery(
-                    "select w from WorkEntity w where w.categoryId = :categoryId and w.deletedAt is null and w.enabled = true order by w.title",
+                    "select w from WorkEntity w where w.categoryId = :categoryId and w.deletedAt is null order by w.title",
                     WorkEntity.class)
                     .setParameter("categoryId", categoryId)
                     .getResultList();
@@ -93,7 +94,7 @@ public class HibernateWorkRepository extends AbstractHibernateRepository impleme
     public List<WorkEntity> findByOriginalLanguageId(Long languageId) {
         try (Session session = sessionFactory.openSession()) {
             return session.createQuery(
-                    "select w from WorkEntity w where w.originalLanguageId = :languageId and w.deletedAt is null and w.enabled = true order by w.title",
+                    "select w from WorkEntity w where w.originalLanguageId = :languageId and w.deletedAt is null order by w.title",
                     WorkEntity.class)
                     .setParameter("languageId", languageId)
                     .getResultList();
@@ -106,7 +107,7 @@ public class HibernateWorkRepository extends AbstractHibernateRepository impleme
             return session.createQuery(
                     "select w from WorkEntity w " +
                     "join WorkAuthorEntity wa on w.id = wa.workId " +
-                    "where wa.authorId = :authorId and w.deletedAt is null and w.enabled = true " +
+                    "where wa.authorId = :authorId and w.deletedAt is null " +
                     "order by w.title",
                     WorkEntity.class)
                     .setParameter("authorId", authorId)
@@ -127,11 +128,14 @@ public class HibernateWorkRepository extends AbstractHibernateRepository impleme
 
     @Override
     public void deleteById(Long id) {
-        consumeWithSession(session -> session.createMutationQuery(
-                "update WorkEntity w set w.deletedAt = :now, w.enabled = false where w.id = :id and w.deletedAt is null and w.enabled = true")
-                .setParameter("now", java.time.Instant.now())
-                .setParameter("id", id)
-                .executeUpdate());
+        executeWithSession(session -> {
+            WorkEntity entity = session.get(WorkEntity.class, id);
+            if (entity != null) {
+                entity.markDeleted();
+                session.merge(entity);
+            }
+            return null;
+        });
     }
 
     @Override
@@ -141,7 +145,7 @@ public class HibernateWorkRepository extends AbstractHibernateRepository impleme
         }
         try (Session session = sessionFactory.openSession()) {
             return session.createQuery(
-                    "select w from WorkEntity w where w.id in :ids and w.deletedAt is null and w.enabled = true",
+                    "select w from WorkEntity w where w.id in :ids and w.deletedAt is null",
                     WorkEntity.class)
                     .setParameter("ids", ids)
                     .getResultList();
@@ -152,7 +156,7 @@ public class HibernateWorkRepository extends AbstractHibernateRepository impleme
     public boolean existsLanguage(Long id) {
         try (Session session = sessionFactory.openSession()) {
             Long count = session.createQuery(
-                    "select count(l) from LanguageEntity l where l.id = :id and l.deletedAt is null and l.enabled = true",
+                    "select count(l) from LanguageEntity l where l.id = :id and l.deletedAt is null",
                     Long.class)
                     .setParameter("id", id)
                     .uniqueResult();
@@ -164,7 +168,7 @@ public class HibernateWorkRepository extends AbstractHibernateRepository impleme
     public boolean existsCategory(Long id) {
         try (Session session = sessionFactory.openSession()) {
             Long count = session.createQuery(
-                    "select count(c) from CategoryEntity c where c.id = :id and c.deletedAt is null and c.enabled = true",
+                    "select count(c) from CategoryEntity c where c.id = :id and c.deletedAt is null",
                     Long.class)
                     .setParameter("id", id)
                     .uniqueResult();
@@ -173,12 +177,13 @@ public class HibernateWorkRepository extends AbstractHibernateRepository impleme
     }
 
     @Override
-    public void saveWorkAuthor(Long workId, Long authorId) {
+    public void saveWorkAuthor(Long workId, Long authorId, Long authorRoleId) {
         consumeWithSession(session -> session.createMutationQuery(
-                "insert into WorkAuthorEntity (workId, authorId, role, enabled, createdAt, updatedAt) "
-                + "values (:workId, :authorId, 'Author', true, :now, :now)")
+                "insert into WorkAuthorEntity (workId, authorId, authorRoleId, enabled, createdAt, updatedAt) "
+                + "values (:workId, :authorId, :authorRoleId, true, :now, :now)")
                 .setParameter("workId", workId)
                 .setParameter("authorId", authorId)
+                .setParameter("authorRoleId", authorRoleId)
                 .setParameter("now", java.time.Instant.now())
                 .executeUpdate());
     }
@@ -186,8 +191,23 @@ public class HibernateWorkRepository extends AbstractHibernateRepository impleme
     @Override
     public void deleteWorkAuthorsByWorkId(Long workId) {
         consumeWithSession(session -> session.createMutationQuery(
-                "delete WorkAuthorEntity w where w.workId = :workId")
+                "update WorkAuthorEntity w set w.deletedAt = :now, w.enabled = false where w.workId = :workId and w.deletedAt is null and w.enabled = true")
+                .setParameter("now", java.time.Instant.now())
                 .setParameter("workId", workId)
+                .executeUpdate());
+    }
+
+    public void nullifyOriginalLanguage(Long languageId) {
+        consumeWithSession(session -> session.createMutationQuery(
+                "update WorkEntity w set w.originalLanguageId = null where w.originalLanguageId = :languageId and w.deletedAt is null")
+                .setParameter("languageId", languageId)
+                .executeUpdate());
+    }
+
+    public void nullifyCategory(Long categoryId) {
+        consumeWithSession(session -> session.createMutationQuery(
+                "update WorkEntity w set w.categoryId = null where w.categoryId = :categoryId and w.deletedAt is null")
+                .setParameter("categoryId", categoryId)
                 .executeUpdate());
     }
 
@@ -197,7 +217,8 @@ public class HibernateWorkRepository extends AbstractHibernateRepository impleme
                     "select w from WorkEntity w " +
                     "left join fetch w.workAuthors wa " +
                     "left join fetch wa.author a " +
-                    "where w.id = :id and w.deletedAt is null and w.enabled = true",
+                    "left join fetch wa.authorRole ar " +
+                    "where w.id = :id and w.deletedAt is null",
                     WorkEntity.class)
                     .setParameter("id", id)
                     .uniqueResult();
@@ -209,7 +230,7 @@ public class HibernateWorkRepository extends AbstractHibernateRepository impleme
             String languageName = null;
             if (workEntity.getOriginalLanguageId() != null) {
                 LanguageEntity language = session.createQuery(
-                        "select l from LanguageEntity l where l.id = :id and l.deletedAt is null and l.enabled = true",
+                        "select l from LanguageEntity l where l.id = :id and l.deletedAt is null",
                         LanguageEntity.class)
                         .setParameter("id", workEntity.getOriginalLanguageId())
                         .uniqueResult();
@@ -221,7 +242,7 @@ public class HibernateWorkRepository extends AbstractHibernateRepository impleme
             String categoryName = null;
             if (workEntity.getCategoryId() != null) {
                 CategoryEntity category = session.createQuery(
-                        "select c from CategoryEntity c where c.id = :id and c.deletedAt is null and c.enabled = true",
+                        "select c from CategoryEntity c where c.id = :id and c.deletedAt is null",
                         CategoryEntity.class)
                         .setParameter("id", workEntity.getCategoryId())
                         .uniqueResult();
@@ -234,7 +255,8 @@ public class HibernateWorkRepository extends AbstractHibernateRepository impleme
                     .map(wa -> {
                         AuthorEntity author = wa.getAuthor();
                         String fullName = author != null ? (author.getFirstName() + " " + author.getLastName()).trim() : "";
-                        return new FlatAuthorDTO(wa.getAuthorId(), fullName, wa.getRole());
+                        String authorRoleName = wa.getAuthorRole() != null ? wa.getAuthorRole().getName() : null;
+                        return new FlatAuthorDTO(wa.getAuthorId(), fullName, wa.getAuthorRoleId(), authorRoleName);
                     })
                     .toList()
                     : List.of();

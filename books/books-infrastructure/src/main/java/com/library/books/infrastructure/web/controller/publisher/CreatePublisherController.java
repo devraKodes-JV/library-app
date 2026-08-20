@@ -7,18 +7,18 @@ import com.library.books.application.dto.command.publisher.CreatePublisherComman
 import com.library.books.application.service.publisher.CreatePublisherUseCase;
 import com.library.books.domain.exception.ValidationException;
 import com.library.kernel.web.WebControllerContext;
-import com.library.kernel.web.WebHelper;
 
 import io.javalin.http.Context;
 
-public class CreatePublisherController {
+import com.library.kernel.web.BaseController;
+
+public class CreatePublisherController extends BaseController {
 
     private final CreatePublisherUseCase createPublisherUseCase;
-    private final WebControllerContext webContext;
 
     public CreatePublisherController(CreatePublisherUseCase createPublisherUseCase, WebControllerContext webContext) {
+        super(webContext);
         this.createPublisherUseCase = createPublisherUseCase;
-        this.webContext = webContext;
     }
 
     public void showCreateForm(Context ctx) {
@@ -35,7 +35,7 @@ public class CreatePublisherController {
 
         try {
             createPublisherUseCase.execute(command);
-            WebHelper.flashSuccess(ctx, "Publisher created successfully.");
+            flashSuccess(ctx, "Publisher created successfully.");
             ctx.redirect("/books/publishers");
         } catch (ValidationException e) {
             Map<String, Object> model = buildCreateModel(ctx);
@@ -45,8 +45,8 @@ public class CreatePublisherController {
     }
 
     private Map<String, Object> buildCreateModel(Context ctx) {
-        var current = webContext.currentUser(ctx);
-        List<?> navSections = webContext.navSections(ctx);
+        var current = currentUser(ctx);
+        List<?> navSections = navSections(ctx);
         Map<String, Object> model = new java.util.LinkedHashMap<>();
         model.put("mode", "create");
         model.put("publisher", null);
@@ -55,9 +55,4 @@ public class CreatePublisherController {
         return model;
     }
 
-    private void requireCan(Context ctx, String permCode) {
-        if (!webContext.hasPermission(ctx, permCode)) {
-            throw new io.javalin.http.ForbiddenResponse();
-        }
-    }
 }

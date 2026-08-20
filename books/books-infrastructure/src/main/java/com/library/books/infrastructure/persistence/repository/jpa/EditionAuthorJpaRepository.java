@@ -10,4 +10,5 @@ public interface EditionAuthorJpaRepository<T, ID> extends CrudRepository<T, ID>
     List<EditionAuthorEntity> findByAuthorId(Long authorId);
     void deleteByEditionId(Long editionId);
     void deleteByAuthorId(Long authorId);
+    void saveEditionAuthor(Long editionId, Long authorId, Long authorRoleId);
 }

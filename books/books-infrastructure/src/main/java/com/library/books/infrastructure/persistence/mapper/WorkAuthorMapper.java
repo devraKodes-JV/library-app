@@ -13,7 +13,7 @@ public class WorkAuthorMapper {
                 entity.getId(),
                 entity.getWorkId(),
                 entity.getAuthorId(),
-                entity.getRole(),
+                entity.getAuthorRoleId(),
                 entity.getCreatedAt(),
                 entity.getUpdatedAt()
         );
@@ -27,7 +27,7 @@ public class WorkAuthorMapper {
         entity.setId(domain.getId());
         entity.setWorkId(domain.getWorkId());
         entity.setAuthorId(domain.getAuthorId());
-        entity.setRole(domain.getRole());
+        entity.setAuthorRoleId(domain.getAuthorRoleId());
         entity.setEnabled(true);
         return entity;
     }

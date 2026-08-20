@@ -30,7 +30,9 @@ public class AuthorValidator implements Validator<Author> {
             errors.put("biography", "Biography contains invalid characters.");
         }
 
-        if (author.getBirthDate() != null && !author.getBirthDate().isBlank()) {
+        if (author.getBirthDate() == null || author.getBirthDate().isBlank()) {
+            errors.put("birthDate", "Birth date is required.");
+        } else {
             try {
                 java.time.LocalDate birth = java.time.LocalDate.parse(author.getBirthDate());
                 if (birth.isAfter(java.time.LocalDate.now())) {

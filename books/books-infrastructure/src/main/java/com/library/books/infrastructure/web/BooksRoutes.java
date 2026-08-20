@@ -15,6 +15,11 @@ import com.library.books.infrastructure.web.controller.category.DeleteCategoryCo
 import com.library.books.infrastructure.web.controller.category.ListCategoriesController;
 import com.library.books.infrastructure.web.controller.category.ShowCategoryController;
 import com.library.books.infrastructure.web.controller.category.UpdateCategoryController;
+import com.library.books.infrastructure.web.controller.authorRole.CreateAuthorRoleController;
+import com.library.books.infrastructure.web.controller.authorRole.DeleteAuthorRoleController;
+import com.library.books.infrastructure.web.controller.authorRole.ListAuthorRolesController;
+import com.library.books.infrastructure.web.controller.authorRole.ShowAuthorRoleController;
+import com.library.books.infrastructure.web.controller.authorRole.UpdateAuthorRoleController;
 import com.library.books.infrastructure.web.controller.edition.CreateEditionController;
 import com.library.books.infrastructure.web.controller.edition.DeleteEditionController;
 import com.library.books.infrastructure.web.controller.edition.ListEditionsController;
@@ -35,6 +40,7 @@ import com.library.books.infrastructure.web.controller.work.DeleteWorkController
 import com.library.books.infrastructure.web.controller.work.ListWorksController;
 import com.library.books.infrastructure.web.controller.work.ShowWorkController;
 import com.library.books.infrastructure.web.controller.work.UpdateWorkController;
+import com.library.books.infrastructure.web.controller.audit.AuditHistoryController;
 import com.library.iam.infrastructure.notification.SseNotificationService;
 import com.library.security.service.SecurityAuditService;
 
@@ -80,9 +86,15 @@ public final class BooksRoutes {
                                 ShowCategoryController showCategoryController,
                                 CreateCategoryController createCategoryController,
                                 UpdateCategoryController updateCategoryController,
-                                DeleteCategoryController deleteCategoryController,
-                                SseNotificationService notificationService,
-                                SecurityAuditService auditService) {
+                                 DeleteCategoryController deleteCategoryController,
+                                 ListAuthorRolesController listAuthorRolesController,
+                                 ShowAuthorRoleController showAuthorRoleController,
+                                 CreateAuthorRoleController createAuthorRoleController,
+                                 UpdateAuthorRoleController updateAuthorRoleController,
+                                 DeleteAuthorRoleController deleteAuthorRoleController,
+                                 AuditHistoryController auditHistoryController,
+                                 SseNotificationService notificationService,
+                                 SecurityAuditService auditService) {
         config.routes.get("/books/works", listWorksController::listWorks);
         config.routes.get("/books/works/new", createWorkController::showCreateForm);
         config.routes.post("/books/works", createWorkController::createWork);
@@ -138,5 +150,16 @@ public final class BooksRoutes {
         config.routes.get("/books/categories/{id}/edit", updateCategoryController::showEditForm);
         config.routes.post("/books/categories/{id}", updateCategoryController::updateCategory);
         config.routes.post("/books/categories/{id}/delete", deleteCategoryController::deleteCategory);
+
+        config.routes.get("/books/authorRoles", listAuthorRolesController::listAuthorRoles);
+        config.routes.get("/books/authorRoles/new", createAuthorRoleController::showCreateForm);
+        config.routes.post("/books/authorRoles", createAuthorRoleController::createAuthorRole);
+        config.routes.get("/books/authorRoles/{id}", showAuthorRoleController::showAuthorRole);
+        config.routes.get("/books/authorRoles/{id}/edit", updateAuthorRoleController::showEditForm);
+        config.routes.post("/books/authorRoles/{id}", updateAuthorRoleController::updateAuthorRole);
+        config.routes.post("/books/authorRoles/{id}/delete", deleteAuthorRoleController::deleteAuthorRole);
+
+        config.routes.get("/books/audit/revisions", auditHistoryController::showRevisions);
+        config.routes.get("/books/audit/entity", auditHistoryController::showEntityAtRevision);
     }
 }

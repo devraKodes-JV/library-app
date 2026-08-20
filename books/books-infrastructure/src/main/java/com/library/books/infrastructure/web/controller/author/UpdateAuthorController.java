@@ -9,20 +9,20 @@ import com.library.books.application.service.author.UpdateAuthorUseCase;
 import com.library.books.application.service.author.GetAuthorUseCase;
 import com.library.books.domain.exception.ValidationException;
 import com.library.kernel.web.WebControllerContext;
-import com.library.kernel.web.WebHelper;
 
 import io.javalin.http.Context;
 
-public class UpdateAuthorController {
+import com.library.kernel.web.BaseController;
+
+public class UpdateAuthorController extends BaseController {
 
     private final UpdateAuthorUseCase updateAuthorUseCase;
     private final GetAuthorUseCase getAuthorUseCase;
-    private final WebControllerContext webContext;
 
     public UpdateAuthorController(UpdateAuthorUseCase updateAuthorUseCase, GetAuthorUseCase getAuthorUseCase, WebControllerContext webContext) {
+        super(webContext);
         this.updateAuthorUseCase = updateAuthorUseCase;
         this.getAuthorUseCase = getAuthorUseCase;
-        this.webContext = webContext;
     }
 
     public void showEditForm(Context ctx) {
@@ -44,7 +44,7 @@ public class UpdateAuthorController {
 
         try {
             updateAuthorUseCase.execute(command);
-            WebHelper.flashSuccess(ctx, "Author updated successfully.");
+            flashSuccess(ctx, "Author updated successfully.");
             ctx.redirect("/books/authors");
         } catch (ValidationException e) {
             AuthorResponseDTO author = getAuthorUseCase.execute(command.id());
@@ -56,8 +56,8 @@ public class UpdateAuthorController {
     }
 
     private Map<String, Object> buildEditModel(Context ctx, Map<String, Object> extra) {
-        var current = webContext.currentUser(ctx);
-        List<?> navSections = webContext.navSections(ctx);
+        var current = currentUser(ctx);
+        List<?> navSections = navSections(ctx);
         Map<String, Object> model = new java.util.LinkedHashMap<>();
         model.put("mode", "edit");
         model.put("user", current);
@@ -66,9 +66,4 @@ public class UpdateAuthorController {
         return model;
     }
 
-    private void requireCan(Context ctx, String permCode) {
-        if (!webContext.hasPermission(ctx, permCode)) {
-            throw new io.javalin.http.ForbiddenResponse();
-        }
-    }
 }

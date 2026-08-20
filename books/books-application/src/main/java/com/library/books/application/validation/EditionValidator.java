@@ -42,6 +42,17 @@ public class EditionValidator implements Validator<Edition> {
             }
         }
 
+        if (edition.getEditionAuthors() == null || edition.getEditionAuthors().isEmpty()) {
+            errors.put("authors", "At least one author is required");
+        } else {
+            for (int i = 0; i < edition.getEditionAuthors().size(); i++) {
+                var ea = edition.getEditionAuthors().get(i);
+                if (ea.getAuthorRoleId() == null) {
+                    errors.put("authorRole_" + i, "Role is required for author " + (i + 1));
+                }
+            }
+        }
+
         if (!errors.isEmpty()) {
             throw new com.library.books.domain.exception.ValidationException(errors);
         }

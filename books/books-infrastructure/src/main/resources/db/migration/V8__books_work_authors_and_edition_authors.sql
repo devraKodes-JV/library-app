@@ -49,7 +49,7 @@ INSERT INTO work_authors (work_id, author_id, role, enabled, created_at, updated
 
 CREATE TABLE work_authors_AUD (
     id           BIGINT NOT NULL,
-    REV          INTEGER NOT NULL,
+    REV BIGINT NOT NULL,
     REVTYPE      SMALLINT,
     work_id      BIGINT,
     author_id    BIGINT,
@@ -67,7 +67,7 @@ CREATE TABLE work_authors_AUD (
 
 CREATE TABLE edition_authors_AUD (
     id           BIGINT NOT NULL,
-    REV          INTEGER NOT NULL,
+    REV BIGINT NOT NULL,
     REVTYPE      SMALLINT,
     edition_id   BIGINT,
     author_id    BIGINT,

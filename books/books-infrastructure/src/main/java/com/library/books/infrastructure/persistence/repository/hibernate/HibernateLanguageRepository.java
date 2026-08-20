@@ -24,7 +24,7 @@ public class HibernateLanguageRepository extends AbstractHibernateRepository imp
     public Optional<LanguageEntity> findByCode(String code) {
         try (Session session = sessionFactory.openSession()) {
             LanguageEntity language = session.createQuery(
-                    "select l from LanguageEntity l where l.code = :code and l.deletedAt is null and l.enabled = true",
+                    "select l from LanguageEntity l where l.code = :code and l.deletedAt is null",
                     LanguageEntity.class)
                     .setParameter("code", code)
                     .uniqueResult();
@@ -36,7 +36,7 @@ public class HibernateLanguageRepository extends AbstractHibernateRepository imp
     public Optional<LanguageEntity> findById(Long id) {
         try (Session session = sessionFactory.openSession()) {
             LanguageEntity language = session.createQuery(
-                    "select l from LanguageEntity l where l.id = :id and l.deletedAt is null and l.enabled = true",
+                    "select l from LanguageEntity l where l.id = :id and l.deletedAt is null",
                     LanguageEntity.class)
                     .setParameter("id", id)
                     .uniqueResult();
@@ -48,7 +48,7 @@ public class HibernateLanguageRepository extends AbstractHibernateRepository imp
     public List<LanguageEntity> findAll() {
         try (Session session = sessionFactory.openSession()) {
             return session.createQuery(
-                    "select l from LanguageEntity l where l.deletedAt is null and l.enabled = true order by l.name",
+                    "select l from LanguageEntity l where l.deletedAt is null order by l.name",
                     LanguageEntity.class)
                     .getResultList();
         }
@@ -67,11 +67,14 @@ public class HibernateLanguageRepository extends AbstractHibernateRepository imp
 
     @Override
     public void deleteById(Long id) {
-        consumeWithSession(session -> session.createMutationQuery(
-                "update LanguageEntity l set l.deletedAt = :now, l.enabled = false where l.id = :id and l.deletedAt is null and l.enabled = true")
-                .setParameter("now", java.time.Instant.now())
-                .setParameter("id", id)
-                .executeUpdate());
+        executeWithSession(session -> {
+            LanguageEntity entity = session.get(LanguageEntity.class, id);
+            if (entity != null) {
+                entity.markDeleted();
+                session.merge(entity);
+            }
+            return null;
+        });
     }
 
     @Override
@@ -81,7 +84,7 @@ public class HibernateLanguageRepository extends AbstractHibernateRepository imp
         }
         try (Session session = sessionFactory.openSession()) {
             List<LanguageEntity> results = session.createQuery(
-                    "select l from LanguageEntity l where l.id in :ids and l.deletedAt is null and l.enabled = true",
+                    "select l from LanguageEntity l where l.id in :ids and l.deletedAt is null",
                     LanguageEntity.class)
                     .setParameter("ids", ids)
                     .getResultList();
@@ -94,7 +97,7 @@ public class HibernateLanguageRepository extends AbstractHibernateRepository imp
     public Optional<Language> findDetailById(Long id) {
         try (Session session = sessionFactory.openSession()) {
             LanguageEntity languageEntity = session.createQuery(
-                    "select l from LanguageEntity l where l.id = :id and l.deletedAt is null and l.enabled = true",
+                    "select l from LanguageEntity l where l.id = :id and l.deletedAt is null",
                     LanguageEntity.class)
                     .setParameter("id", id)
                     .uniqueResult();
@@ -109,7 +112,7 @@ public class HibernateLanguageRepository extends AbstractHibernateRepository imp
     public List<Work> findRelatedWorks(Long languageId) {
         try (Session session = sessionFactory.openSession()) {
             List<com.library.books.infrastructure.persistence.entity.WorkEntity> workEntities = session.createQuery(
-                    "select w from WorkEntity w where w.originalLanguageId = :languageId and w.deletedAt is null and w.enabled = true order by w.title",
+                    "select w from WorkEntity w where w.originalLanguageId = :languageId and w.deletedAt is null order by w.title",
                     com.library.books.infrastructure.persistence.entity.WorkEntity.class)
                     .setParameter("languageId", languageId)
                     .getResultList();

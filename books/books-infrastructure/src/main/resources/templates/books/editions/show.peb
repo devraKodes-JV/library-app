@@ -101,7 +101,10 @@
                                 {{ authorNames[ea.authorId] | default("Unknown") }}
                             </a>
                         </td>
-                        <td class="text-muted">{{ ea.role | default("N/A") }}</td>
+                        <td class="text-muted">
+                            {% set roleName = authorRoleNames[ea.authorRoleId] | default("N/A") %}
+                            {{ roleName }}
+                        </td>
                     </tr>
                     {% endfor %}
                 </tbody>

@@ -11,16 +11,17 @@ import com.library.kernel.web.WebControllerContext;
 
 import io.javalin.http.Context;
 
-public class ShowWorkController {
+import com.library.kernel.web.BaseController;
+
+public class ShowWorkController extends BaseController {
 
     private final GetWorkDetailUseCase getWorkDetailUseCase;
     private final ListEditionsByWorkUseCase listEditionsByWorkUseCase;
-    private final WebControllerContext webContext;
 
     public ShowWorkController(GetWorkDetailUseCase getWorkDetailUseCase, ListEditionsByWorkUseCase listEditionsByWorkUseCase, WebControllerContext webContext) {
+        super(webContext);
         this.getWorkDetailUseCase = getWorkDetailUseCase;
         this.listEditionsByWorkUseCase = listEditionsByWorkUseCase;
-        this.webContext = webContext;
     }
 
     public void showWork(Context ctx) {
@@ -39,20 +40,15 @@ public class ShowWorkController {
     }
 
     private Map<String, Object> buildShowModel(Context ctx, Map<String, Object> extra) {
-        var current = webContext.currentUser(ctx);
-        List<?> navSections = webContext.navSections(ctx);
+        var current = currentUser(ctx);
+        List<?> navSections = navSections(ctx);
         Map<String, Object> model = new java.util.LinkedHashMap<>();
         model.put("user", current);
         model.put("navSections", navSections);
-        model.put("canUpdate", webContext.hasPermission(ctx, "works.update"));
-        model.put("canDelete", webContext.hasPermission(ctx, "works.delete"));
+        model.put("canUpdate", hasPermission(ctx, "works.update"));
+        model.put("canDelete", hasPermission(ctx, "works.delete"));
         model.putAll(extra);
         return model;
     }
 
-    private void requireCan(Context ctx, String permCode) {
-        if (!webContext.hasPermission(ctx, permCode)) {
-            throw new io.javalin.http.ForbiddenResponse();
-        }
-    }
 }

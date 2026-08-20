@@ -22,14 +22,13 @@
                     <label class="form-label" for="name">Name</label>
                     <input type="text" id="name" name="name" class="form-control bg-dark border-secondary text-light {% if name is defined and name %}is-invalid{% else %}{% if publisher is not null %}is-valid{% endif %}{% endif %}" required
                            value="{% if publisher is not null %}{{ publisher.name }}{% endif %}">
-                    {% if name is defined and name %}
-                    <div class="invalid-feedback">{{ name }}</div>
-                    {% endif %}
+                    <div class="invalid-feedback" id="nameError">{% if name is defined and name %}{{ name }}{% endif %}</div>
                 </div>
                 <div class="col-md-6">
                     <label class="form-label" for="country">Country</label>
-                    <input type="text" id="country" name="country" class="form-control bg-dark border-secondary text-light"
+                    <input type="text" id="country" name="country" class="form-control bg-dark border-secondary text-light {% if country is defined and country %}is-invalid{% else %}{% if publisher is not null %}is-valid{% endif %}{% endif %}" required
                            value="{% if publisher is not null %}{{ publisher.country }}{% endif %}">
+                    <div class="invalid-feedback" id="countryError">{% if country is defined and country %}{{ country }}{% endif %}</div>
                 </div>
             </div>
             <div class="row g-3 mt-0">
@@ -37,45 +36,151 @@
                     <label class="form-label" for="website">Website</label>
                     <input type="text" id="website" name="website" class="form-control bg-dark border-secondary text-light {% if website is defined and website %}is-invalid{% else %}{% if publisher is not null and publisher.website is not empty %}is-valid{% endif %}{% endif %}"
                            value="{% if publisher is not null %}{{ publisher.website }}{% endif %}">
-                    {% if website is defined and website %}
-                    <div class="invalid-feedback">{{ website }}</div>
-                    {% endif %}
+                    <div class="invalid-feedback" id="websiteError">{% if website is defined and website %}{{ website }}{% endif %}</div>
                 </div>
             </div>
         </div>
     </div>
 
     <div class="mt-3">
-        <button type="submit" class="btn btn-primary">
+        <button type="submit" id="submitBtn" class="btn btn-primary" disabled>
             <i class="bi bi-check-lg"></i> Save
         </button>
         <a href="/books/publishers" class="btn btn-outline-secondary">Cancel</a>
     </div>
 </form>
 
-<script>
+<script nonce="{{ securityNonce }}">
 document.addEventListener('DOMContentLoaded', function() {
     var form = document.querySelector('form[novalidate]');
     if (!form) return;
-    form.addEventListener('submit', function(e) {
-        var valid = true;
-        var name = document.getElementById('name');
-        var alphaRegex = /^[a-zA-ZÀ-ÿ\s'-]+$/;
-        
-        if (!name.value.trim()) {
+    
+    var name = document.getElementById('name');
+    var country = document.getElementById('country');
+    var website = document.getElementById('website');
+    var nameError = document.getElementById('nameError');
+    var countryError = document.getElementById('countryError');
+    var websiteError = document.getElementById('websiteError');
+    var submitBtn = document.getElementById('submitBtn');
+    var alphaRegex = /^[a-zA-ZÀ-ÿ\s'-]+$/;
+    var urlRegex = /^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([\/\w .-]*)*\/?$/;
+    
+    function isNameValid() {
+        if (!name.value.trim()) return false;
+        if (!alphaRegex.test(name.value.trim()) || name.value.trim().length < 2) return false;
+        return true;
+    }
+    
+    function isCountryValid() {
+        if (!country.value.trim()) return false;
+        if (!alphaRegex.test(country.value.trim()) || country.value.trim().length < 2) return false;
+        return true;
+    }
+    
+    function isWebsiteValid() {
+        if (website.value.trim() && website.value.trim().length > 300) return false;
+        if (website.value.trim() && !urlRegex.test(website.value.trim())) return false;
+        return true;
+    }
+    
+    function validateName() {
+        if (!isNameValid()) {
+            if (!name.value.trim()) {
+                nameError.textContent = 'Name is required.';
+            } else {
+                nameError.textContent = 'Name must contain only letters, spaces, hyphens or apostrophes.';
+            }
             name.classList.add('is-invalid');
             name.classList.remove('is-valid');
-            valid = false;
-        } else if (!alphaRegex.test(name.value.trim())) {
-            name.classList.add('is-invalid');
-            name.classList.remove('is-valid');
-            valid = false;
-        } else {
-            name.classList.remove('is-invalid');
-            name.classList.add('is-valid');
+            return false;
         }
-        
-        if (!valid) {
+        nameError.textContent = '';
+        name.classList.remove('is-invalid');
+        name.classList.add('is-valid');
+        return true;
+    }
+    
+    function validateCountry() {
+        if (!isCountryValid()) {
+            if (!country.value.trim()) {
+                countryError.textContent = 'Country is required.';
+            } else {
+                countryError.textContent = 'Country must contain only letters, spaces, hyphens or apostrophes.';
+            }
+            country.classList.add('is-invalid');
+            country.classList.remove('is-valid');
+            return false;
+        }
+        countryError.textContent = '';
+        country.classList.remove('is-invalid');
+        country.classList.add('is-valid');
+        return true;
+    }
+    
+    function validateWebsite() {
+        if (!isWebsiteValid()) {
+            if (website.value.trim().length > 300) {
+                websiteError.textContent = 'Website must be 300 characters or less.';
+            } else {
+                websiteError.textContent = 'Website must be a valid URL (e.g. https://example.com).';
+            }
+            website.classList.add('is-invalid');
+            website.classList.remove('is-valid');
+            return false;
+        }
+        websiteError.textContent = '';
+        website.classList.remove('is-invalid');
+        if (website.value.trim()) website.classList.add('is-valid');
+        return true;
+    }
+    
+    function updateSubmitButton() {
+        var valid = isNameValid() && isCountryValid() && isWebsiteValid();
+        submitBtn.disabled = !valid;
+        return valid;
+    }
+    
+    name.addEventListener('input', function() {
+        validateName();
+        updateSubmitButton();
+    });
+    name.addEventListener('change', function() {
+        validateName();
+        updateSubmitButton();
+    });
+    name.addEventListener('blur', function() {
+        validateName();
+        updateSubmitButton();
+    });
+    
+    country.addEventListener('input', function() {
+        validateCountry();
+        updateSubmitButton();
+    });
+    country.addEventListener('change', function() {
+        validateCountry();
+        updateSubmitButton();
+    });
+    country.addEventListener('blur', function() {
+        validateCountry();
+        updateSubmitButton();
+    });
+    
+    website.addEventListener('input', function() {
+        validateWebsite();
+        updateSubmitButton();
+    });
+    website.addEventListener('change', function() {
+        validateWebsite();
+        updateSubmitButton();
+    });
+    website.addEventListener('blur', function() {
+        validateWebsite();
+        updateSubmitButton();
+    });
+    
+    form.addEventListener('submit', function(e) {
+        if (!updateSubmitButton()) {
             e.preventDefault();
         }
     });

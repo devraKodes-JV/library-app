@@ -1,5 +1,6 @@
 package com.library.books.infrastructure.transaction;
 
+import java.util.NoSuchElementException;
 import java.util.function.Supplier;
 
 import org.hibernate.Session;
@@ -27,14 +28,9 @@ public class HibernateTransactionExecutor implements Transactional {
         try (Session session = sessionFactory.openSession()) {
             Transaction tx = session.beginTransaction();
             try {
-                T result = ScopedValue.where(CURRENT_SESSION, session).call(() -> {
-                    work.get();
-                    return null;
-                });
-                // Need to get the actual result from work.get()
-                T actualResult = work.get();
+                T result = ScopedValue.where(CURRENT_SESSION, session).call(() -> work.get());
                 tx.commit();
-                return actualResult;
+                return result;
             } catch (Exception e) {
                 tx.rollback();
                 log.error("Transaction rolled back due to error", e);
@@ -44,6 +40,10 @@ public class HibernateTransactionExecutor implements Transactional {
     }
 
     public static Session currentSession() {
-        return CURRENT_SESSION.get();
+        try {
+            return CURRENT_SESSION.get();
+        } catch (NoSuchElementException e) {
+            return null;
+        }
     }
 }

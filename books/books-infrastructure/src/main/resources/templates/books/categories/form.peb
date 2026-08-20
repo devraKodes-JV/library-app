@@ -22,17 +22,13 @@
                     <label class="form-label" for="code">Code</label>
                     <input type="text" id="code" name="code" class="form-control bg-dark border-secondary text-light {% if code is defined and code %}is-invalid{% else %}{% if category is not null %}is-valid{% endif %}{% endif %}" required
                            value="{% if category is not null %}{{ category.code }}{% endif %}">
-                    {% if code is defined and code %}
-                    <div class="invalid-feedback">{{ code }}</div>
-                    {% endif %}
+                    <div class="invalid-feedback" id="codeError">{% if code is defined and code %}{{ code }}{% endif %}</div>
                 </div>
                 <div class="col-md-6">
                     <label class="form-label" for="name">Name</label>
                     <input type="text" id="name" name="name" class="form-control bg-dark border-secondary text-light {% if name is defined and name %}is-invalid{% else %}{% if category is not null %}is-valid{% endif %}{% endif %}" required
                            value="{% if category is not null %}{{ category.name }}{% endif %}">
-                    {% if name is defined and name %}
-                    <div class="invalid-feedback">{{ name }}</div>
-                    {% endif %}
+                    <div class="invalid-feedback" id="nameError">{% if name is defined and name %}{{ name }}{% endif %}</div>
                 </div>
             </div>
             <div class="row g-3 mt-0">
@@ -54,60 +50,145 @@
                 <div class="col-12">
                     <label class="form-label" for="description">Description</label>
                     <textarea id="description" name="description" rows="2" class="form-control bg-dark border-secondary text-light {% if description is defined and description %}is-invalid{% else %}{% if category is not null and category.description is not empty %}is-valid{% endif %}{% endif %}">{% if category is not null %}{{ category.description }}{% endif %}</textarea>
-                    {% if description is defined and description %}
-                    <div class="invalid-feedback">{{ description }}</div>
-                    {% endif %}
+                    <div class="invalid-feedback" id="descriptionError">{% if description is defined and description %}{{ description }}{% endif %}</div>
                 </div>
             </div>
         </div>
     </div>
 
     <div class="mt-3">
-        <button type="submit" class="btn btn-primary">
+        <button type="submit" id="submitBtn" class="btn btn-primary" disabled>
             <i class="bi bi-check-lg"></i> Save
         </button>
         <a href="/books/categories" class="btn btn-outline-secondary">Cancel</a>
     </div>
 </form>
 
-<script>
+<script nonce="{{ securityNonce }}">
 document.addEventListener('DOMContentLoaded', function() {
     var form = document.querySelector('form[novalidate]');
     if (!form) return;
+    
+    var code = document.getElementById('code');
+    var name = document.getElementById('name');
+    var description = document.getElementById('description');
+    var codeError = document.getElementById('codeError');
+    var nameError = document.getElementById('nameError');
+    var descriptionError = document.getElementById('descriptionError');
+    var submitBtn = document.getElementById('submitBtn');
+    var alphaRegex = /^[a-zA-ZÀ-ÿ\s'-]+$/;
+    
+    function isCodeValid() {
+        if (!code.value.trim()) return false;
+        if (!/^[a-zA-Z0-9]+$/.test(code.value.trim()) || code.value.trim().length > 50) return false;
+        return true;
+    }
+    
+    function isNameValid() {
+        if (!name.value.trim()) return false;
+        if (!alphaRegex.test(name.value.trim()) || name.value.trim().length < 2) return false;
+        return true;
+    }
+    
+    function isDescriptionValid() {
+        if (description.value.trim() && description.value.trim().length > 1000) return false;
+        return true;
+    }
+    
+    function validateCode() {
+        if (!isCodeValid()) {
+            if (!code.value.trim()) {
+                codeError.textContent = 'Code is required.';
+            } else {
+                codeError.textContent = 'Code must be alphanumeric and 50 characters or less.';
+            }
+            code.classList.add('is-invalid');
+            code.classList.remove('is-valid');
+            return false;
+        }
+        codeError.textContent = '';
+        code.classList.remove('is-invalid');
+        code.classList.add('is-valid');
+        return true;
+    }
+    
+    function validateName() {
+        if (!isNameValid()) {
+            if (!name.value.trim()) {
+                nameError.textContent = 'Name is required.';
+            } else {
+                nameError.textContent = 'Name must contain only letters, spaces, hyphens or apostrophes.';
+            }
+            name.classList.add('is-invalid');
+            name.classList.remove('is-valid');
+            return false;
+        }
+        nameError.textContent = '';
+        name.classList.remove('is-invalid');
+        name.classList.add('is-valid');
+        return true;
+    }
+    
+    function validateDescription() {
+        if (!isDescriptionValid()) {
+            descriptionError.textContent = 'Description must be 1000 characters or less.';
+            description.classList.add('is-invalid');
+            description.classList.remove('is-valid');
+            return false;
+        }
+        descriptionError.textContent = '';
+        description.classList.remove('is-invalid');
+        description.classList.add('is-valid');
+        return true;
+    }
+    
+    function updateSubmitButton() {
+        var valid = isCodeValid() && isNameValid() && isDescriptionValid();
+        submitBtn.disabled = !valid;
+        return valid;
+    }
+    
+    code.addEventListener('input', function() {
+        validateCode();
+        updateSubmitButton();
+    });
+    code.addEventListener('change', function() {
+        validateCode();
+        updateSubmitButton();
+    });
+    code.addEventListener('blur', function() {
+        validateCode();
+        updateSubmitButton();
+    });
+    
+    name.addEventListener('input', function() {
+        validateName();
+        updateSubmitButton();
+    });
+    name.addEventListener('change', function() {
+        validateName();
+        updateSubmitButton();
+    });
+    name.addEventListener('blur', function() {
+        validateName();
+        updateSubmitButton();
+    });
+    
+    description.addEventListener('input', function() {
+        validateDescription();
+        updateSubmitButton();
+    });
+    description.addEventListener('change', function() {
+        validateDescription();
+        updateSubmitButton();
+    });
+    description.addEventListener('blur', function() {
+        validateDescription();
+        updateSubmitButton();
+    });
+    
     form.addEventListener('submit', function(e) {
-        var valid = true;
-        var code = document.getElementById('code');
-        var name = document.getElementById('name');
-        var alphaRegex = /^[a-zA-ZÀ-ÿ\s'-]+$/;
-        var codeRegex = /^[a-zA-Z0-9\s'-]+$/;
-        
-        if (!code.value.trim()) {
-            code.classList.add('is-invalid');
-            code.classList.remove('is-valid');
-            valid = false;
-        } else if (!codeRegex.test(code.value.trim())) {
-            code.classList.add('is-invalid');
-            code.classList.remove('is-valid');
-            valid = false;
-        } else {
-            code.classList.remove('is-invalid');
-            code.classList.add('is-valid');
-        }
-        
-        if (!name.value.trim()) {
-            name.classList.add('is-invalid');
-            name.classList.remove('is-valid');
-            valid = false;
-        } else if (!alphaRegex.test(name.value.trim())) {
-            name.classList.add('is-invalid');
-            name.classList.remove('is-valid');
-            valid = false;
-        } else {
-            name.classList.remove('is-invalid');
-            name.classList.add('is-valid');
-        }
-        
-        if (!valid) {
+        if (!updateSubmitButton()) {
             e.preventDefault();
         }
     });

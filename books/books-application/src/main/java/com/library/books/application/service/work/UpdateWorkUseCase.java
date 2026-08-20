@@ -51,6 +51,10 @@ public class UpdateWorkUseCase {
                 .filter(aid -> aid != null && !aid.isBlank())
                 .map(Long::parseLong)
                 .toList();
+        List<Long> parsedAuthorRoleIds = command.authorRoleIds() == null ? List.of() : command.authorRoleIds().stream()
+                .filter(id -> id != null && !id.isBlank())
+                .map(Long::parseLong)
+                .toList();
 
         return transactional.execute(() -> {
             existing.setTitle(command.title());
@@ -59,14 +63,19 @@ public class UpdateWorkUseCase {
             existing.setCategoryId(command.categoryId());
             existing.setSummary(command.summary());
             existing.setWorkAuthors(parsedAuthorIds.stream()
-                    .map(authorId -> new WorkAuthor(null, null, authorId, "Author", null, null))
+                    .map(authorId -> {
+                        Long roleId = parsedAuthorRoleIds.isEmpty() ? null : parsedAuthorRoleIds.get(parsedAuthorIds.indexOf(authorId));
+                        return new WorkAuthor(null, null, authorId, roleId, null, null);
+                    })
                     .toList());
             workValidator.validate(existing);
             Work saved = workRepository.save(existing);
             if (!parsedAuthorIds.isEmpty()) {
                 workRepository.deleteWorkAuthorsByWorkId(command.id());
-                for (Long authorId : parsedAuthorIds) {
-                    workRepository.saveWorkAuthor(command.id(), authorId);
+                for (int i = 0; i < parsedAuthorIds.size(); i++) {
+                    Long authorId = parsedAuthorIds.get(i);
+                    Long roleId = parsedAuthorRoleIds.isEmpty() || i >= parsedAuthorRoleIds.size() ? null : parsedAuthorRoleIds.get(i);
+                    workRepository.saveWorkAuthor(command.id(), authorId, roleId);
                 }
             }
             return toWorkDTO(saved);

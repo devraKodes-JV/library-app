@@ -9,20 +9,20 @@ import com.library.books.application.service.publisher.UpdatePublisherUseCase;
 import com.library.books.application.service.publisher.GetPublisherUseCase;
 import com.library.books.domain.exception.ValidationException;
 import com.library.kernel.web.WebControllerContext;
-import com.library.kernel.web.WebHelper;
 
 import io.javalin.http.Context;
 
-public class UpdatePublisherController {
+import com.library.kernel.web.BaseController;
+
+public class UpdatePublisherController extends BaseController {
 
     private final UpdatePublisherUseCase updatePublisherUseCase;
     private final GetPublisherUseCase getPublisherUseCase;
-    private final WebControllerContext webContext;
 
     public UpdatePublisherController(UpdatePublisherUseCase updatePublisherUseCase, GetPublisherUseCase getPublisherUseCase, WebControllerContext webContext) {
+        super(webContext);
         this.updatePublisherUseCase = updatePublisherUseCase;
         this.getPublisherUseCase = getPublisherUseCase;
-        this.webContext = webContext;
     }
 
     public void showEditForm(Context ctx) {
@@ -50,13 +50,13 @@ public class UpdatePublisherController {
             return;
         }
 
-        WebHelper.flashSuccess(ctx, "Publisher updated successfully.");
+        flashSuccess(ctx, "Publisher updated successfully.");
         ctx.redirect("/books/publishers");
     }
 
     private Map<String, Object> buildEditModel(Context ctx, Map<String, Object> extra) {
-        var current = webContext.currentUser(ctx);
-        List<?> navSections = webContext.navSections(ctx);
+        var current = currentUser(ctx);
+        List<?> navSections = navSections(ctx);
         Map<String, Object> model = new java.util.LinkedHashMap<>();
         model.put("mode", "edit");
         model.put("user", current);
@@ -65,9 +65,4 @@ public class UpdatePublisherController {
         return model;
     }
 
-    private void requireCan(Context ctx, String permCode) {
-        if (!webContext.hasPermission(ctx, permCode)) {
-            throw new io.javalin.http.ForbiddenResponse();
-        }
-    }
 }

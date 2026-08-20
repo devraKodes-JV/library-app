@@ -44,7 +44,7 @@ public abstract class AuditableEntity implements Serializable {
     }
 
     private String resolveCurrentUser() {
-        return "system";
+        return com.library.iam.infrastructure.security.CurrentUser.getOrDefault("system");
     }
 
     /**

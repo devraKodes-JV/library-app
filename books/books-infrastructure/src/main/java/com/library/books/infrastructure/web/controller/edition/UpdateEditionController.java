@@ -9,19 +9,24 @@ import com.library.books.application.dto.response.work.WorkResponseDTO;
 import com.library.books.application.dto.response.publisher.PublisherResponseDTO;
 import com.library.books.application.dto.response.booksFormat.BookFormatResponseDTO;
 import com.library.books.application.dto.response.language.LanguageResponseDTO;
+import com.library.books.application.dto.response.author.AuthorResponseDTO;
+import com.library.books.application.dto.response.authorRole.AuthorRoleResponseDTO;
 import com.library.books.application.service.edition.UpdateEditionUseCase;
 import com.library.books.application.service.edition.GetEditionUseCase;
 import com.library.books.application.service.work.ListWorksUseCase;
 import com.library.books.application.service.publisher.ListPublishersUseCase;
 import com.library.books.application.service.bookFormat.ListBookFormatsUseCase;
 import com.library.books.application.service.language.ListLanguagesUseCase;
+import com.library.books.application.service.author.ListAuthorsUseCase;
+import com.library.books.application.service.authorRole.ListAuthorRolesUseCase;
 import com.library.books.domain.exception.ValidationException;
 import com.library.kernel.web.WebControllerContext;
-import com.library.kernel.web.WebHelper;
 
 import io.javalin.http.Context;
 
-public class UpdateEditionController {
+import com.library.kernel.web.BaseController;
+
+public class UpdateEditionController extends BaseController {
 
     private final UpdateEditionUseCase updateEditionUseCase;
     private final GetEditionUseCase getEditionUseCase;
@@ -29,16 +34,19 @@ public class UpdateEditionController {
     private final ListPublishersUseCase listPublishersUseCase;
     private final ListBookFormatsUseCase listBookFormatsUseCase;
     private final ListLanguagesUseCase listLanguagesUseCase;
-    private final WebControllerContext webContext;
+    private final ListAuthorsUseCase listAuthorsUseCase;
+    private final ListAuthorRolesUseCase listAuthorRolesUseCase;
 
-    public UpdateEditionController(UpdateEditionUseCase updateEditionUseCase, GetEditionUseCase getEditionUseCase, ListWorksUseCase listWorksUseCase, ListPublishersUseCase listPublishersUseCase, ListBookFormatsUseCase listBookFormatsUseCase, ListLanguagesUseCase listLanguagesUseCase, WebControllerContext webContext) {
+    public UpdateEditionController(UpdateEditionUseCase updateEditionUseCase, GetEditionUseCase getEditionUseCase, ListWorksUseCase listWorksUseCase, ListPublishersUseCase listPublishersUseCase, ListBookFormatsUseCase listBookFormatsUseCase, ListLanguagesUseCase listLanguagesUseCase, ListAuthorsUseCase listAuthorsUseCase, ListAuthorRolesUseCase listAuthorRolesUseCase, WebControllerContext webContext) {
+        super(webContext);
         this.updateEditionUseCase = updateEditionUseCase;
         this.getEditionUseCase = getEditionUseCase;
         this.listWorksUseCase = listWorksUseCase;
         this.listPublishersUseCase = listPublishersUseCase;
         this.listBookFormatsUseCase = listBookFormatsUseCase;
         this.listLanguagesUseCase = listLanguagesUseCase;
-        this.webContext = webContext;
+        this.listAuthorsUseCase = listAuthorsUseCase;
+        this.listAuthorRolesUseCase = listAuthorRolesUseCase;
     }
 
     public void showEditForm(Context ctx) {
@@ -49,16 +57,24 @@ public class UpdateEditionController {
         List<PublisherResponseDTO> publishers = listPublishersUseCase.execute();
         List<BookFormatResponseDTO> formats = listBookFormatsUseCase.execute();
         List<LanguageResponseDTO> languages = listLanguagesUseCase.execute();
+        List<AuthorResponseDTO> authors = listAuthorsUseCase.execute();
+        List<AuthorRoleResponseDTO> authorRoles = listAuthorRolesUseCase.execute();
         ctx.render("books/editions/form", buildEditModel(ctx, Map.of(
                 "edition", edition,
                 "works", works,
                 "publishers", publishers,
                 "formats", formats,
-                "languages", languages)));
+                "languages", languages,
+                "authorList", authors,
+                "authorRoles", authorRoles)));
     }
 
     public void updateEdition(Context ctx) {
         requireCan(ctx, "editions.update");
+        List<String> authorIds = ctx.formParams("authorIds");
+        List<String> authorRoleIds = authorIds.stream()
+                .map(id -> ctx.formParam("authorRoleId_" + id))
+                .toList();
         UpdateEditionCommand command = new UpdateEditionCommand(
                 ctx.pathParamAsClass("id", Long.class).get(),
                 parseLong(ctx.formParam("workId")),
@@ -68,11 +84,13 @@ public class UpdateEditionController {
                 ctx.formParam("isbn"),
                 parseInt(ctx.formParam("pages")),
                 parseInt(ctx.formParam("publicationYear")),
-                ctx.formParam("editionNumber"));
+                ctx.formParam("editionNumber"),
+                authorIds,
+                authorRoleIds);
 
         try {
             updateEditionUseCase.execute(command);
-            WebHelper.flashSuccess(ctx, "Edition updated successfully.");
+            flashSuccess(ctx, "Edition updated successfully.");
             ctx.redirect("/books/editions");
         } catch (ValidationException e) {
             EditionResponseDTO edition = getEditionUseCase.execute(command.id());
@@ -80,12 +98,16 @@ public class UpdateEditionController {
             List<PublisherResponseDTO> publishers = listPublishersUseCase.execute();
             List<BookFormatResponseDTO> formats = listBookFormatsUseCase.execute();
             List<LanguageResponseDTO> languages = listLanguagesUseCase.execute();
+            List<AuthorResponseDTO> authors = listAuthorsUseCase.execute();
+            List<AuthorRoleResponseDTO> authorRoles = listAuthorRolesUseCase.execute();
             Map<String, Object> model = buildEditModel(ctx, Map.of(
                     "edition", edition,
                     "works", works,
                     "publishers", publishers,
                     "formats", formats,
-                    "languages", languages));
+                    "languages", languages,
+                    "authorList", authors,
+                    "authorRoles", authorRoles));
             model.putAll(e.getFieldErrors());
             ctx.render("books/editions/form", model);
             return;
@@ -93,8 +115,8 @@ public class UpdateEditionController {
     }
 
     private Map<String, Object> buildEditModel(Context ctx, Map<String, Object> extra) {
-        var current = webContext.currentUser(ctx);
-        List<?> navSections = webContext.navSections(ctx);
+        var current = currentUser(ctx);
+        List<?> navSections = navSections(ctx);
         Map<String, Object> model = new java.util.LinkedHashMap<>();
         model.put("mode", "edit");
         model.put("user", current);
@@ -103,11 +125,6 @@ public class UpdateEditionController {
         return model;
     }
 
-    private void requireCan(Context ctx, String permCode) {
-        if (!webContext.hasPermission(ctx, permCode)) {
-            throw new io.javalin.http.ForbiddenResponse();
-        }
-    }
 
     private Long parseLong(String value) {
         if (value == null || value.isBlank()) {

@@ -58,4 +58,9 @@ public class WorkAuthorPersistenceAdapter implements WorkAuthorRepository {
                 .map(WorkAuthorMapper::toDomain)
                 .toList();
     }
+
+    @Override
+    public void saveWorkAuthor(Long workId, Long authorId, Long authorRoleId) {
+        workAuthorRepository.saveWorkAuthor(workId, authorId, authorRoleId);
+    }
 }

@@ -22,36 +22,33 @@
                     <label class="form-label" for="title">Title</label>
                     <input type="text" id="title" name="title" class="form-control bg-dark border-secondary text-light {% if title is defined and title %}is-invalid{% else %}{% if work is not null %}is-valid{% endif %}{% endif %}" required
                            value="{% if work is not null %}{{ work.title }}{% endif %}">
-                    {% if title is defined and title %}
-                    <div class="invalid-feedback">{{ title }}</div>
-                    {% endif %}
+                    <div class="invalid-feedback" id="titleError">{% if title is defined and title %}{{ title }}{% endif %}</div>
                 </div>
                 <div class="col-md-6">
                     <label class="form-label" for="subtitle">Subtitle</label>
                     <input type="text" id="subtitle" name="subtitle" class="form-control bg-dark border-secondary text-light {% if subtitle is defined and subtitle %}is-invalid{% else %}{% if work is not null and work.subtitle is not empty %}is-valid{% endif %}{% endif %}"
                            value="{% if work is not null %}{{ work.subtitle }}{% endif %}">
-                    {% if subtitle is defined and subtitle %}
-                    <div class="invalid-feedback">{{ subtitle }}</div>
-                    {% endif %}
+                    <div class="invalid-feedback" id="subtitleError">{% if subtitle is defined and subtitle %}{{ subtitle }}{% endif %}</div>
                 </div>
             </div>
             <div class="row g-3 mt-0">
                 <div class="col-12">
                     <label class="form-label">Authors <span class="text-danger">*</span></label>
-                    <div class="card bg-dark border-secondary">
+                    <div class="card bg-dark border-secondary" id="authorsCard">
                         <div class="card-body bg-dark p-0">
                             <div class="table-responsive container">
                                 <table class="table table-hover align-middle mb-0 data-table text-light">
                                     <thead>
                                         <tr>
-                                            <th style="width: 40px;"></th>
+                                            <th></th>
                                             <th>Name</th>
                                             <th>Biography</th>
                                             <th>Dates</th>
+                                            <th>Role</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {% for author in authors %}
+                                        {% for author in authorList %}
                                         <tr>
                                             <td class="text-center">
                                                 <input type="checkbox" name="authorIds" value="{{ author.id }}" {% if work is not null %}{% for wa in work.authors %}{% if wa.authorId == author.id %}checked{% endif %}{% endfor %}{% endif %}>
@@ -59,6 +56,14 @@
                                             <td>{{ author.fullName }}</td>
                                             <td class="text-muted">{{ author.biography | default("N/A") }}</td>
                                             <td class="text-muted">{{ author.birthDate | default("N/A") }} - {{ author.deathDate | default("present") }}</td>
+                                            <td>
+                                                <select name="authorRoleId_{{ author.id }}" class="form-select form-select-sm w-auto bg-dark border-secondary text-light" {% if work is not null %}{% for wa in work.authors %}{% if wa.authorId == author.id %}data-selected="{{ wa.authorRoleId }}"{% endif %}{% endfor %}{% endif %}>
+                                                    <option value="">Select role</option>
+                                                    {% for role in authorRoles %}
+                                                    <option value="{{ role.id }}">{{ role.name }}</option>
+                                                    {% endfor %}
+                                                </select>
+                                            </td>
                                         </tr>
                                         {% endfor %}
                                     </tbody>
@@ -66,9 +71,7 @@
                             </div>
                         </div>
                     </div>
-                    {% if authors is defined and authors %}
-                    <div class="invalid-feedback d-block">{{ authors }}</div>
-                    {% endif %}
+                    <div class="invalid-feedback d-block" id="authorsError">{% if authors is defined and authors %}{{ authors }}{% endif %}</div>
                 </div>
             </div>
             <div class="row g-3 mt-0">
@@ -99,16 +102,14 @@
                 <div class="col-12">
                     <label class="form-label" for="summary">Summary</label>
                     <textarea id="summary" name="summary" rows="3" class="form-control bg-dark border-secondary text-light {% if summary is defined and summary %}is-invalid{% else %}{% if work is not null and work.summary is not empty %}is-valid{% endif %}{% endif %}">{% if work is not null %}{{ work.summary }}{% endif %}</textarea>
-                    {% if summary is defined and summary %}
-                    <div class="invalid-feedback">{{ summary }}</div>
-                    {% endif %}
+                    <div class="invalid-feedback" id="summaryError">{% if summary is defined and summary %}{{ summary }}{% endif %}</div>
                 </div>
             </div>
         </div>
     </div>
 
     <div class="mt-3">
-        <button type="submit" class="btn btn-primary">
+        <button type="submit" id="submitBtn" class="btn btn-primary" disabled>
             <i class="bi bi-check-lg"></i> Save
         </button>
         <a href="/books/works" class="btn btn-outline-secondary">Cancel</a>

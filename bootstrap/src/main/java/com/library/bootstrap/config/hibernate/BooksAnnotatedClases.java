@@ -11,6 +11,8 @@ import com.library.books.infrastructure.persistence.entity.BookFormatEntity;
 import com.library.books.infrastructure.persistence.entity.CategoryEntity;
 import com.library.books.infrastructure.persistence.entity.WorkAuthorEntity;
 import com.library.books.infrastructure.persistence.entity.EditionAuthorEntity;
+import com.library.books.infrastructure.persistence.entity.AuthorRoleEntity;
+import com.library.books.infrastructure.persistence.entity.envers.BooksRevisionEntity;
 
 public class BooksAnnotatedClases {
 
@@ -24,6 +26,8 @@ public class BooksAnnotatedClases {
         cfg.addAnnotatedClass(CategoryEntity.class);
         cfg.addAnnotatedClass(WorkAuthorEntity.class);
         cfg.addAnnotatedClass(EditionAuthorEntity.class);
+        cfg.addAnnotatedClass(AuthorRoleEntity.class);
+        cfg.addAnnotatedClass(BooksRevisionEntity.class);
     }
 
 }

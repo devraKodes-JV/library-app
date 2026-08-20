@@ -63,7 +63,7 @@
                 <table class="table table-hover align-middle mb-0 data-table text-light" id="permissionsTable">
                     <thead>
                         <tr>
-                            <th style="width: 40px;"><input class="form-check-input bg-dark border-secondary" type="checkbox" id="selectAllPermissions"></th>
+                            <th class="text-center"><input class="form-check-input bg-dark border-secondary" type="checkbox" id="selectAllPermissions"></th>
                             <th>Permission</th>
                             <th>Code</th>
                             <th>Module</th>
@@ -105,5 +105,5 @@
 {% endblock %}
 
 {% block scripts %}
-<script src="/js/iam.js"></script>
+<script src="/js/iam.js" nonce="{{ securityNonce }}"></script>
 {% endblock %}

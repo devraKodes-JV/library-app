@@ -85,13 +85,23 @@ public class WorkPersistenceAdapter implements WorkRepository {
     }
 
     @Override
-    public void saveWorkAuthor(Long workId, Long authorId) {
-        workJpaRepository.saveWorkAuthor(workId, authorId);
+    public void saveWorkAuthor(Long workId, Long authorId, Long authorRoleId) {
+        workJpaRepository.saveWorkAuthor(workId, authorId, authorRoleId);
     }
 
     @Override
     public void deleteWorkAuthorsByWorkId(Long workId) {
         workJpaRepository.deleteWorkAuthorsByWorkId(workId);
+    }
+
+    @Override
+    public void nullifyOriginalLanguage(Long languageId) {
+        hibernateWorkRepository.nullifyOriginalLanguage(languageId);
+    }
+
+    @Override
+    public void nullifyCategory(Long categoryId) {
+        hibernateWorkRepository.nullifyCategory(categoryId);
     }
 
     @Override

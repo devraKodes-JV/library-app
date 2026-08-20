@@ -7,18 +7,18 @@ import com.library.books.application.dto.command.bookFormat.CreateBookFormatComm
 import com.library.books.application.service.bookFormat.CreateBookFormatUseCase;
 import com.library.books.domain.exception.ValidationException;
 import com.library.kernel.web.WebControllerContext;
-import com.library.kernel.web.WebHelper;
 
 import io.javalin.http.Context;
 
-public class CreateBookFormatController {
+import com.library.kernel.web.BaseController;
+
+public class CreateBookFormatController extends BaseController {
 
     private final CreateBookFormatUseCase createBookFormatUseCase;
-    private final WebControllerContext webContext;
 
     public CreateBookFormatController(CreateBookFormatUseCase createBookFormatUseCase, WebControllerContext webContext) {
+        super(webContext);
         this.createBookFormatUseCase = createBookFormatUseCase;
-        this.webContext = webContext;
     }
 
     public void showCreateForm(Context ctx) {
@@ -35,7 +35,7 @@ public class CreateBookFormatController {
 
         try {
             createBookFormatUseCase.execute(command);
-            WebHelper.flashSuccess(ctx, "Format created successfully.");
+            flashSuccess(ctx, "Format created successfully.");
             ctx.redirect("/books/formats");
         } catch (ValidationException e) {
             Map<String, Object> model = buildCreateModel(ctx);
@@ -45,8 +45,8 @@ public class CreateBookFormatController {
     }
 
     private Map<String, Object> buildCreateModel(Context ctx) {
-        var current = webContext.currentUser(ctx);
-        List<?> navSections = webContext.navSections(ctx);
+        var current = currentUser(ctx);
+        List<?> navSections = navSections(ctx);
         Map<String, Object> model = new java.util.LinkedHashMap<>();
         model.put("mode", "create");
         model.put("format", null);
@@ -55,9 +55,4 @@ public class CreateBookFormatController {
         return model;
     }
 
-    private void requireCan(Context ctx, String permCode) {
-        if (!webContext.hasPermission(ctx, permCode)) {
-            throw new io.javalin.http.ForbiddenResponse();
-        }
-    }
 }

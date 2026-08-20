@@ -8,5 +8,6 @@ public record CreateWorkCommand(
         Long originalLanguageId,
         Long categoryId,
         String summary,
-        List<String> authorIds) {
+        List<String> authorIds,
+        List<String> authorRoleIds) {
 }

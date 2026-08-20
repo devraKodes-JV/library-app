@@ -24,7 +24,7 @@ public class HibernatePublisherRepository extends AbstractHibernateRepository im
     public Optional<PublisherEntity> findByCode(String code) {
         try (Session session = sessionFactory.openSession()) {
             PublisherEntity publisher = session.createQuery(
-                    "select p from PublisherEntity p where p.code = :code and p.deletedAt is null and p.enabled = true",
+                    "select p from PublisherEntity p where p.code = :code and p.deletedAt is null",
                     PublisherEntity.class)
                     .setParameter("code", code)
                     .uniqueResult();
@@ -36,7 +36,7 @@ public class HibernatePublisherRepository extends AbstractHibernateRepository im
     public Optional<PublisherEntity> findById(Long id) {
         try (Session session = sessionFactory.openSession()) {
             PublisherEntity publisher = session.createQuery(
-                    "select p from PublisherEntity p where p.id = :id and p.deletedAt is null and p.enabled = true",
+                    "select p from PublisherEntity p where p.id = :id and p.deletedAt is null",
                     PublisherEntity.class)
                     .setParameter("id", id)
                     .uniqueResult();
@@ -48,7 +48,7 @@ public class HibernatePublisherRepository extends AbstractHibernateRepository im
     public List<PublisherEntity> findAll() {
         try (Session session = sessionFactory.openSession()) {
             return session.createQuery(
-                    "select p from PublisherEntity p where p.deletedAt is null and p.enabled = true order by p.name",
+                    "select p from PublisherEntity p where p.deletedAt is null order by p.name",
                     PublisherEntity.class)
                     .getResultList();
         }
@@ -67,11 +67,14 @@ public class HibernatePublisherRepository extends AbstractHibernateRepository im
 
     @Override
     public void deleteById(Long id) {
-        consumeWithSession(session -> session.createMutationQuery(
-                "update PublisherEntity p set p.deletedAt = :now, p.enabled = false where p.id = :id and p.deletedAt is null and p.enabled = true")
-                .setParameter("now", java.time.Instant.now())
-                .setParameter("id", id)
-                .executeUpdate());
+        executeWithSession(session -> {
+            PublisherEntity entity = session.get(PublisherEntity.class, id);
+            if (entity != null) {
+                entity.markDeleted();
+                session.merge(entity);
+            }
+            return null;
+        });
     }
 
     @Override
@@ -81,7 +84,7 @@ public class HibernatePublisherRepository extends AbstractHibernateRepository im
         }
         try (Session session = sessionFactory.openSession()) {
             List<PublisherEntity> results = session.createQuery(
-                    "select p from PublisherEntity p where p.id in :ids and p.deletedAt is null and p.enabled = true",
+                    "select p from PublisherEntity p where p.id in :ids and p.deletedAt is null",
                     PublisherEntity.class)
                     .setParameter("ids", ids)
                     .getResultList();
@@ -94,7 +97,7 @@ public class HibernatePublisherRepository extends AbstractHibernateRepository im
     public Optional<Publisher> findDetailById(Long id) {
         try (Session session = sessionFactory.openSession()) {
             PublisherEntity publisherEntity = session.createQuery(
-                    "select p from PublisherEntity p where p.id = :id and p.deletedAt is null and p.enabled = true",
+                    "select p from PublisherEntity p where p.id = :id and p.deletedAt is null",
                     PublisherEntity.class)
                     .setParameter("id", id)
                     .uniqueResult();
@@ -109,7 +112,7 @@ public class HibernatePublisherRepository extends AbstractHibernateRepository im
     public List<Edition> findSummariesByPublisherId(Long publisherId) {
         try (Session session = sessionFactory.openSession()) {
             List<com.library.books.infrastructure.persistence.entity.EditionEntity> editionEntities = session.createQuery(
-                    "select e from EditionEntity e where e.publisherId = :publisherId and e.deletedAt is null and e.enabled = true order by e.workId, e.editionNumber",
+                    "select e from EditionEntity e where e.publisherId = :publisherId and e.deletedAt is null order by e.workId, e.editionNumber",
                     com.library.books.infrastructure.persistence.entity.EditionEntity.class)
                     .setParameter("publisherId", publisherId)
                     .getResultList();

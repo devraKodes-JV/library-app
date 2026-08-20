@@ -21,7 +21,7 @@ public class LanguageEntity extends AuditableEntity implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true, length = 10)
+    @Column(nullable = false, length = 10)
     private String code;
 
     @Column(nullable = false, length = 100)

@@ -18,7 +18,7 @@ public class HibernateEditionAuthorRepository extends AbstractHibernateRepositor
     public List<EditionAuthorEntity> findByEditionId(Long editionId) {
         try (Session session = sessionFactory.openSession()) {
             return session.createQuery(
-                    "select e from EditionAuthorEntity e where e.editionId = :editionId and e.deletedAt is null and e.enabled = true",
+                    "select e from EditionAuthorEntity e where e.editionId = :editionId and e.deletedAt is null",
                     EditionAuthorEntity.class)
                     .setParameter("editionId", editionId)
                     .getResultList();
@@ -29,7 +29,7 @@ public class HibernateEditionAuthorRepository extends AbstractHibernateRepositor
     public List<EditionAuthorEntity> findByAuthorId(Long authorId) {
         try (Session session = sessionFactory.openSession()) {
             return session.createQuery(
-                    "select e from EditionAuthorEntity e where e.authorId = :authorId and e.deletedAt is null and e.enabled = true",
+                    "select e from EditionAuthorEntity e where e.authorId = :authorId and e.deletedAt is null",
                     EditionAuthorEntity.class)
                     .setParameter("authorId", authorId)
                     .getResultList();
@@ -40,7 +40,7 @@ public class HibernateEditionAuthorRepository extends AbstractHibernateRepositor
     public java.util.Optional<EditionAuthorEntity> findById(Long id) {
         try (Session session = sessionFactory.openSession()) {
             EditionAuthorEntity entity = session.createQuery(
-                    "select e from EditionAuthorEntity e where e.id = :id and e.deletedAt is null and e.enabled = true",
+                    "select e from EditionAuthorEntity e where e.id = :id and e.deletedAt is null",
                     EditionAuthorEntity.class)
                     .setParameter("id", id)
                     .uniqueResult();
@@ -52,7 +52,7 @@ public class HibernateEditionAuthorRepository extends AbstractHibernateRepositor
     public java.util.List<EditionAuthorEntity> findAll() {
         try (Session session = sessionFactory.openSession()) {
             return session.createQuery(
-                    "select e from EditionAuthorEntity e where e.deletedAt is null and e.enabled = true",
+                    "select e from EditionAuthorEntity e where e.deletedAt is null",
                     EditionAuthorEntity.class)
                     .getResultList();
         }
@@ -60,18 +60,34 @@ public class HibernateEditionAuthorRepository extends AbstractHibernateRepositor
 
     @Override
     public void deleteByEditionId(Long editionId) {
-        consumeWithSession(session -> session.createMutationQuery(
-                "delete EditionAuthorEntity e where e.editionId = :editionId")
-                .setParameter("editionId", editionId)
-                .executeUpdate());
+        executeWithSession(session -> {
+            List<EditionAuthorEntity> entities = session.createQuery(
+                            "select e from EditionAuthorEntity e where e.editionId = :editionId and e.deletedAt is null",
+                            EditionAuthorEntity.class)
+                    .setParameter("editionId", editionId)
+                    .getResultList();
+            for (EditionAuthorEntity entity : entities) {
+                entity.markDeleted();
+                session.merge(entity);
+            }
+            return null;
+        });
     }
 
     @Override
     public void deleteByAuthorId(Long authorId) {
-        consumeWithSession(session -> session.createMutationQuery(
-                "delete EditionAuthorEntity e where e.authorId = :authorId")
-                .setParameter("authorId", authorId)
-                .executeUpdate());
+        executeWithSession(session -> {
+            List<EditionAuthorEntity> entities = session.createQuery(
+                            "select e from EditionAuthorEntity e where e.authorId = :authorId and e.deletedAt is null",
+                            EditionAuthorEntity.class)
+                    .setParameter("authorId", authorId)
+                    .getResultList();
+            for (EditionAuthorEntity entity : entities) {
+                entity.markDeleted();
+                session.merge(entity);
+            }
+            return null;
+        });
     }
 
     @Override
@@ -87,9 +103,26 @@ public class HibernateEditionAuthorRepository extends AbstractHibernateRepositor
 
     @Override
     public void deleteById(Long id) {
-        consumeWithSession(session -> session.createMutationQuery(
-                "delete EditionAuthorEntity e where e.id = :id")
-                .setParameter("id", id)
-                .executeUpdate());
+        executeWithSession(session -> {
+            EditionAuthorEntity entity = session.get(EditionAuthorEntity.class, id);
+            if (entity != null) {
+                entity.markDeleted();
+                session.merge(entity);
+            }
+            return null;
+        });
+    }
+
+    @Override
+    public void saveEditionAuthor(Long editionId, Long authorId, Long authorRoleId) {
+        executeWithSession(session -> {
+            EditionAuthorEntity entity = new EditionAuthorEntity();
+            entity.setEditionId(editionId);
+            entity.setAuthorId(authorId);
+            entity.setAuthorRoleId(authorRoleId);
+            entity.setEnabled(true);
+            session.persist(entity);
+            return null;
+        });
     }
 }

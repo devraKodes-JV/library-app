@@ -51,4 +51,9 @@ public class EditionAuthorPersistenceAdapter implements EditionAuthorRepository 
     public void deleteByAuthorId(Long authorId) {
         editionAuthorRepository.deleteByAuthorId(authorId);
     }
+
+    @Override
+    public void saveEditionAuthor(Long editionId, Long authorId, Long authorRoleId) {
+        editionAuthorRepository.saveEditionAuthor(editionId, authorId, authorRoleId);
+    }
 }

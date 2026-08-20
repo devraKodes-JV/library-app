@@ -24,7 +24,7 @@ public class HibernateCategoryRepository extends AbstractHibernateRepository imp
     public Optional<CategoryEntity> findByCode(String code) {
         try (Session session = sessionFactory.openSession()) {
             CategoryEntity category = session.createQuery(
-                    "select c from CategoryEntity c where c.code = :code and c.deletedAt is null and c.enabled = true",
+                    "select c from CategoryEntity c where c.code = :code and c.deletedAt is null",
                     CategoryEntity.class)
                     .setParameter("code", code)
                     .uniqueResult();
@@ -36,7 +36,7 @@ public class HibernateCategoryRepository extends AbstractHibernateRepository imp
     public Optional<CategoryEntity> findById(Long id) {
         try (Session session = sessionFactory.openSession()) {
             CategoryEntity category = session.createQuery(
-                    "select c from CategoryEntity c where c.id = :id and c.deletedAt is null and c.enabled = true",
+                    "select c from CategoryEntity c where c.id = :id and c.deletedAt is null",
                     CategoryEntity.class)
                     .setParameter("id", id)
                     .uniqueResult();
@@ -48,7 +48,7 @@ public class HibernateCategoryRepository extends AbstractHibernateRepository imp
     public List<CategoryEntity> findAll() {
         try (Session session = sessionFactory.openSession()) {
             return session.createQuery(
-                    "select c from CategoryEntity c where c.deletedAt is null and c.enabled = true order by c.name",
+                    "select c from CategoryEntity c where c.deletedAt is null order by c.name",
                     CategoryEntity.class)
                     .getResultList();
         }
@@ -67,11 +67,14 @@ public class HibernateCategoryRepository extends AbstractHibernateRepository imp
 
     @Override
     public void deleteById(Long id) {
-        consumeWithSession(session -> session.createMutationQuery(
-                "update CategoryEntity c set c.deletedAt = :now, c.enabled = false where c.id = :id and c.deletedAt is null and c.enabled = true")
-                .setParameter("now", java.time.Instant.now())
-                .setParameter("id", id)
-                .executeUpdate());
+        executeWithSession(session -> {
+            CategoryEntity entity = session.get(CategoryEntity.class, id);
+            if (entity != null) {
+                entity.markDeleted();
+                session.merge(entity);
+            }
+            return null;
+        });
     }
 
     @Override
@@ -81,7 +84,7 @@ public class HibernateCategoryRepository extends AbstractHibernateRepository imp
         }
         try (Session session = sessionFactory.openSession()) {
             List<CategoryEntity> results = session.createQuery(
-                    "select c from CategoryEntity c where c.id in :ids and c.deletedAt is null and c.enabled = true",
+                    "select c from CategoryEntity c where c.id in :ids and c.deletedAt is null",
                     CategoryEntity.class)
                     .setParameter("ids", ids)
                     .getResultList();
@@ -94,7 +97,7 @@ public class HibernateCategoryRepository extends AbstractHibernateRepository imp
     public Optional<Category> findDetailById(Long id) {
         try (Session session = sessionFactory.openSession()) {
             CategoryEntity categoryEntity = session.createQuery(
-                    "select c from CategoryEntity c where c.id = :id and c.deletedAt is null and c.enabled = true",
+                    "select c from CategoryEntity c where c.id = :id and c.deletedAt is null",
                     CategoryEntity.class)
                     .setParameter("id", id)
                     .uniqueResult();
@@ -111,7 +114,7 @@ public class HibernateCategoryRepository extends AbstractHibernateRepository imp
     public List<Work> findRelatedWorks(Long categoryId) {
         try (Session session = sessionFactory.openSession()) {
             List<com.library.books.infrastructure.persistence.entity.WorkEntity> workEntities = session.createQuery(
-                    "select w from WorkEntity w where w.categoryId = :categoryId and w.deletedAt is null and w.enabled = true order by w.title",
+                    "select w from WorkEntity w where w.categoryId = :categoryId and w.deletedAt is null order by w.title",
                     com.library.books.infrastructure.persistence.entity.WorkEntity.class)
                     .setParameter("categoryId", categoryId)
                     .getResultList();
@@ -119,5 +122,12 @@ public class HibernateCategoryRepository extends AbstractHibernateRepository imp
                     .map(WorkMapper::toDomain)
                     .toList();
         }
+    }
+
+    public void nullifyParent(Long parentId) {
+        consumeWithSession(session -> session.createMutationQuery(
+                "update CategoryEntity c set c.parentId = null where c.parentId = :parentId and c.deletedAt is null")
+                .setParameter("parentId", parentId)
+                .executeUpdate());
     }
 }

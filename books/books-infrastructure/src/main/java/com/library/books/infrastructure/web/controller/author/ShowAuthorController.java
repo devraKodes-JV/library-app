@@ -9,14 +9,15 @@ import com.library.kernel.web.WebControllerContext;
 
 import io.javalin.http.Context;
 
-public class ShowAuthorController {
+import com.library.kernel.web.BaseController;
+
+public class ShowAuthorController extends BaseController {
 
     private final GetAuthorDetailUseCase getAuthorDetailUseCase;
-    private final WebControllerContext webContext;
 
     public ShowAuthorController(GetAuthorDetailUseCase getAuthorDetailUseCase, WebControllerContext webContext) {
+        super(webContext);
         this.getAuthorDetailUseCase = getAuthorDetailUseCase;
-        this.webContext = webContext;
     }
 
     public void showAuthor(Context ctx) {
@@ -34,20 +35,15 @@ public class ShowAuthorController {
     }
 
     private Map<String, Object> buildShowModel(Context ctx, Map<String, Object> extra) {
-        var current = webContext.currentUser(ctx);
-        List<?> navSections = webContext.navSections(ctx);
+        var current = currentUser(ctx);
+        List<?> navSections = navSections(ctx);
         Map<String, Object> model = new java.util.LinkedHashMap<>();
         model.put("user", current);
         model.put("navSections", navSections);
-        model.put("canUpdate", webContext.hasPermission(ctx, "authors.update"));
-        model.put("canDelete", webContext.hasPermission(ctx, "authors.delete"));
+        model.put("canUpdate", hasPermission(ctx, "authors.update"));
+        model.put("canDelete", hasPermission(ctx, "authors.delete"));
         model.putAll(extra);
         return model;
     }
 
-    private void requireCan(Context ctx, String permCode) {
-        if (!webContext.hasPermission(ctx, permCode)) {
-            throw new io.javalin.http.ForbiddenResponse();
-        }
-    }
 }

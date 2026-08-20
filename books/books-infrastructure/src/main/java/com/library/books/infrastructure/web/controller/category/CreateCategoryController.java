@@ -9,20 +9,20 @@ import com.library.books.application.service.category.CreateCategoryUseCase;
 import com.library.books.application.service.category.ListCategoriesUseCase;
 import com.library.books.domain.exception.ValidationException;
 import com.library.kernel.web.WebControllerContext;
-import com.library.kernel.web.WebHelper;
 
 import io.javalin.http.Context;
 
-public class CreateCategoryController {
+import com.library.kernel.web.BaseController;
+
+public class CreateCategoryController extends BaseController {
 
     private final CreateCategoryUseCase createCategoryUseCase;
     private final ListCategoriesUseCase listCategoriesUseCase;
-    private final WebControllerContext webContext;
 
     public CreateCategoryController(CreateCategoryUseCase createCategoryUseCase, ListCategoriesUseCase listCategoriesUseCase, WebControllerContext webContext) {
+        super(webContext);
         this.createCategoryUseCase = createCategoryUseCase;
         this.listCategoriesUseCase = listCategoriesUseCase;
-        this.webContext = webContext;
     }
 
     public void showCreateForm(Context ctx) {
@@ -41,7 +41,7 @@ public class CreateCategoryController {
 
         try {
             createCategoryUseCase.execute(command);
-            WebHelper.flashSuccess(ctx, "Category created successfully.");
+            flashSuccess(ctx, "Category created successfully.");
             ctx.redirect("/books/categories");
         } catch (ValidationException e) {
             List<CategoryResponseDTO> categories = listCategoriesUseCase.execute();
@@ -52,8 +52,8 @@ public class CreateCategoryController {
     }
 
     private Map<String, Object> buildCreateModel(Context ctx, Map<String, Object> extra) {
-        var current = webContext.currentUser(ctx);
-        List<?> navSections = webContext.navSections(ctx);
+        var current = currentUser(ctx);
+        List<?> navSections = navSections(ctx);
         Map<String, Object> model = new java.util.LinkedHashMap<>();
         model.put("mode", "create");
         model.put("category", null);
@@ -63,11 +63,6 @@ public class CreateCategoryController {
         return model;
     }
 
-    private void requireCan(Context ctx, String permCode) {
-        if (!webContext.hasPermission(ctx, permCode)) {
-            throw new io.javalin.http.ForbiddenResponse();
-        }
-    }
 
     private Long parseLong(String value) {
         if (value == null || value.isBlank()) {

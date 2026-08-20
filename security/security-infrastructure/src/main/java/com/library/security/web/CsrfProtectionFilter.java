@@ -19,7 +19,7 @@ import jakarta.servlet.http.HttpSession;
 
 public final class CsrfProtectionFilter {
     
-    private static final String CSRF_COOKIE_NAME = "__Host-XSRF-TOKEN";
+    private static final String CSRF_COOKIE_NAME = "XSRF-TOKEN";
     private static final String CSRF_HEADER_NAME = "X-XSRF-TOKEN";
     private static final String CSRF_FORM_FIELD_NAME = "_csrf";
     private static final String CSRF_ATTR_NAME = "com.library.security.csrfToken";
@@ -89,7 +89,7 @@ public final class CsrfProtectionFilter {
             Cookie cookie = new Cookie(CSRF_COOKIE_NAME, signedToken);
             cookie.setMaxAge((int) TOKEN_EXPIRATION_SECONDS);
             cookie.setHttpOnly(false);
-            cookie.setSecure(true);
+            cookie.setSecure(ctx.req().isSecure());
             cookie.setSameSite(SameSite.STRICT);
             cookie.setPath("/");
             

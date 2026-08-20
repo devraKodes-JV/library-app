@@ -17,7 +17,9 @@ public interface WorkRepository {
     List<Work> findByAuthorId(Long authorId);
     boolean existsLanguage(Long id);
     boolean existsCategory(Long id);
-    void saveWorkAuthor(Long workId, Long authorId);
+    void saveWorkAuthor(Long workId, Long authorId, Long authorRoleId);
     void deleteWorkAuthorsByWorkId(Long workId);
     WorkWithRelationsDTO findByIdWithRelations(Long id);
+    void nullifyOriginalLanguage(Long languageId);
+    void nullifyCategory(Long categoryId);
 }

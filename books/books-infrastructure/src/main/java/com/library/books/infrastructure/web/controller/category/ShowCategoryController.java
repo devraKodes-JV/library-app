@@ -12,18 +12,19 @@ import com.library.kernel.web.WebControllerContext;
 
 import io.javalin.http.Context;
 
-public class ShowCategoryController {
+import com.library.kernel.web.BaseController;
+
+public class ShowCategoryController extends BaseController {
 
     private final GetCategoryUseCase getCategoryUseCase;
     private final ListCategoriesUseCase listCategoriesUseCase;
     private final ListWorksByCategoryUseCase listWorksByCategoryUseCase;
-    private final WebControllerContext webContext;
 
     public ShowCategoryController(GetCategoryUseCase getCategoryUseCase, ListCategoriesUseCase listCategoriesUseCase, ListWorksByCategoryUseCase listWorksByCategoryUseCase, WebControllerContext webContext) {
+        super(webContext);
         this.getCategoryUseCase = getCategoryUseCase;
         this.listCategoriesUseCase = listCategoriesUseCase;
         this.listWorksByCategoryUseCase = listWorksByCategoryUseCase;
-        this.webContext = webContext;
     }
 
     public void showCategory(Context ctx) {
@@ -44,20 +45,15 @@ public class ShowCategoryController {
     }
 
     private Map<String, Object> buildShowModel(Context ctx, Map<String, Object> extra) {
-        var current = webContext.currentUser(ctx);
-        List<?> navSections = webContext.navSections(ctx);
+        var current = currentUser(ctx);
+        List<?> navSections = navSections(ctx);
         Map<String, Object> model = new java.util.LinkedHashMap<>();
         model.put("user", current);
         model.put("navSections", navSections);
-        model.put("canUpdate", webContext.hasPermission(ctx, "categories.update"));
-        model.put("canDelete", webContext.hasPermission(ctx, "categories.delete"));
+        model.put("canUpdate", hasPermission(ctx, "categories.update"));
+        model.put("canDelete", hasPermission(ctx, "categories.delete"));
         model.putAll(extra);
         return model;
     }
 
-    private void requireCan(Context ctx, String permCode) {
-        if (!webContext.hasPermission(ctx, permCode)) {
-            throw new io.javalin.http.ForbiddenResponse();
-        }
-    }
 }

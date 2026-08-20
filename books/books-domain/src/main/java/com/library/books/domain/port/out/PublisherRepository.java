@@ -7,6 +7,7 @@ import com.library.books.domain.model.Publisher;
 
 public interface PublisherRepository {
     Optional<Publisher> findById(Long id);
+    Optional<Publisher> findByCode(String code);
     List<Publisher> findAll();
     Publisher save(Publisher publisher);
     void deleteById(Long id);

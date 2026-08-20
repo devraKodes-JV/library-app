@@ -26,8 +26,8 @@ public class EditionAuthorEntity extends AuditableEntity implements Serializable
     @Column(name = "author_id", nullable = false, insertable = false, updatable = false)
     private Long authorId;
 
-    @Column(name = "role", length = 100)
-    private String role;
+    @Column(name = "author_role_id", nullable = false, insertable = false, updatable = false)
+    private Long authorRoleId;
 
     @Column(nullable = false)
     private boolean enabled = true;
@@ -36,11 +36,15 @@ public class EditionAuthorEntity extends AuditableEntity implements Serializable
     @JoinColumn(name = "edition_id", insertable = false, updatable = false)
     private EditionEntity edition;
 
-    public EditionAuthorEntity(Long id, Long editionId, Long authorId, String role, boolean enabled) {
+    @ManyToOne
+    @JoinColumn(name = "author_role_id", insertable = false, updatable = false)
+    private AuthorRoleEntity authorRole;
+
+    public EditionAuthorEntity(Long id, Long editionId, Long authorId, Long authorRoleId, boolean enabled) {
         this.id = id;
         this.editionId = editionId;
         this.authorId = authorId;
-        this.role = role;
+        this.authorRoleId = authorRoleId;
         this.enabled = enabled;
     }
 
@@ -53,10 +57,12 @@ public class EditionAuthorEntity extends AuditableEntity implements Serializable
     public void setEditionId(Long editionId) { this.editionId = editionId; }
     public Long getAuthorId() { return authorId; }
     public void setAuthorId(Long authorId) { this.authorId = authorId; }
-    public String getRole() { return role; }
-    public void setRole(String role) { this.role = role; }
+    public Long getAuthorRoleId() { return authorRoleId; }
+    public void setAuthorRoleId(Long authorRoleId) { this.authorRoleId = authorRoleId; }
     public boolean isEnabled() { return enabled; }
     public void setEnabled(boolean enabled) { this.enabled = enabled; }
     public EditionEntity getEdition() { return edition; }
     public void setEdition(EditionEntity edition) { this.edition = edition; }
+    public AuthorRoleEntity getAuthorRole() { return authorRole; }
+    public void setAuthorRole(AuthorRoleEntity authorRole) { this.authorRole = authorRole; }
 }

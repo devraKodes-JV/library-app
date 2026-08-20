@@ -11,14 +11,15 @@ import com.library.kernel.web.WebControllerContext;
 
 import io.javalin.http.Context;
 
-public class ListBookFormatsController {
+import com.library.kernel.web.BaseController;
+
+public class ListBookFormatsController extends BaseController {
 
     private final ListBookFormatsUseCase listBookFormatsUseCase;
-    private final WebControllerContext webContext;
 
     public ListBookFormatsController(ListBookFormatsUseCase listBookFormatsUseCase, WebControllerContext webContext) {
+        super(webContext);
         this.listBookFormatsUseCase = listBookFormatsUseCase;
-        this.webContext = webContext;
     }
 
     public void listFormats(Context ctx) {
@@ -29,21 +30,16 @@ public class ListBookFormatsController {
     }
 
     private Map<String, Object> buildListModel(Context ctx, Map<String, Object> extra) {
-        var current = webContext.currentUser(ctx);
-        List<?> navSections = webContext.navSections(ctx);
+        var current = currentUser(ctx);
+        List<?> navSections = navSections(ctx);
         Map<String, Object> model = new java.util.LinkedHashMap<>();
         model.put("user", current);
         model.put("navSections", navSections);
-        model.put("canCreate", webContext.hasPermission(ctx, "formats.create"));
-        model.put("canUpdate", webContext.hasPermission(ctx, "formats.update"));
-        model.put("canDelete", webContext.hasPermission(ctx, "formats.delete"));
+        model.put("canCreate", hasPermission(ctx, "formats.create"));
+        model.put("canUpdate", hasPermission(ctx, "formats.update"));
+        model.put("canDelete", hasPermission(ctx, "formats.delete"));
         model.putAll(extra);
         return model;
     }
 
-    private void requireCan(Context ctx, String permCode) {
-        if (!webContext.hasPermission(ctx, permCode)) {
-            throw new io.javalin.http.ForbiddenResponse();
-        }
-    }
 }

@@ -25,6 +25,12 @@ public class PublisherPersistenceAdapter implements PublisherRepository {
     }
 
     @Override
+    public Optional<Publisher> findByCode(String code) {
+        return publisherJpaRepository.findByCode(code)
+                .map(PublisherMapper::toDomain);
+    }
+
+    @Override
     public List<Publisher> findAll() {
         return publisherJpaRepository.findAll().stream()
                 .map(PublisherMapper::toDomain)

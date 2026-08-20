@@ -11,4 +11,5 @@ public interface WorkAuthorJpaRepository<T, ID> extends CrudRepository<T, ID> {
     void deleteByWorkId(Long workId);
     void deleteByAuthorId(Long authorId);
     java.util.List<WorkAuthorEntity> findByWorkIds(java.util.List<Long> workIds);
+    void saveWorkAuthor(Long workId, Long authorId, Long authorRoleId);
 }

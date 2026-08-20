@@ -23,11 +23,11 @@ public class HibernateConfiguration {
         cfg.setProperty("hibernate.connection.username", "sa");
         cfg.setProperty("hibernate.connection.password", "");
         cfg.setProperty("hibernate.connection.driver_class", "org.h2.Driver");
-        // Hibernate must NOT touch the schema: Flyway owns it.
         cfg.setProperty("hibernate.hbm2ddl.auto", "validate");
         cfg.setProperty("hibernate.dialect", "org.hibernate.dialect.H2Dialect");
         cfg.setProperty("hibernate.show_sql", "false");
         cfg.setProperty("hibernate.format_sql", "true");
+        cfg.setProperty("hibernate.audit.enabled", "true");
 
         // Register the JPA-mapped entities.
         IamAnnotatedClases.annotate(cfg);

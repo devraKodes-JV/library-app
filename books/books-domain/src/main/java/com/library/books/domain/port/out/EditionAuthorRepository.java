@@ -11,4 +11,5 @@ public interface EditionAuthorRepository {
     List<EditionAuthor> findByAuthorId(Long authorId);
     void deleteByEditionId(Long editionId);
     void deleteByAuthorId(Long authorId);
+    void saveEditionAuthor(Long editionId, Long authorId, Long authorRoleId);
 }

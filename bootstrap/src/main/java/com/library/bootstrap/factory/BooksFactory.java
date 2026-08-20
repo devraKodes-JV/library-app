@@ -9,6 +9,7 @@ import com.library.books.application.service.author.GetAuthorDetailUseCase;
 import com.library.books.application.service.author.GetAuthorUseCase;
 import com.library.books.application.service.author.ListAuthorsUseCase;
 import com.library.books.application.service.author.UpdateAuthorUseCase;
+import com.library.books.application.service.authorRole.ListAuthorRolesUseCase;
 import com.library.books.application.service.bookFormat.CreateBookFormatUseCase;
 import com.library.books.application.service.bookFormat.DeleteBookFormatUseCase;
 import com.library.books.application.service.bookFormat.GetBookFormatUseCase;
@@ -46,7 +47,12 @@ import com.library.books.application.service.work.ListWorksByCategoryUseCase;
 import com.library.books.application.service.work.ListWorksByLanguageUseCase;
 import com.library.books.application.service.work.ListWorksUseCase;
 import com.library.books.application.service.work.UpdateWorkUseCase;
+import com.library.books.application.service.authorRole.CreateAuthorRoleUseCase;
+import com.library.books.application.service.authorRole.DeleteAuthorRoleUseCase;
+import com.library.books.application.service.authorRole.GetAuthorRoleUseCase;
+import com.library.books.application.service.authorRole.UpdateAuthorRoleUseCase;
 import com.library.books.application.validation.AuthorValidator;
+import com.library.books.application.validation.AuthorRoleValidator;
 import com.library.books.application.validation.BookFormatValidator;
 import com.library.books.application.validation.CategoryValidator;
 import com.library.books.application.validation.EditionValidator;
@@ -68,6 +74,11 @@ import com.library.books.infrastructure.web.controller.category.DeleteCategoryCo
 import com.library.books.infrastructure.web.controller.category.ListCategoriesController;
 import com.library.books.infrastructure.web.controller.category.ShowCategoryController;
 import com.library.books.infrastructure.web.controller.category.UpdateCategoryController;
+import com.library.books.infrastructure.web.controller.authorRole.CreateAuthorRoleController;
+import com.library.books.infrastructure.web.controller.authorRole.DeleteAuthorRoleController;
+import com.library.books.infrastructure.web.controller.authorRole.ListAuthorRolesController;
+import com.library.books.infrastructure.web.controller.authorRole.ShowAuthorRoleController;
+import com.library.books.infrastructure.web.controller.authorRole.UpdateAuthorRoleController;
 import com.library.books.infrastructure.web.controller.edition.CreateEditionController;
 import com.library.books.infrastructure.web.controller.edition.DeleteEditionController;
 import com.library.books.infrastructure.web.controller.edition.ListEditionsController;
@@ -89,30 +100,38 @@ import com.library.books.infrastructure.web.controller.work.ListWorksController;
 import com.library.books.infrastructure.web.controller.work.ShowWorkController;
 import com.library.books.infrastructure.web.controller.work.UpdateWorkController;
 import com.library.books.domain.port.out.AuthorRepository;
+import com.library.books.domain.port.out.AuthorRoleRepository;
 import com.library.books.domain.port.out.BookFormatRepository;
 import com.library.books.domain.port.out.CategoryRepository;
 import com.library.books.domain.port.out.EditionRepository;
+import com.library.books.domain.port.out.EditionAuthorRepository;
 import com.library.books.domain.port.out.LanguageRepository;
 import com.library.books.domain.port.out.PublisherRepository;
 import com.library.books.domain.port.out.WorkAuthorRepository;
 import com.library.books.domain.port.out.WorkRepository;
 import com.library.books.infrastructure.persistence.adapter.AuthorPersistenceAdapter;
+import com.library.books.infrastructure.persistence.adapter.AuthorRolePersistenceAdapter;
 import com.library.books.infrastructure.persistence.adapter.BookFormatPersistenceAdapter;
 import com.library.books.infrastructure.persistence.adapter.CategoryPersistenceAdapter;
 import com.library.books.infrastructure.persistence.adapter.EditionPersistenceAdapter;
+import com.library.books.infrastructure.persistence.adapter.EditionAuthorPersistenceAdapter;
 import com.library.books.infrastructure.persistence.adapter.LanguagePersistenceAdapter;
 import com.library.books.infrastructure.persistence.adapter.PublisherPersistenceAdapter;
 import com.library.books.infrastructure.persistence.adapter.WorkAuthorPersistenceAdapter;
 import com.library.books.infrastructure.persistence.adapter.WorkPersistenceAdapter;
 import com.library.books.infrastructure.persistence.repository.hibernate.HibernateAuthorRepository;
+import com.library.books.infrastructure.persistence.repository.hibernate.HibernateAuthorRoleRepository;
 import com.library.books.infrastructure.persistence.repository.hibernate.HibernateBookFormatRepository;
 import com.library.books.infrastructure.persistence.repository.hibernate.HibernateCategoryRepository;
 import com.library.books.infrastructure.persistence.repository.hibernate.HibernateEditionRepository;
+import com.library.books.infrastructure.persistence.repository.hibernate.HibernateEditionAuthorRepository;
 import com.library.books.infrastructure.persistence.repository.hibernate.HibernateLanguageRepository;
 import com.library.books.infrastructure.persistence.repository.hibernate.HibernatePublisherRepository;
 import com.library.books.infrastructure.persistence.repository.hibernate.HibernateWorkAuthorRepository;
 import com.library.books.infrastructure.persistence.repository.hibernate.HibernateWorkRepository;
+import com.library.books.infrastructure.audit.AuditQueryService;
 import com.library.books.infrastructure.web.BooksRoutes;
+import com.library.books.infrastructure.web.controller.audit.AuditHistoryController;
 import com.library.kernel.web.WebHelper;
 import com.library.iam.infrastructure.notification.SseNotificationService;
 import com.library.kernel.transaction.Transactional;
@@ -128,13 +147,15 @@ public final class BooksFactory {
 
     public static void register(JavalinConfig config, SessionFactory sessionFactory, WebControllerContext webContext) {
         WorkRepository workRepository = new WorkPersistenceAdapter(new HibernateWorkRepository(sessionFactory), new HibernateWorkRepository(sessionFactory));
-        EditionRepository editionRepository = new EditionPersistenceAdapter(new HibernateEditionRepository(sessionFactory));
+        EditionRepository editionRepository = new EditionPersistenceAdapter(new HibernateEditionRepository(sessionFactory), new HibernateEditionAuthorRepository(sessionFactory));
         AuthorRepository authorRepository = new AuthorPersistenceAdapter(new HibernateAuthorRepository(sessionFactory), new HibernateAuthorRepository(sessionFactory));
         PublisherRepository publisherRepository = new PublisherPersistenceAdapter(new HibernatePublisherRepository(sessionFactory));
         LanguageRepository languageRepository = new LanguagePersistenceAdapter(new HibernateLanguageRepository(sessionFactory));
         BookFormatRepository bookFormatRepository = new BookFormatPersistenceAdapter(new HibernateBookFormatRepository(sessionFactory));
         CategoryRepository categoryRepository = new CategoryPersistenceAdapter(new HibernateCategoryRepository(sessionFactory));
         WorkAuthorRepository workAuthorRepository = new WorkAuthorPersistenceAdapter(new HibernateWorkAuthorRepository(sessionFactory));
+        EditionAuthorRepository editionAuthorRepository = new EditionAuthorPersistenceAdapter(new HibernateEditionAuthorRepository(sessionFactory));
+        AuthorRoleRepository authorRoleRepository = new AuthorRolePersistenceAdapter(new HibernateAuthorRoleRepository(sessionFactory));
 
         Transactional transactional = new com.library.books.infrastructure.transaction.HibernateTransactionExecutor(sessionFactory);
         AuthorValidator authorValidator = new AuthorValidator();
@@ -144,6 +165,7 @@ public final class BooksFactory {
         LanguageValidator languageValidator = new LanguageValidator();
         PublisherValidator publisherValidator = new PublisherValidator();
         WorkValidator workValidator = new WorkValidator();
+        AuthorRoleValidator authorRoleValidator = new AuthorRoleValidator();
 
         CreateAuthorUseCase createAuthorUseCase = new CreateAuthorUseCase(authorRepository, authorValidator);
         UpdateAuthorUseCase updateAuthorUseCase = new UpdateAuthorUseCase(authorRepository, authorValidator);
@@ -154,20 +176,20 @@ public final class BooksFactory {
 
         CreateBookFormatUseCase createBookFormatUseCase = new CreateBookFormatUseCase(bookFormatRepository, bookFormatValidator);
         UpdateBookFormatUseCase updateBookFormatUseCase = new UpdateBookFormatUseCase(bookFormatRepository, bookFormatValidator);
-        DeleteBookFormatUseCase deleteBookFormatUseCase = new DeleteBookFormatUseCase(bookFormatRepository);
+        DeleteBookFormatUseCase deleteBookFormatUseCase = new DeleteBookFormatUseCase(bookFormatRepository, editionRepository);
         GetBookFormatUseCase getBookFormatUseCase = new GetBookFormatUseCase(bookFormatRepository);
         ListBookFormatsUseCase listBookFormatsUseCase = new ListBookFormatsUseCase(bookFormatRepository);
 
         CreateCategoryUseCase createCategoryUseCase = new CreateCategoryUseCase(categoryRepository, categoryValidator);
         UpdateCategoryUseCase updateCategoryUseCase = new UpdateCategoryUseCase(categoryRepository, categoryValidator);
-        DeleteCategoryUseCase deleteCategoryUseCase = new DeleteCategoryUseCase(categoryRepository);
+        DeleteCategoryUseCase deleteCategoryUseCase = new DeleteCategoryUseCase(categoryRepository, workRepository);
         GetCategoryUseCase getCategoryUseCase = new GetCategoryUseCase(categoryRepository);
         ListCategoriesUseCase listCategoriesUseCase = new ListCategoriesUseCase(categoryRepository);
 
-        CreateEditionUseCase createEditionUseCase = new CreateEditionUseCase(editionRepository, editionValidator, transactional);
-        UpdateEditionUseCase updateEditionUseCase = new UpdateEditionUseCase(editionRepository, editionValidator);
+        CreateEditionUseCase createEditionUseCase = new CreateEditionUseCase(editionRepository, editionValidator, transactional, workRepository, publisherRepository, bookFormatRepository, languageRepository, editionAuthorRepository);
+        UpdateEditionUseCase updateEditionUseCase = new UpdateEditionUseCase(editionRepository, editionValidator, publisherRepository, bookFormatRepository, languageRepository, editionAuthorRepository);
         DeleteEditionUseCase deleteEditionUseCase = new DeleteEditionUseCase(editionRepository);
-        GetEditionUseCase getEditionUseCase = new GetEditionUseCase(editionRepository);
+        GetEditionUseCase getEditionUseCase = new GetEditionUseCase(editionRepository, workRepository, publisherRepository, bookFormatRepository, languageRepository);
         ListEditionsUseCase listEditionsUseCase = new ListEditionsUseCase(editionRepository);
         ListEditionsByPublisherUseCase listEditionsByPublisherUseCase = new ListEditionsByPublisherUseCase(editionRepository);
         ListEditionsByFormatUseCase listEditionsByFormatUseCase = new ListEditionsByFormatUseCase(editionRepository);
@@ -175,19 +197,19 @@ public final class BooksFactory {
 
         CreateLanguageUseCase createLanguageUseCase = new CreateLanguageUseCase(languageRepository, languageValidator);
         UpdateLanguageUseCase updateLanguageUseCase = new UpdateLanguageUseCase(languageRepository, languageValidator);
-        DeleteLanguageUseCase deleteLanguageUseCase = new DeleteLanguageUseCase(languageRepository);
+        DeleteLanguageUseCase deleteLanguageUseCase = new DeleteLanguageUseCase(languageRepository, editionRepository, workRepository);
         GetLanguageUseCase getLanguageUseCase = new GetLanguageUseCase(languageRepository);
         ListLanguagesUseCase listLanguagesUseCase = new ListLanguagesUseCase(languageRepository);
 
         CreatePublisherUseCase createPublisherUseCase = new CreatePublisherUseCase(publisherRepository, publisherValidator);
         UpdatePublisherUseCase updatePublisherUseCase = new UpdatePublisherUseCase(publisherRepository, publisherValidator);
-        DeletePublisherUseCase deletePublisherUseCase = new DeletePublisherUseCase(publisherRepository);
+        DeletePublisherUseCase deletePublisherUseCase = new DeletePublisherUseCase(publisherRepository, editionRepository);
         GetPublisherUseCase getPublisherUseCase = new GetPublisherUseCase(publisherRepository);
         ListPublishersUseCase listPublishersUseCase = new ListPublishersUseCase(publisherRepository);
 
         CreateWorkUseCase createWorkUseCase = new CreateWorkUseCase(workRepository, authorRepository, languageRepository, categoryRepository, workValidator, transactional);
         UpdateWorkUseCase updateWorkUseCase = new UpdateWorkUseCase(workRepository, authorRepository, languageRepository, categoryRepository, workValidator, transactional);
-        DeleteWorkUseCase deleteWorkUseCase = new DeleteWorkUseCase(workRepository);
+        DeleteWorkUseCase deleteWorkUseCase = new DeleteWorkUseCase(workRepository, editionRepository);
         GetWorkUseCase getWorkUseCase = new GetWorkUseCase(workRepository);
         ListWorksUseCase listWorksUseCase = new ListWorksUseCase(workRepository, languageRepository, categoryRepository);
         ListWorksByCategoryUseCase listWorksByCategoryUseCase = new ListWorksByCategoryUseCase(workRepository, languageRepository, categoryRepository);
@@ -195,19 +217,27 @@ public final class BooksFactory {
         ListWorksByAuthorUseCase listWorksByAuthorUseCase = new ListWorksByAuthorUseCase(workRepository, languageRepository, categoryRepository);
         GetWorkDetailUseCase getWorkDetailUseCase = new GetWorkDetailUseCase(workRepository);
 
+        CreateAuthorRoleUseCase createAuthorRoleUseCase = new CreateAuthorRoleUseCase(authorRoleRepository);
+        UpdateAuthorRoleUseCase updateAuthorRoleUseCase = new UpdateAuthorRoleUseCase(authorRoleRepository);
+        DeleteAuthorRoleUseCase deleteAuthorRoleUseCase = new DeleteAuthorRoleUseCase(authorRoleRepository);
+        GetAuthorRoleUseCase getAuthorRoleUseCase = new GetAuthorRoleUseCase(authorRoleRepository);
+
         SecurityAuditService auditService = SecurityFactory.register(config, sessionFactory);
+        AuditQueryService auditQueryService = new AuditQueryService(sessionFactory);
         SseNotificationService notificationService = new SseNotificationService();
+
+        ListAuthorRolesUseCase listAuthorRolesUseCase = new ListAuthorRolesUseCase(authorRoleRepository);
 
         ListWorksController listWorksController = new ListWorksController(listWorksUseCase, webContext);
         ShowWorkController showWorkController = new ShowWorkController(getWorkDetailUseCase, listEditionsByWorkUseCase, webContext);
-        CreateWorkController createWorkController = new CreateWorkController(createWorkUseCase, listWorksUseCase, listLanguagesUseCase, listCategoriesUseCase, listAuthorsUseCase, webContext);
-        UpdateWorkController updateWorkController = new UpdateWorkController(updateWorkUseCase, getWorkUseCase, listWorksUseCase, listLanguagesUseCase, listCategoriesUseCase, listAuthorsUseCase, webContext);
+        CreateWorkController createWorkController = new CreateWorkController(createWorkUseCase, listWorksUseCase, listLanguagesUseCase, listCategoriesUseCase, listAuthorsUseCase, listAuthorRolesUseCase, webContext);
+        UpdateWorkController updateWorkController = new UpdateWorkController(updateWorkUseCase, getWorkUseCase, listWorksUseCase, listLanguagesUseCase, listCategoriesUseCase, listAuthorsUseCase, listAuthorRolesUseCase, webContext);
         DeleteWorkController deleteWorkController = new DeleteWorkController(deleteWorkUseCase, webContext);
 
         ListEditionsController listEditionsController = new ListEditionsController(listEditionsUseCase, webContext);
-        ShowEditionController showEditionController = new ShowEditionController(getEditionUseCase, webContext);
-        CreateEditionController createEditionController = new CreateEditionController(createEditionUseCase, listWorksUseCase, listPublishersUseCase, listBookFormatsUseCase, listLanguagesUseCase, webContext);
-        UpdateEditionController updateEditionController = new UpdateEditionController(updateEditionUseCase, getEditionUseCase, listWorksUseCase, listPublishersUseCase, listBookFormatsUseCase, listLanguagesUseCase, webContext);
+        ShowEditionController showEditionController = new ShowEditionController(getEditionUseCase, listAuthorsUseCase, listAuthorRolesUseCase, webContext);
+        CreateEditionController createEditionController = new CreateEditionController(createEditionUseCase, listWorksUseCase, listPublishersUseCase, listBookFormatsUseCase, listLanguagesUseCase, listAuthorsUseCase, listAuthorRolesUseCase, webContext);
+        UpdateEditionController updateEditionController = new UpdateEditionController(updateEditionUseCase, getEditionUseCase, listWorksUseCase, listPublishersUseCase, listBookFormatsUseCase, listLanguagesUseCase, listAuthorsUseCase, listAuthorRolesUseCase, webContext);
         DeleteEditionController deleteEditionController = new DeleteEditionController(deleteEditionUseCase, webContext);
 
         ListAuthorsController listAuthorsController = new ListAuthorsController(listAuthorsUseCase, webContext);
@@ -240,6 +270,14 @@ public final class BooksFactory {
         UpdateCategoryController updateCategoryController = new UpdateCategoryController(updateCategoryUseCase, getCategoryUseCase, listCategoriesUseCase, webContext);
         DeleteCategoryController deleteCategoryController = new DeleteCategoryController(deleteCategoryUseCase, webContext);
 
+        ListAuthorRolesController listAuthorRolesController = new ListAuthorRolesController(listAuthorRolesUseCase, webContext);
+        ShowAuthorRoleController showAuthorRoleController = new ShowAuthorRoleController(getAuthorRoleUseCase, webContext);
+        CreateAuthorRoleController createAuthorRoleController = new CreateAuthorRoleController(createAuthorRoleUseCase, webContext);
+        UpdateAuthorRoleController updateAuthorRoleController = new UpdateAuthorRoleController(updateAuthorRoleUseCase, getAuthorRoleUseCase, webContext);
+        DeleteAuthorRoleController deleteAuthorRoleController = new DeleteAuthorRoleController(deleteAuthorRoleUseCase, webContext);
+
+        AuditHistoryController auditHistoryController = new AuditHistoryController(auditQueryService, webContext);
+
         BooksRoutes.register(config,
                 listWorksController, showWorkController, createWorkController, updateWorkController, deleteWorkController,
                 listEditionsController, showEditionController, createEditionController, updateEditionController, deleteEditionController,
@@ -248,6 +286,8 @@ public final class BooksFactory {
                 listLanguagesController, showLanguageController, createLanguageController, updateLanguageController, deleteLanguageController,
                 listBookFormatsController, showBookFormatController, createBookFormatController, updateBookFormatController, deleteBookFormatController,
                 listCategoriesController, showCategoryController, createCategoryController, updateCategoryController, deleteCategoryController,
+                listAuthorRolesController, showAuthorRoleController, createAuthorRoleController, updateAuthorRoleController, deleteAuthorRoleController,
+                auditHistoryController,
                 notificationService,
                 auditService);
     }

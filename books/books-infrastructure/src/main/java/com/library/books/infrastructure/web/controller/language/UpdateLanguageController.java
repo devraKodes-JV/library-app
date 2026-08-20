@@ -9,20 +9,20 @@ import com.library.books.application.service.language.UpdateLanguageUseCase;
 import com.library.books.application.service.language.GetLanguageUseCase;
 import com.library.books.domain.exception.ValidationException;
 import com.library.kernel.web.WebControllerContext;
-import com.library.kernel.web.WebHelper;
 
 import io.javalin.http.Context;
 
-public class UpdateLanguageController {
+import com.library.kernel.web.BaseController;
+
+public class UpdateLanguageController extends BaseController {
 
     private final UpdateLanguageUseCase updateLanguageUseCase;
     private final GetLanguageUseCase getLanguageUseCase;
-    private final WebControllerContext webContext;
 
     public UpdateLanguageController(UpdateLanguageUseCase updateLanguageUseCase, GetLanguageUseCase getLanguageUseCase, WebControllerContext webContext) {
+        super(webContext);
         this.updateLanguageUseCase = updateLanguageUseCase;
         this.getLanguageUseCase = getLanguageUseCase;
-        this.webContext = webContext;
     }
 
     public void showEditForm(Context ctx) {
@@ -49,13 +49,13 @@ public class UpdateLanguageController {
             return;
         }
 
-        WebHelper.flashSuccess(ctx, "Language updated successfully.");
+        flashSuccess(ctx, "Language updated successfully.");
         ctx.redirect("/books/languages");
     }
 
     private Map<String, Object> buildEditModel(Context ctx, Map<String, Object> extra) {
-        var current = webContext.currentUser(ctx);
-        List<?> navSections = webContext.navSections(ctx);
+        var current = currentUser(ctx);
+        List<?> navSections = navSections(ctx);
         Map<String, Object> model = new java.util.LinkedHashMap<>();
         model.put("mode", "edit");
         model.put("user", current);
@@ -64,9 +64,4 @@ public class UpdateLanguageController {
         return model;
     }
 
-    private void requireCan(Context ctx, String permCode) {
-        if (!webContext.hasPermission(ctx, permCode)) {
-            throw new io.javalin.http.ForbiddenResponse();
-        }
-    }
 }

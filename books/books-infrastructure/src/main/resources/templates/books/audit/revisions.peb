@@ -1,0 +1,61 @@
+{%- extends "layout" -%}
+
+{% block title %}Audit History - Library{% endblock %}
+
+{% block content %}
+<div class="page-header d-flex justify-content-between align-items-center">
+    <div>
+        <h1 class="mb-0">Audit History</h1>
+        <p class="text-muted">Revision trail for {{ entityClass }} #{{ entityId }}</p>
+    </div>
+</div>
+
+{% if error %}
+<div class="alert alert-danger">{{ error }}</div>
+{% endif %}
+
+<div class="mt-3">
+    <div class="card bg-dark border-secondary">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-dark table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>Revision</th>
+                            <th>Timestamp</th>
+                            <th>User</th>
+                            <th>Type</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for rev in revisions %}
+                        <tr>
+                            <td>#{{ rev.revision }}</td>
+                            <td>{{ rev.timestamp | date("Y-MM-dd HH:mm:ss") }}</td>
+                            <td>{{ rev.username }}</td>
+                            <td>
+                                {% if rev.revisionType == 0 %}ADD
+                                {% elseif rev.revisionType == 1 %}MOD
+                                {% elseif rev.revisionType == 2 %}DEL
+                                {% else %}UNKNOWN{% endif %}
+                            </td>
+                            <td>
+                                <a href="/books/audit/entity?entityClass={{ entityClass }}&entityId={{ entityId }}&revision={{ rev.revision }}"
+                                   class="btn btn-sm btn-outline-info">
+                                    View
+                                </a>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="5" class="text-center text-muted">No revisions found.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -11,16 +11,17 @@ import com.library.kernel.web.WebControllerContext;
 
 import io.javalin.http.Context;
 
-public class ShowLanguageController {
+import com.library.kernel.web.BaseController;
+
+public class ShowLanguageController extends BaseController {
 
     private final GetLanguageUseCase getLanguageUseCase;
     private final ListWorksByLanguageUseCase listWorksByLanguageUseCase;
-    private final WebControllerContext webContext;
 
     public ShowLanguageController(GetLanguageUseCase getLanguageUseCase, ListWorksByLanguageUseCase listWorksByLanguageUseCase, WebControllerContext webContext) {
+        super(webContext);
         this.getLanguageUseCase = getLanguageUseCase;
         this.listWorksByLanguageUseCase = listWorksByLanguageUseCase;
-        this.webContext = webContext;
     }
 
     public void showLanguage(Context ctx) {
@@ -39,20 +40,15 @@ public class ShowLanguageController {
     }
 
     private Map<String, Object> buildShowModel(Context ctx, Map<String, Object> extra) {
-        var current = webContext.currentUser(ctx);
-        List<?> navSections = webContext.navSections(ctx);
+        var current = currentUser(ctx);
+        List<?> navSections = navSections(ctx);
         Map<String, Object> model = new java.util.LinkedHashMap<>();
         model.put("user", current);
         model.put("navSections", navSections);
-        model.put("canUpdate", webContext.hasPermission(ctx, "languages.update"));
-        model.put("canDelete", webContext.hasPermission(ctx, "languages.delete"));
+        model.put("canUpdate", hasPermission(ctx, "languages.update"));
+        model.put("canDelete", hasPermission(ctx, "languages.delete"));
         model.putAll(extra);
         return model;
     }
 
-    private void requireCan(Context ctx, String permCode) {
-        if (!webContext.hasPermission(ctx, permCode)) {
-            throw new io.javalin.http.ForbiddenResponse();
-        }
-    }
 }

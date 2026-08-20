@@ -10,22 +10,22 @@ import com.library.books.application.service.category.GetCategoryUseCase;
 import com.library.books.application.service.category.ListCategoriesUseCase;
 import com.library.books.domain.exception.ValidationException;
 import com.library.kernel.web.WebControllerContext;
-import com.library.kernel.web.WebHelper;
 
 import io.javalin.http.Context;
 
-public class UpdateCategoryController {
+import com.library.kernel.web.BaseController;
+
+public class UpdateCategoryController extends BaseController {
 
     private final UpdateCategoryUseCase updateCategoryUseCase;
     private final GetCategoryUseCase getCategoryUseCase;
     private final ListCategoriesUseCase listCategoriesUseCase;
-    private final WebControllerContext webContext;
 
     public UpdateCategoryController(UpdateCategoryUseCase updateCategoryUseCase, GetCategoryUseCase getCategoryUseCase, ListCategoriesUseCase listCategoriesUseCase, WebControllerContext webContext) {
+        super(webContext);
         this.updateCategoryUseCase = updateCategoryUseCase;
         this.getCategoryUseCase = getCategoryUseCase;
         this.listCategoriesUseCase = listCategoriesUseCase;
-        this.webContext = webContext;
     }
 
     public void showEditForm(Context ctx) {
@@ -49,7 +49,7 @@ public class UpdateCategoryController {
 
         try {
             updateCategoryUseCase.execute(command);
-            WebHelper.flashSuccess(ctx, "Category updated successfully.");
+            flashSuccess(ctx, "Category updated successfully.");
             ctx.redirect("/books/categories");
         } catch (ValidationException e) {
             CategoryResponseDTO category = getCategoryUseCase.execute(command.id());
@@ -63,8 +63,8 @@ public class UpdateCategoryController {
     }
 
     private Map<String, Object> buildEditModel(Context ctx, Map<String, Object> extra) {
-        var current = webContext.currentUser(ctx);
-        List<?> navSections = webContext.navSections(ctx);
+        var current = currentUser(ctx);
+        List<?> navSections = navSections(ctx);
         Map<String, Object> model = new java.util.LinkedHashMap<>();
         model.put("mode", "edit");
         model.put("user", current);
@@ -73,11 +73,6 @@ public class UpdateCategoryController {
         return model;
     }
 
-    private void requireCan(Context ctx, String permCode) {
-        if (!webContext.hasPermission(ctx, permCode)) {
-            throw new io.javalin.http.ForbiddenResponse();
-        }
-    }
 
     private Long parseLong(String value) {
         if (value == null || value.isBlank()) {

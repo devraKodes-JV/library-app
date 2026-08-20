@@ -6,21 +6,21 @@ public class EditionAuthor {
     private Long id;
     private Long editionId;
     private Long authorId;
-    private String role;
+    private Long authorRoleId;
     private Instant createdAt;
     private Instant updatedAt;
 
-    public EditionAuthor(Long id, Long editionId, Long authorId, String role, Instant createdAt, Instant updatedAt) {
+    public EditionAuthor(Long id, Long editionId, Long authorId, Long authorRoleId, Instant createdAt, Instant updatedAt) {
         this.id = id;
         this.editionId = editionId;
         this.authorId = authorId;
-        this.role = role;
+        this.authorRoleId = authorRoleId;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
     }
 
-    public static EditionAuthor withoutId(Long editionId, Long authorId, String role) {
-        return new EditionAuthor(null, editionId, authorId, role, null, null);
+    public static EditionAuthor withoutId(Long editionId, Long authorId, Long authorRoleId) {
+        return new EditionAuthor(null, editionId, authorId, authorRoleId, null, null);
     }
 
     public Long getId() {
@@ -47,13 +47,8 @@ public class EditionAuthor {
         this.authorId = authorId;
     }
 
-    public String getRole() {
-        return role;
-    }
-
-    public void setRole(String role) {
-        this.role = role;
-    }
+    public Long getAuthorRoleId() { return authorRoleId; }
+    public void setAuthorRoleId(Long authorRoleId) { this.authorRoleId = authorRoleId; }
 
     public Instant getCreatedAt() {
         return createdAt;

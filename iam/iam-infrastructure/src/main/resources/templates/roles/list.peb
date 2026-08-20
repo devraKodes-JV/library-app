@@ -70,9 +70,9 @@
 {% endif %}
 
 <!-- Real-time notification stream (SSE) destination for this page. -->
-<div class="toast-container position-fixed top-0 end-0 p-3" id="notificationToast" style="z-index: 1050;"></div>
+<div class="toast-container position-fixed top-0 end-0 p-3" id="notificationToast"></div>
 {% endblock %}
 
 {% block scripts %}
-<script src="/js/iam.js"></script>
+<script src="/js/iam.js" nonce="{{ securityNonce }}"></script>
 {% endblock %}

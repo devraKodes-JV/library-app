@@ -12,4 +12,5 @@ public interface CategoryRepository {
     Category save(Category category);
     void deleteById(Long id);
     java.util.Map<Long, String> findNamesByIds(java.util.List<Long> ids);
+    void nullifyParent(Long parentId);
 }

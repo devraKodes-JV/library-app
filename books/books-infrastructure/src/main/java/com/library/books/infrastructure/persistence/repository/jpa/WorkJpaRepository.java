@@ -13,6 +13,6 @@ public interface WorkJpaRepository<T, ID> extends CrudRepository<T, ID>, Findabl
     List<WorkEntity> findByAuthorId(Long authorId);
     boolean existsLanguage(Long id);
     boolean existsCategory(Long id);
-    void saveWorkAuthor(Long workId, Long authorId);
+    void saveWorkAuthor(Long workId, Long authorId, Long authorRoleId);
     void deleteWorkAuthorsByWorkId(Long workId);
 }

@@ -28,7 +28,7 @@ public class HibernateAuthorRepository extends AbstractHibernateRepository imple
     public Optional<AuthorEntity> findByCode(String code) {
         try (Session session = sessionFactory.openSession()) {
             AuthorEntity author = session.createQuery(
-                    "select a from AuthorEntity a where a.code = :code and a.deletedAt is null and a.enabled = true",
+                    "select a from AuthorEntity a where a.code = :code and a.deletedAt is null",
                     AuthorEntity.class)
                     .setParameter("code", code)
                     .uniqueResult();
@@ -40,7 +40,7 @@ public class HibernateAuthorRepository extends AbstractHibernateRepository imple
     public Optional<AuthorEntity> findById(Long id) {
         try (Session session = sessionFactory.openSession()) {
             AuthorEntity author = session.createQuery(
-                    "select a from AuthorEntity a where a.id = :id and a.deletedAt is null and a.enabled = true",
+                    "select a from AuthorEntity a where a.id = :id and a.deletedAt is null",
                     AuthorEntity.class)
                     .setParameter("id", id)
                     .uniqueResult();
@@ -52,7 +52,7 @@ public class HibernateAuthorRepository extends AbstractHibernateRepository imple
     public List<AuthorEntity> findAll() {
         try (Session session = sessionFactory.openSession()) {
             return session.createQuery(
-                    "select a from AuthorEntity a where a.deletedAt is null and a.enabled = true order by a.lastName, a.firstName",
+                    "select a from AuthorEntity a where a.deletedAt is null order by a.lastName, a.firstName",
                     AuthorEntity.class)
                     .getResultList();
         }
@@ -71,11 +71,14 @@ public class HibernateAuthorRepository extends AbstractHibernateRepository imple
 
     @Override
     public void deleteById(Long id) {
-        consumeWithSession(session -> session.createMutationQuery(
-                "update AuthorEntity a set a.deletedAt = :now, a.enabled = false where a.id = :id and a.deletedAt is null and a.enabled = true")
-                .setParameter("now", java.time.Instant.now())
-                .setParameter("id", id)
-                .executeUpdate());
+        executeWithSession(session -> {
+            AuthorEntity entity = session.get(AuthorEntity.class, id);
+            if (entity != null) {
+                entity.markDeleted();
+                session.merge(entity);
+            }
+            return null;
+        });
     }
 
     @Override
@@ -85,7 +88,7 @@ public class HibernateAuthorRepository extends AbstractHibernateRepository imple
         }
         try (Session session = sessionFactory.openSession()) {
             List<AuthorEntity> results = session.createQuery(
-                    "select a from AuthorEntity a where a.id in :ids and a.deletedAt is null and a.enabled = true",
+                    "select a from AuthorEntity a where a.id in :ids and a.deletedAt is null",
                     AuthorEntity.class)
                     .setParameter("ids", ids)
                     .getResultList();
@@ -101,7 +104,7 @@ public class HibernateAuthorRepository extends AbstractHibernateRepository imple
         }
         try (Session session = sessionFactory.openSession()) {
             List<AuthorEntity> results = session.createQuery(
-                    "select a from AuthorEntity a where a.id in :ids and a.deletedAt is null and a.enabled = true",
+                    "select a from AuthorEntity a where a.id in :ids and a.deletedAt is null",
                     AuthorEntity.class)
                     .setParameter("ids", ids)
                     .getResultList();
@@ -120,7 +123,7 @@ public class HibernateAuthorRepository extends AbstractHibernateRepository imple
     public Optional<Author> findDetailById(Long id) {
         try (Session session = sessionFactory.openSession()) {
             AuthorEntity authorEntity = session.createQuery(
-                    "select a from AuthorEntity a where a.id = :id and a.deletedAt is null and a.enabled = true",
+                    "select a from AuthorEntity a where a.id = :id and a.deletedAt is null",
                     AuthorEntity.class)
                     .setParameter("id", id)
                     .uniqueResult();
@@ -139,7 +142,7 @@ public class HibernateAuthorRepository extends AbstractHibernateRepository imple
                     "select distinct a from AuthorEntity a " +
                     "left join fetch a.workAuthors wa " +
                     "left join fetch wa.work w " +
-                    "where a.id = :id and a.deletedAt is null and a.enabled = true",
+                    "where a.id = :id and a.deletedAt is null",
                     AuthorEntity.class)
                     .setParameter("id", id)
                     .uniqueResult();
@@ -157,7 +160,7 @@ public class HibernateAuthorRepository extends AbstractHibernateRepository imple
                         String languageName = null;
                         if (work.getOriginalLanguageId() != null) {
                             LanguageEntity language = session.createQuery(
-                                    "select l from LanguageEntity l where l.id = :id and l.deletedAt is null and l.enabled = true",
+                                    "select l from LanguageEntity l where l.id = :id and l.deletedAt is null",
                                     LanguageEntity.class)
                                     .setParameter("id", work.getOriginalLanguageId())
                                     .uniqueResult();
@@ -168,7 +171,7 @@ public class HibernateAuthorRepository extends AbstractHibernateRepository imple
                         String categoryName = null;
                         if (work.getCategoryId() != null) {
                             CategoryEntity category = session.createQuery(
-                                    "select c from CategoryEntity c where c.id = :id and c.deletedAt is null and c.enabled = true",
+                                    "select c from CategoryEntity c where c.id = :id and c.deletedAt is null",
                                     CategoryEntity.class)
                                     .setParameter("id", work.getCategoryId())
                                     .uniqueResult();

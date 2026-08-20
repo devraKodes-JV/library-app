@@ -1,0 +1,3 @@
+-- Tabla de revisiones Envers para el módulo books.
+-- Se usa en conjunto con @RevisionEntity(BooksRevisionListener.class).
+-- La columna username ya fue agregada en V1 del módulo IAM.

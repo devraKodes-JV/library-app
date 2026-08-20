@@ -70,6 +70,6 @@
 {% endblock %}
 
 {% block scripts %}
-<script src="/js/iam.js"></script>
+<script src="/js/iam.js" nonce="{{ securityNonce }}"></script>
 <script src="/js/books.js" nonce="{{ securityNonce }}"></script>
 {% endblock %}

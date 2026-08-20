@@ -26,7 +26,7 @@ public class HibernateBookFormatRepository extends AbstractHibernateRepository i
     public Optional<BookFormatEntity> findByCode(String code) {
         try (Session session = sessionFactory.openSession()) {
             BookFormatEntity format = session.createQuery(
-                    "select f from BookFormatEntity f where f.code = :code and f.deletedAt is null and f.enabled = true",
+                    "select f from BookFormatEntity f where f.code = :code and f.deletedAt is null",
                     BookFormatEntity.class)
                     .setParameter("code", code)
                     .uniqueResult();
@@ -38,7 +38,7 @@ public class HibernateBookFormatRepository extends AbstractHibernateRepository i
     public Optional<BookFormatEntity> findById(Long id) {
         try (Session session = sessionFactory.openSession()) {
             BookFormatEntity format = session.createQuery(
-                    "select f from BookFormatEntity f where f.id = :id and f.deletedAt is null and f.enabled = true",
+                    "select f from BookFormatEntity f where f.id = :id and f.deletedAt is null",
                     BookFormatEntity.class)
                     .setParameter("id", id)
                     .uniqueResult();
@@ -50,7 +50,7 @@ public class HibernateBookFormatRepository extends AbstractHibernateRepository i
     public List<BookFormatEntity> findAll() {
         try (Session session = sessionFactory.openSession()) {
             return session.createQuery(
-                    "select f from BookFormatEntity f where f.deletedAt is null and f.enabled = true order by f.name",
+                    "select f from BookFormatEntity f where f.deletedAt is null order by f.name",
                     BookFormatEntity.class)
                     .getResultList();
         }
@@ -69,11 +69,14 @@ public class HibernateBookFormatRepository extends AbstractHibernateRepository i
 
     @Override
     public void deleteById(Long id) {
-        consumeWithSession(session -> session.createMutationQuery(
-                "update BookFormatEntity f set f.deletedAt = :now, f.enabled = false where f.id = :id and f.deletedAt is null and f.enabled = true")
-                .setParameter("now", java.time.Instant.now())
-                .setParameter("id", id)
-                .executeUpdate());
+        executeWithSession(session -> {
+            BookFormatEntity entity = session.get(BookFormatEntity.class, id);
+            if (entity != null) {
+                entity.markDeleted();
+                session.merge(entity);
+            }
+            return null;
+        });
     }
 
     @Override
@@ -83,7 +86,7 @@ public class HibernateBookFormatRepository extends AbstractHibernateRepository i
         }
         try (Session session = sessionFactory.openSession()) {
             List<BookFormatEntity> results = session.createQuery(
-                    "select f from BookFormatEntity f where f.id in :ids and f.deletedAt is null and f.enabled = true",
+                    "select f from BookFormatEntity f where f.id in :ids and f.deletedAt is null",
                     BookFormatEntity.class)
                     .setParameter("ids", ids)
                     .getResultList();
@@ -96,7 +99,7 @@ public class HibernateBookFormatRepository extends AbstractHibernateRepository i
     public Optional<BookFormat> findDetailById(Long id) {
         try (Session session = sessionFactory.openSession()) {
             BookFormatEntity formatEntity = session.createQuery(
-                    "select f from BookFormatEntity f where f.id = :id and f.deletedAt is null and f.enabled = true",
+                    "select f from BookFormatEntity f where f.id = :id and f.deletedAt is null",
                     BookFormatEntity.class)
                     .setParameter("id", id)
                     .uniqueResult();
@@ -112,7 +115,7 @@ public class HibernateBookFormatRepository extends AbstractHibernateRepository i
     public List<Edition> findEditionsByFormatId(Long formatId) {
         try (Session session = sessionFactory.openSession()) {
             List<EditionEntity> editionEntities = session.createQuery(
-                    "select e from EditionEntity e where e.formatId = :formatId and e.deletedAt is null and e.enabled = true order by e.editionNumber",
+                    "select e from EditionEntity e where e.formatId = :formatId and e.deletedAt is null order by e.editionNumber",
                     EditionEntity.class)
                     .setParameter("formatId", formatId)
                     .getResultList();
