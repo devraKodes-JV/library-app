@@ -53,6 +53,17 @@ public class HibernateLanguageRepository extends AbstractHibernateRepository imp
                     .getResultList();
         }
     }
+    @Override
+    public List<LanguageEntity> findAll(String status) {
+        try (Session session = sessionFactory.openSession()) {
+            String hql = "select l from LanguageEntity l";
+            if ("active".equals(status)) hql += " where l.deletedAt is null";
+            else if ("inactive".equals(status)) hql += " where l.deletedAt is not null";
+            hql += " order by l.name";
+            return session.createQuery(hql, LanguageEntity.class).getResultList();
+        }
+    }
+
 
     @Override
     public LanguageEntity save(LanguageEntity entity) {
@@ -121,4 +132,32 @@ public class HibernateLanguageRepository extends AbstractHibernateRepository imp
                     .toList();
         }
     }
+
+    @Override
+    public void softDeleteEditionsByLanguageId(Long languageId) {
+        consumeWithSession(session -> session.createMutationQuery(
+                        "update EditionEntity e set e.deletedAt = :now, e.enabled = false where e.languageId = :languageId and e.deletedAt is null and e.enabled = true")
+                .setParameter("now", java.time.Instant.now())
+                .setParameter("languageId", languageId)
+                .executeUpdate());
+    }
+
+
+    @Override
+    public void reactivateById(Long id) {
+        consumeWithSession(session -> session.createMutationQuery(
+                        "update LanguageEntity l set l.deletedAt = null, l.enabled = true where l.id = :id and l.deletedAt is not null")
+                .setParameter("id", id)
+                .executeUpdate());
+    }
+
+
+    @Override
+    public void reactivateEditionsByLanguageId(Long languageId) {
+        consumeWithSession(session -> session.createMutationQuery(
+                        "update EditionEntity e set e.deletedAt = null, e.enabled = true where e.languageId = :languageId and e.deletedAt is not null")
+                .setParameter("languageId", languageId)
+                .executeUpdate());
+    }
+
 }

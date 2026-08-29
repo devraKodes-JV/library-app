@@ -16,7 +16,13 @@ public class ListCategoriesUseCase {
     }
 
     public List<CategoryResponseDTO> execute() {
-        return categoryRepository.findAll().stream()
+        return categoryRepository.findAll("active").stream()
+                .map(CategoryResponseDTO::of)
+                .toList();
+    }
+
+    public List<CategoryResponseDTO> execute(String status) {
+        return categoryRepository.findAll(status).stream()
                 .map(CategoryResponseDTO::of)
                 .toList();
     }

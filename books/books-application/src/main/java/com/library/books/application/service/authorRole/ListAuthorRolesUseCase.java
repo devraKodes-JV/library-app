@@ -14,7 +14,13 @@ public class ListAuthorRolesUseCase {
     }
 
     public List<AuthorRoleResponseDTO> execute() {
-        return authorRoleRepository.findAll().stream()
+        return authorRoleRepository.findAll("active").stream()
+                .map(AuthorRoleResponseDTO::of)
+                .toList();
+    }
+
+    public List<AuthorRoleResponseDTO> execute(String status) {
+        return authorRoleRepository.findAll(status).stream()
                 .map(AuthorRoleResponseDTO::of)
                 .toList();
     }

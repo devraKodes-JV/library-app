@@ -16,7 +16,13 @@ public class ListLanguagesUseCase {
     }
 
     public List<LanguageResponseDTO> execute() {
-        return languageRepository.findAll().stream()
+        return languageRepository.findAll("active").stream()
+                .map(LanguageResponseDTO::of)
+                .toList();
+    }
+
+    public List<LanguageResponseDTO> execute(String status) {
+        return languageRepository.findAll(status).stream()
                 .map(LanguageResponseDTO::of)
                 .toList();
     }

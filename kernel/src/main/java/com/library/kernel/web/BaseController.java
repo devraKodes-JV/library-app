@@ -40,6 +40,10 @@ public abstract class BaseController {
         WebHelper.flashWarning(ctx, message);
     }
 
+    protected void flashDanger(Context ctx, String message) {
+        WebHelper.flashDanger(ctx, message);
+    }
+
     protected Map<String, Object> baseModel(Context ctx, Map<String, Object> extra) {
         var user = currentUser(ctx);
         List<?> sections = navSections(ctx);

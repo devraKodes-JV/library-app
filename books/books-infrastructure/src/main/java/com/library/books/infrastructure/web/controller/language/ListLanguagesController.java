@@ -22,9 +22,11 @@ public class ListLanguagesController extends BaseController {
 
     public void listLanguages(Context ctx) {
         requireCan(ctx, "languages.read");
-        List<LanguageResponseDTO> languages = listLanguagesUseCase.execute();
+        String status = ctx.queryParamAsClass("status", String.class).getOrDefault("active");
+        List<LanguageResponseDTO> languages = listLanguagesUseCase.execute(status);
         ctx.render("books/languages/list", buildListModel(ctx, Map.of(
-                "languages", languages)));
+                "languages", languages,
+                "status", status)));
     }
 
     private Map<String, Object> buildListModel(Context ctx, Map<String, Object> extra) {
@@ -36,6 +38,7 @@ public class ListLanguagesController extends BaseController {
         model.put("canCreate", hasPermission(ctx, "languages.create"));
         model.put("canUpdate", hasPermission(ctx, "languages.update"));
         model.put("canDelete", hasPermission(ctx, "languages.delete"));
+        model.put("canReactivate", hasPermission(ctx, "languages.reactivate"));
         model.putAll(extra);
         return model;
     }

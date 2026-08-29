@@ -30,6 +30,10 @@ class FakePublisherRepository implements PublisherRepository {
     public List<Publisher> findAll() {
         return new ArrayList<>(store.values());
     }
+    @Override
+    public List<Publisher> findAll(String status) {
+        return new ArrayList<>(store.values());
+    }
 
     @Override
     public Publisher save(Publisher publisher) {
@@ -59,4 +63,13 @@ class FakePublisherRepository implements PublisherRepository {
         }
         return result;
     }
+    @Override
+    public void softDeleteEditionsByPublisherId(Long publisherId) {}
+
+
+    @Override
+    public void reactivateById(Long id) {}
+
+    @Override
+    public void reactivateEditionsByPublisherId(Long publisherId) {}
 }

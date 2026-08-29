@@ -35,6 +35,13 @@ public class WorkPersistenceAdapter implements WorkRepository {
     }
 
     @Override
+    public List<com.library.books.domain.model.Work> findAll(String status) {
+        return workJpaRepository.findAll(status).stream()
+                .map(WorkMapper::toDomain)
+                .toList();
+    }
+
+    @Override
     public List<Work> findByCategoryId(Long categoryId) {
         return workJpaRepository.findByCategoryId(categoryId).stream()
                 .map(WorkMapper::toDomain)
@@ -65,6 +72,39 @@ public class WorkPersistenceAdapter implements WorkRepository {
     @Override
     public void deleteById(Long id) {
         workJpaRepository.deleteById(id);
+    }
+
+    @Override
+    public void reactivateById(Long id) {
+        hibernateWorkRepository.reactivateById(id);
+    }
+    @Override
+    public void softDeleteEditionsByWorkIds(List<Long> workIds) {
+        hibernateWorkRepository.softDeleteEditionsByWorkIds(workIds);
+    }
+
+    @Override
+    public void softDeleteWorksByIds(List<Long> ids) {
+        hibernateWorkRepository.softDeleteWorksByIds(ids);
+    }
+
+    @Override
+    public void reactivateEditionsByWorkId(Long workId) {
+        hibernateWorkRepository.reactivateEditionsByWorkId(workId);
+    }
+    @Override
+    public long countActiveAuthorsByWorkId(Long workId) {
+        return hibernateWorkRepository.countActiveAuthorsByWorkId(workId);
+    }
+
+    @Override
+    public List<Long> findAuthorIdsByWorkId(Long workId) {
+        return hibernateWorkRepository.findAuthorIdsByWorkId(workId);
+    }
+
+    @Override
+    public List<Long> findWorkIdsByCategoryId(Long categoryId) {
+        return hibernateWorkRepository.findWorkIdsByCategoryId(categoryId);
     }
 
     @Override

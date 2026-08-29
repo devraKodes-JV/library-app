@@ -16,7 +16,11 @@ public class ListEditionsUseCase {
     }
 
     public List<EditionResponseDTO> execute() {
-        return editionRepository.findAll().stream()
+        return execute("active");
+    }
+
+    public List<EditionResponseDTO> execute(String status) {
+        return editionRepository.findAll(status).stream()
                 .map(EditionResponseDTO::of)
                 .toList();
     }

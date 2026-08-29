@@ -50,4 +50,22 @@ class FakeEditionAuthorRepository implements EditionAuthorRepository {
         EditionAuthor ea = new EditionAuthor(null, editionId, authorId, authorRoleId, null, null);
         save(ea);
     }
+    @Override
+    public void softDeleteByAuthorId(Long authorId) {}
+
+    @Override
+    public void softDeleteByEditionId(Long editionId) {}
+
+    @Override
+    public void softDeleteByEditionIds(List<Long> editionIds) {}
+
+    @Override
+    public List<Long> findEditionIdsByAuthorId(Long authorId) { return List.of(); }
+
+
+    @Override
+    public void reactivateByAuthorId(Long authorId) {}
+
+    @Override
+    public void reactivateByEditionId(Long editionId) {}
 }

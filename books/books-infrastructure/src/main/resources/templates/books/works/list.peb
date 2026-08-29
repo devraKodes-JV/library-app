@@ -16,6 +16,12 @@
     {% endif %}
 </div>
 
+<div class="d-flex gap-2 mb-3">
+    <a href="?status=active" class="btn btn-sm {% if status == 'active' %}btn-primary{% else %}btn-outline-secondary{% endif %}">Active</a>
+    <a href="?status=inactive" class="btn btn-sm {% if status == 'inactive' %}btn-primary{% else %}btn-outline-secondary{% endif %}">Inactive</a>
+    <a href="?status=all" class="btn btn-sm {% if status == 'all' %}btn-primary{% else %}btn-outline-secondary{% endif %}">All</a>
+</div>
+
 <div class="mt-3">
     <input type="text" id="workSearch" class="form-control bg-dark border-secondary text-light mb-3" placeholder="Search works by title, language or category...">
     <div id="worksGrid" class="row g-3">
@@ -46,6 +52,14 @@
                     <a href="/books/works/{{ work.id }}/edit" class="btn btn-sm btn-outline-secondary" aria-label="Edit {{ work.title }}">
                         <i class="bi bi-pencil"></i> Edit
                     </a>
+                    {% endif %}
+                    {% if status == 'inactive' and canReactivate %}
+                    <form method="post" action="/books/works/{{ work.id }}/reactivate" class="d-inline reactivate-form">
+                        {{ csrf.token(csrfToken) }}
+                        <button type="submit" class="btn btn-sm btn-outline-success" aria-label="Reactivate">
+                            <i class="bi bi-arrow-counterclockwise"></i> Reactivate
+                        </button>
+                    </form>
                     {% endif %}
                     {% if canDelete %}
                     <form method="post" action="/books/works/{{ work.id }}/delete" class="d-inline delete-form"

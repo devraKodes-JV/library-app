@@ -32,6 +32,13 @@ public class BookFormatPersistenceAdapter implements BookFormatRepository {
     }
 
     @Override
+    public List<com.library.books.domain.model.BookFormat> findAll(String status) {
+        return bookFormatJpaRepository.findAll(status).stream()
+                .map(BookFormatMapper::toDomain)
+                .toList();
+    }
+
+    @Override
     public Optional<BookFormat> findByCode(String code) {
         return bookFormatJpaRepository.findByCode(code)
                 .map(BookFormatMapper::toDomain);
@@ -49,6 +56,19 @@ public class BookFormatPersistenceAdapter implements BookFormatRepository {
         bookFormatJpaRepository.deleteById(id);
     }
 
+    @Override
+    public void reactivateById(Long id) {
+        bookFormatJpaRepository.reactivateById(id);
+    }
+    @Override
+    public void softDeleteEditionsByFormatId(Long formatId) {
+        bookFormatJpaRepository.softDeleteEditionsByFormatId(formatId);
+    }
+
+    @Override
+    public void reactivateEditionsByFormatId(Long formatId) {
+        bookFormatJpaRepository.reactivateEditionsByFormatId(formatId);
+    }
     @Override
     public Map<Long, String> findNamesByIds(List<Long> ids) {
         return bookFormatJpaRepository.findNamesByIds(ids);

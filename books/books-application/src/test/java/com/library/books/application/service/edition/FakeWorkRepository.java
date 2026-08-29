@@ -9,7 +9,7 @@ import java.util.Optional;
 import com.library.books.domain.model.Work;
 import com.library.books.domain.port.out.WorkRepository;
 
-class FakeWorkRepository implements WorkRepository {
+public class FakeWorkRepository implements WorkRepository {
 
     private final Map<Long, Work> store = new LinkedHashMap<>();
     private long nextId = 1L;
@@ -21,6 +21,10 @@ class FakeWorkRepository implements WorkRepository {
 
     @Override
     public List<Work> findAll() {
+        return new ArrayList<>(store.values());
+    }
+    @Override
+    public List<Work> findAll(String status) {
         return new ArrayList<>(store.values());
     }
 
@@ -88,4 +92,20 @@ class FakeWorkRepository implements WorkRepository {
     @Override
     public void nullifyCategory(Long categoryId) {
     }
+    @Override
+    public void softDeleteEditionsByWorkIds(List<Long> workIds) {}
+    @Override
+    public void softDeleteWorksByIds(List<Long> ids) {}
+    @Override
+    public long countActiveAuthorsByWorkId(Long workId) { return 0; }
+    @Override
+    public List<Long> findAuthorIdsByWorkId(Long workId) { return List.of(); }
+    @Override
+    public List<Long> findWorkIdsByCategoryId(Long categoryId) { return List.of(); }
+
+    @Override
+    public void reactivateById(Long id) {}
+
+    @Override
+    public void reactivateEditionsByWorkId(Long workId) {}
 }

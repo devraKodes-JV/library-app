@@ -9,4 +9,11 @@ import com.library.kernel.jpa.CrudRepository;
 public interface AuthorRoleJpaRepository<T, ID> extends CrudRepository<T, ID> {
     Optional<AuthorRoleEntity> findByCode(String code);
     Optional<AuthorRoleEntity> findByName(String name);
+    void softDeleteWorkAuthorsByRoleId(Long roleId);
+    void softDeleteEditionAuthorsByRoleId(Long roleId);
+    void reactivateById(Long id);
+    void reactivateWorkAuthorsByRoleId(Long roleId);
+    void reactivateEditionAuthorsByRoleId(Long roleId);
+    List<T> findAll(String status);
+
 }

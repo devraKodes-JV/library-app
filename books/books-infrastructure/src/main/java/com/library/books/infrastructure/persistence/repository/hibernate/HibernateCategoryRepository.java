@@ -53,6 +53,17 @@ public class HibernateCategoryRepository extends AbstractHibernateRepository imp
                     .getResultList();
         }
     }
+    @Override
+    public List<CategoryEntity> findAll(String status) {
+        try (Session session = sessionFactory.openSession()) {
+            String hql = "select c from CategoryEntity c";
+            if ("active".equals(status)) hql += " where c.deletedAt is null";
+            else if ("inactive".equals(status)) hql += " where c.deletedAt is not null";
+            hql += " order by c.name";
+            return session.createQuery(hql, CategoryEntity.class).getResultList();
+        }
+    }
+
 
     @Override
     public CategoryEntity save(CategoryEntity entity) {
@@ -130,4 +141,44 @@ public class HibernateCategoryRepository extends AbstractHibernateRepository imp
                 .setParameter("parentId", parentId)
                 .executeUpdate());
     }
+
+    @Override
+    public List<Long> findWorkIdsByCategoryId(Long categoryId) {
+        try (Session session = sessionFactory.openSession()) {
+            return session.createQuery(
+                            "select w.id from WorkEntity w where w.categoryId = :categoryId and w.deletedAt is null",
+                            Long.class)
+                    .setParameter("categoryId", categoryId)
+                    .getResultList();
+        }
+    }
+
+
+    @Override
+    public void reactivateById(Long id) {
+        consumeWithSession(session -> session.createMutationQuery(
+                        "update CategoryEntity c set c.deletedAt = null, c.enabled = true where c.id = :id and c.deletedAt is not null")
+                .setParameter("id", id)
+                .executeUpdate());
+    }
+
+
+    @Override
+    public void reactivateWorksByCategoryId(Long categoryId) {
+        List<Long> workIds = findWorkIdsByCategoryId(categoryId);
+        for (Long workId : workIds) {
+            Long activeAuthors = sessionFactory.openSession().createQuery(
+                            "select count(wa) from WorkAuthorEntity wa where wa.workId = :workId and wa.deletedAt is null and wa.enabled = true",
+                            Long.class)
+                    .setParameter("workId", workId)
+                    .uniqueResult();
+            if (activeAuthors != null && activeAuthors > 0) {
+                consumeWithSession(session -> session.createMutationQuery(
+                                "update WorkEntity w set w.deletedAt = null, w.enabled = true where w.id = :id and w.deletedAt is not null")
+                        .setParameter("id", workId)
+                        .executeUpdate());
+            }
+        }
+    }
+
 }

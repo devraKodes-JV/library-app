@@ -16,6 +16,12 @@
     {% endif %}
 </div>
 
+<div class="d-flex gap-2 mb-3">
+    <a href="?status=active" class="btn btn-sm {% if status == 'active' %}btn-primary{% else %}btn-outline-secondary{% endif %}">Active</a>
+    <a href="?status=inactive" class="btn btn-sm {% if status == 'inactive' %}btn-primary{% else %}btn-outline-secondary{% endif %}">Inactive</a>
+    <a href="?status=all" class="btn btn-sm {% if status == 'all' %}btn-primary{% else %}btn-outline-secondary{% endif %}">All</a>
+</div>
+
 {% if formats is empty %}
 <div class="alert alert-info bg-dark border-secondary text-light">No formats found.</div>
 {% else %}
@@ -48,7 +54,15 @@
                             <i class="bi bi-pencil"></i>
                         </a>
                         {% endif %}
-                        {% if canDelete %}
+                        {% if status == 'inactive' and canReactivate %}
+                        <form method="post" action="/books/formats/{{ fmt.id }}/reactivate" class="d-inline reactivate-form">
+                            {{ csrf.token(csrfToken) }}
+                            <button type="submit" class="btn btn-sm btn-outline-success" title="Reactivate">
+                                <i class="bi bi-arrow-counterclockwise"></i>
+                            </button>
+                        </form>
+                    {% endif %}
+                    {% if canDelete %}
                         <form method="post" action="/books/formats/{{ fmt.id }}/delete" class="d-inline delete-form"
                               data-confirm-title="Delete Format"
                               data-confirm-message="Delete format <strong>{{ fmt.name }}</strong>? This action can be undone.">

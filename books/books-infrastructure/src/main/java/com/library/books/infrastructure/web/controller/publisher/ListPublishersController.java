@@ -22,9 +22,11 @@ public class ListPublishersController extends BaseController {
 
     public void listPublishers(Context ctx) {
         requireCan(ctx, "publishers.read");
-        List<PublisherResponseDTO> publishers = listPublishersUseCase.execute();
+        String status = ctx.queryParamAsClass("status", String.class).getOrDefault("active");
+        List<PublisherResponseDTO> publishers = listPublishersUseCase.execute(status);
         ctx.render("books/publishers/list", buildListModel(ctx, Map.of(
-                "publishers", publishers)));
+                "publishers", publishers,
+                "status", status)));
     }
 
     private Map<String, Object> buildListModel(Context ctx, Map<String, Object> extra) {
@@ -36,6 +38,7 @@ public class ListPublishersController extends BaseController {
         model.put("canCreate", hasPermission(ctx, "publishers.create"));
         model.put("canUpdate", hasPermission(ctx, "publishers.update"));
         model.put("canDelete", hasPermission(ctx, "publishers.delete"));
+        model.put("canReactivate", hasPermission(ctx, "publishers.reactivate"));
         model.putAll(extra);
         return model;
     }

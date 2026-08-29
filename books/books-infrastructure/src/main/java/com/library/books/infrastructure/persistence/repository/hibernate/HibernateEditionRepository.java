@@ -20,6 +20,18 @@ public class HibernateEditionRepository extends AbstractHibernateRepository impl
     }
 
     @Override
+    public Optional<Edition> findByIdIncludingDeleted(Long id) {
+        try (Session session = sessionFactory.openSession()) {
+            EditionEntity edition = session.createQuery(
+                    "select e from EditionEntity e where e.id = :id",
+                    EditionEntity.class)
+                    .setParameter("id", id)
+                    .uniqueResult();
+            return Optional.ofNullable(edition).map(EditionMapper::toDomain);
+        }
+    }
+
+    @Override
     public Optional<EditionEntity> findById(Long id) {
         try (Session session = sessionFactory.openSession()) {
             EditionEntity edition = session.createQuery(
@@ -40,6 +52,17 @@ public class HibernateEditionRepository extends AbstractHibernateRepository impl
                     .getResultList();
         }
     }
+    @Override
+    public List<EditionEntity> findAll(String status) {
+        try (Session session = sessionFactory.openSession()) {
+            String hql = "select e from EditionEntity e";
+            if ("active".equals(status)) hql += " where e.deletedAt is null";
+            else if ("inactive".equals(status)) hql += " where e.deletedAt is not null";
+            hql += " order by e.workId, e.editionNumber";
+            return session.createQuery(hql, EditionEntity.class).getResultList();
+        }
+    }
+
 
     @Override
     public List<EditionEntity> findByWorkId(Long workId) {
@@ -239,4 +262,45 @@ public class HibernateEditionRepository extends AbstractHibernateRepository impl
             return count != null ? count : 0;
         }
     }
+
+    @Override
+    public void softDeleteEditionsByIds(List<Long> ids) {
+        if (ids == null || ids.isEmpty()) {
+            return;
+        }
+        consumeWithSession(session -> session.createMutationQuery(
+                        "update EditionEntity e set e.deletedAt = :now, e.enabled = false where e.id in :ids and e.deletedAt is null and e.enabled = true")
+                .setParameter("now", java.time.Instant.now())
+                .setParameter("ids", ids)
+                .executeUpdate());
+    }
+
+
+    @Override
+    public void softDeleteEditionAuthorsByEditionId(Long editionId) {
+        consumeWithSession(session -> session.createMutationQuery(
+                        "update EditionAuthorEntity e set e.deletedAt = :now, e.enabled = false where e.editionId = :editionId and e.deletedAt is null and e.enabled = true")
+                .setParameter("now", java.time.Instant.now())
+                .setParameter("editionId", editionId)
+                .executeUpdate());
+    }
+
+
+    @Override
+    public void reactivateById(Long id) {
+        consumeWithSession(session -> session.createMutationQuery(
+                        "update EditionEntity e set e.deletedAt = null, e.enabled = true where e.id = :id and e.deletedAt is not null")
+                .setParameter("id", id)
+                .executeUpdate());
+    }
+
+
+    @Override
+    public void reactivateEditionAuthorsByEditionId(Long editionId) {
+        consumeWithSession(session -> session.createMutationQuery(
+                        "update EditionAuthorEntity e set e.deletedAt = null, e.enabled = true where e.editionId = :editionId and e.deletedAt is not null")
+                .setParameter("editionId", editionId)
+                .executeUpdate());
+    }
+
 }

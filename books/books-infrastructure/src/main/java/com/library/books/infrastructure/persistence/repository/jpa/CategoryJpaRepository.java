@@ -1,5 +1,7 @@
 package com.library.books.infrastructure.persistence.repository.jpa;
 
+import java.util.List;
+
 import com.library.books.domain.model.Category;
 import com.library.books.domain.model.Work;
 import com.library.kernel.jpa.CrudRepository;
@@ -9,4 +11,9 @@ public interface CategoryJpaRepository<T, ID> extends CrudRepository<T, ID>, Fin
     java.util.Map<Long, String> findNamesByIds(java.util.List<Long> ids);
     java.util.Optional<Category> findDetailById(Long id);
     java.util.List<Work> findRelatedWorks(Long categoryId);
+    List<Long> findWorkIdsByCategoryId(Long categoryId);
+    void reactivateById(Long id);
+    void reactivateWorksByCategoryId(Long categoryId);
+    List<T> findAll(String status);
+
 }

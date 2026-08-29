@@ -125,4 +125,67 @@ public class HibernateEditionAuthorRepository extends AbstractHibernateRepositor
             return null;
         });
     }
+
+    @Override
+    public void softDeleteByAuthorId(Long authorId) {
+        consumeWithSession(session -> session.createMutationQuery(
+                        "update EditionAuthorEntity e set e.deletedAt = :now, e.enabled = false where e.authorId = :authorId and e.deletedAt is null and e.enabled = true")
+                .setParameter("now", java.time.Instant.now())
+                .setParameter("authorId", authorId)
+                .executeUpdate());
+    }
+
+
+    @Override
+    public void softDeleteByEditionId(Long editionId) {
+        consumeWithSession(session -> session.createMutationQuery(
+                        "update EditionAuthorEntity e set e.deletedAt = :now, e.enabled = false where e.editionId = :editionId and e.deletedAt is null and e.enabled = true")
+                .setParameter("now", java.time.Instant.now())
+                .setParameter("editionId", editionId)
+                .executeUpdate());
+    }
+
+
+    @Override
+    public void softDeleteByEditionIds(List<Long> editionIds) {
+        if (editionIds == null || editionIds.isEmpty()) {
+            return;
+        }
+        consumeWithSession(session -> session.createMutationQuery(
+                        "update EditionAuthorEntity e set e.deletedAt = :now, e.enabled = false where e.editionId in :ids and e.deletedAt is null and e.enabled = true")
+                .setParameter("now", java.time.Instant.now())
+                .setParameter("ids", editionIds)
+                .executeUpdate());
+    }
+
+
+    @Override
+    public List<Long> findEditionIdsByAuthorId(Long authorId) {
+        try (Session session = sessionFactory.openSession()) {
+            return session.createQuery(
+                            "select distinct ea.editionId from EditionAuthorEntity ea where ea.authorId = :authorId and ea.deletedAt is null",
+                            Long.class)
+                    .setParameter("authorId", authorId)
+                    .getResultList();
+        }
+    }
+
+
+    @Override
+    public void reactivateByAuthorId(Long authorId) {
+        consumeWithSession(session -> session.createMutationQuery(
+                        "update EditionAuthorEntity e set e.deletedAt = null, e.enabled = true where e.authorId = :authorId and e.deletedAt is not null")
+                .setParameter("authorId", authorId)
+                .executeUpdate());
+    }
+
+
+    @Override
+    public void reactivateByEditionId(Long editionId) {
+        consumeWithSession(session -> session.createMutationQuery(
+                        "update EditionAuthorEntity e set e.deletedAt = null, e.enabled = true where e.editionId = :editionId and e.deletedAt is not null")
+                .setParameter("editionId", editionId)
+                .executeUpdate());
+    }
+
 }

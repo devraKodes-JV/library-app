@@ -20,13 +20,13 @@ public class EditionAuthorEntity extends AuditableEntity implements Serializable
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "edition_id", nullable = false, insertable = false, updatable = false)
+    @Column(name = "edition_id", nullable = false)
     private Long editionId;
 
-    @Column(name = "author_id", nullable = false, insertable = false, updatable = false)
+    @Column(name = "author_id", nullable = false)
     private Long authorId;
 
-    @Column(name = "author_role_id", nullable = false, insertable = false, updatable = false)
+    @Column(name = "author_role_id", nullable = false)
     private Long authorRoleId;
 
     @Column(nullable = false)

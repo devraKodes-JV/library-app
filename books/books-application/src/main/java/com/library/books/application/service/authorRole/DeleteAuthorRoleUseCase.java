@@ -15,6 +15,8 @@ public class DeleteAuthorRoleUseCase {
     public void execute(Long id) {
         AuthorRole existing = authorRoleRepository.findById(id)
                 .orElseThrow(() -> new AuthorRoleNotFoundException(id));
+        authorRoleRepository.softDeleteWorkAuthorsByRoleId(id);
+        authorRoleRepository.softDeleteEditionAuthorsByRoleId(id);
         authorRoleRepository.deleteById(id);
     }
 }

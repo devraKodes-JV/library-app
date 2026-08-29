@@ -21,13 +21,7 @@ public class DeletePublisherUseCase {
         Publisher existing = publisherRepository.findById(command.id())
                 .orElseThrow(() -> new PublisherNotFoundException(command.id()));
 
-        long activeEditions = editionRepository.countActiveByPublisherId(command.id());
-        if (activeEditions > 0) {
-            throw new ValidationException(java.util.Map.of(
-                    "publisherId", "Cannot delete this publisher because it has active editions. Delete the editions first."
-            ));
-        }
-
+        publisherRepository.softDeleteEditionsByPublisherId(command.id());
         publisherRepository.deleteById(command.id());
     }
 }

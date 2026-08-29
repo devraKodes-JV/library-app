@@ -56,4 +56,32 @@ public class EditionAuthorPersistenceAdapter implements EditionAuthorRepository 
     public void saveEditionAuthor(Long editionId, Long authorId, Long authorRoleId) {
         editionAuthorRepository.saveEditionAuthor(editionId, authorId, authorRoleId);
     }
+
+    @Override
+    public void softDeleteByAuthorId(Long authorId) {
+        editionAuthorRepository.softDeleteByAuthorId(authorId);
+    }
+
+    @Override
+    public void reactivateByAuthorId(Long authorId) {
+        editionAuthorRepository.reactivateByAuthorId(authorId);
+    }
+    @Override
+    public void softDeleteByEditionId(Long editionId) {
+        editionAuthorRepository.softDeleteByEditionId(editionId);
+    }
+
+    @Override
+    public void softDeleteByEditionIds(List<Long> editionIds) {
+        editionAuthorRepository.softDeleteByEditionIds(editionIds);
+    }
+
+    @Override
+    public void reactivateByEditionId(Long editionId) {
+        editionAuthorRepository.reactivateByEditionId(editionId);
+    }
+    @Override
+    public List<Long> findEditionIdsByAuthorId(Long authorId) {
+        return editionAuthorRepository.findEditionIdsByAuthorId(authorId);
+    }
 }

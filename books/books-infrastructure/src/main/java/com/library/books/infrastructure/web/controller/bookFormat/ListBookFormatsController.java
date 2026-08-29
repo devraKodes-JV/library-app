@@ -24,9 +24,11 @@ public class ListBookFormatsController extends BaseController {
 
     public void listFormats(Context ctx) {
         requireCan(ctx, "formats.read");
-        List<BookFormatResponseDTO> formats = listBookFormatsUseCase.execute();
+        String status = ctx.queryParamAsClass("status", String.class).getOrDefault("active");
+        List<BookFormatResponseDTO> formats = listBookFormatsUseCase.execute(status);
         ctx.render("books/formats/list", buildListModel(ctx, Map.of(
-                "formats", formats)));
+                "formats", formats,
+                "status", status)));
     }
 
     private Map<String, Object> buildListModel(Context ctx, Map<String, Object> extra) {
@@ -38,6 +40,7 @@ public class ListBookFormatsController extends BaseController {
         model.put("canCreate", hasPermission(ctx, "formats.create"));
         model.put("canUpdate", hasPermission(ctx, "formats.update"));
         model.put("canDelete", hasPermission(ctx, "formats.delete"));
+        model.put("canReactivate", hasPermission(ctx, "formats.reactivate"));
         model.putAll(extra);
         return model;
     }

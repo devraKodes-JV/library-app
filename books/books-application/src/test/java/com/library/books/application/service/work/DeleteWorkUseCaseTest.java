@@ -29,7 +29,7 @@ class DeleteWorkUseCaseTest {
     }
 
     @Test
-    void deleteWork_throwsWhenHasActiveEditions() {
+    void deleteWork_cascadesToEditions() {
         FakeWorkRepository workRepository = new FakeWorkRepository();
         FakeEditionRepository editionRepository = new FakeEditionRepository();
         DeleteWorkUseCase useCase = new DeleteWorkUseCase(workRepository, editionRepository);
@@ -38,10 +38,9 @@ class DeleteWorkUseCaseTest {
         Edition edition = Edition.withoutId(saved.getId(), null, null, null, "ISBN", 100, 2020, "1st");
         editionRepository.save(edition);
 
-        ValidationException ex = assertThrows(ValidationException.class,
-                () -> useCase.execute(new DeleteWorkCommand(saved.getId())));
-        assertEquals("Cannot delete this work because it has active editions. Delete the editions first.",
-                ex.getFieldErrors().get("workId"));
+        useCase.execute(new DeleteWorkCommand(saved.getId()));
+
+        assertTrue(workRepository.findById(saved.getId()).isEmpty());
     }
 
     @Test

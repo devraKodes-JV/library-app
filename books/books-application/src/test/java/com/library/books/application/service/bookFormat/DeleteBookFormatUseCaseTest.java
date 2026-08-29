@@ -29,7 +29,7 @@ class DeleteBookFormatUseCaseTest {
     }
 
     @Test
-    void deleteBookFormat_throwsWhenHasActiveEditions() {
+    void deleteBookFormat_cascadesToEditions() {
         FakeBookFormatRepository bookFormatRepository = new FakeBookFormatRepository();
         FakeEditionRepository editionRepository = new FakeEditionRepository();
         DeleteBookFormatUseCase useCase = new DeleteBookFormatUseCase(bookFormatRepository, editionRepository);
@@ -38,10 +38,9 @@ class DeleteBookFormatUseCaseTest {
         Edition edition = Edition.withoutId(null, null, saved.getId(), null, "ISBN", 100, 2020, "1st");
         editionRepository.save(edition);
 
-        ValidationException ex = assertThrows(ValidationException.class,
-                () -> useCase.execute(new DeleteBookFormatCommand(saved.getId())));
-        assertEquals("Cannot delete this format because it has active editions. Delete the editions first.",
-                ex.getFieldErrors().get("formatId"));
+        useCase.execute(new DeleteBookFormatCommand(saved.getId()));
+
+        assertTrue(bookFormatRepository.findById(saved.getId()).isEmpty());
     }
 
     @Test

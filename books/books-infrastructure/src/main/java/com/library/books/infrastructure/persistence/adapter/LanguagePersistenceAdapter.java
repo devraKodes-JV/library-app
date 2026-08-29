@@ -32,6 +32,13 @@ public class LanguagePersistenceAdapter implements LanguageRepository {
     }
 
     @Override
+    public List<com.library.books.domain.model.Language> findAll(String status) {
+        return languageJpaRepository.findAll(status).stream()
+                .map(LanguageMapper::toDomain)
+                .toList();
+    }
+
+    @Override
     public Optional<Language> findByCode(String code) {
         return languageJpaRepository.findByCode(code)
                 .map(LanguageMapper::toDomain);
@@ -49,6 +56,19 @@ public class LanguagePersistenceAdapter implements LanguageRepository {
         languageJpaRepository.deleteById(id);
     }
 
+    @Override
+    public void reactivateById(Long id) {
+        languageJpaRepository.reactivateById(id);
+    }
+    @Override
+    public void softDeleteEditionsByLanguageId(Long languageId) {
+        languageJpaRepository.softDeleteEditionsByLanguageId(languageId);
+    }
+
+    @Override
+    public void reactivateEditionsByLanguageId(Long languageId) {
+        languageJpaRepository.reactivateEditionsByLanguageId(languageId);
+    }
     @Override
     public Map<Long, String> findNamesByIds(List<Long> ids) {
         return languageJpaRepository.findNamesByIds(ids);

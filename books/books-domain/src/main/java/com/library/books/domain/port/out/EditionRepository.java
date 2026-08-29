@@ -8,8 +8,10 @@ import com.library.books.domain.model.EditionAuthor;
 import com.library.books.domain.dto.response.edition.EditionWithNamesDTO;
 
 public interface EditionRepository {
+    Optional<Edition> findByIdIncludingDeleted(Long id);
     Optional<Edition> findById(Long id);
     List<Edition> findAll();
+    List<Edition> findAll(String status);
     List<Edition> findByWorkId(Long workId);
     List<Edition> findByPublisherId(Long publisherId);
     List<Edition> findByFormatId(Long formatId);
@@ -21,4 +23,8 @@ public interface EditionRepository {
     long countActiveByLanguageId(Long languageId);
     List<EditionWithNamesDTO> findByWorkIdWithDetails(Long workId);
     List<EditionAuthor> findEditionAuthorsByEditionId(Long editionId);
+    void softDeleteEditionsByIds(List<Long> ids);
+    void softDeleteEditionAuthorsByEditionId(Long editionId);
+    void reactivateById(Long id);
+    void reactivateEditionAuthorsByEditionId(Long editionId);
 }

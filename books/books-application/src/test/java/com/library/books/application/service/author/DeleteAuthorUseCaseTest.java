@@ -9,13 +9,19 @@ import org.junit.jupiter.api.Test;
 import com.library.books.application.dto.command.author.DeleteAuthorCommand;
 import com.library.books.domain.exception.AuthorNotFoundException;
 import com.library.books.domain.model.Author;
+import com.library.books.application.service.edition.FakeEditionRepository;
+import com.library.books.application.service.work.FakeWorkRepository;
 
 class DeleteAuthorUseCaseTest {
 
     @Test
     void deleteAuthor_removesAuthor() {
         FakeAuthorRepository authorRepository = new FakeAuthorRepository();
-        DeleteAuthorUseCase useCase = new DeleteAuthorUseCase(authorRepository);
+        FakeWorkAuthorRepository workAuthorRepository = new FakeWorkAuthorRepository();
+        FakeEditionAuthorRepository editionAuthorRepository = new FakeEditionAuthorRepository();
+        FakeWorkRepository workRepository = new FakeWorkRepository();
+        FakeEditionRepository editionRepository = new FakeEditionRepository();
+        DeleteAuthorUseCase useCase = new DeleteAuthorUseCase(authorRepository, workAuthorRepository, editionAuthorRepository, workRepository, editionRepository);
 
         Author saved = authorRepository.save(Author.withoutId("John", "Doe", null, null, null));
         useCase.execute(new DeleteAuthorCommand(saved.getId()));
@@ -26,7 +32,11 @@ class DeleteAuthorUseCaseTest {
     @Test
     void deleteAuthor_throwsWhenNotFound() {
         FakeAuthorRepository authorRepository = new FakeAuthorRepository();
-        DeleteAuthorUseCase useCase = new DeleteAuthorUseCase(authorRepository);
+        FakeWorkAuthorRepository workAuthorRepository = new FakeWorkAuthorRepository();
+        FakeEditionAuthorRepository editionAuthorRepository = new FakeEditionAuthorRepository();
+        FakeWorkRepository workRepository = new FakeWorkRepository();
+        FakeEditionRepository editionRepository = new FakeEditionRepository();
+        DeleteAuthorUseCase useCase = new DeleteAuthorUseCase(authorRepository, workAuthorRepository, editionAuthorRepository, workRepository, editionRepository);
 
         assertThrows(AuthorNotFoundException.class,
                 () -> useCase.execute(new DeleteAuthorCommand(999L)));

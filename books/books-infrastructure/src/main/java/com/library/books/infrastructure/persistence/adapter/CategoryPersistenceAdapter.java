@@ -32,6 +32,13 @@ public class CategoryPersistenceAdapter implements CategoryRepository {
     }
 
     @Override
+    public List<com.library.books.domain.model.Category> findAll(String status) {
+        return categoryJpaRepository.findAll(status).stream()
+                .map(CategoryMapper::toDomain)
+                .toList();
+    }
+
+    @Override
     public Optional<Category> findByCode(String code) {
         return categoryJpaRepository.findByCode(code)
                 .map(CategoryMapper::toDomain);
@@ -50,6 +57,10 @@ public class CategoryPersistenceAdapter implements CategoryRepository {
     }
 
     @Override
+    public void reactivateById(Long id) {
+        categoryJpaRepository.reactivateById(id);
+    }
+    @Override
     public Map<Long, String> findNamesByIds(List<Long> ids) {
         return categoryJpaRepository.findNamesByIds(ids);
     }
@@ -57,5 +68,15 @@ public class CategoryPersistenceAdapter implements CategoryRepository {
     @Override
     public void nullifyParent(Long parentId) {
         ((com.library.books.infrastructure.persistence.repository.hibernate.HibernateCategoryRepository) categoryJpaRepository).nullifyParent(parentId);
+    }
+
+    @Override
+    public List<Long> findWorkIdsByCategoryId(Long categoryId) {
+        return ((com.library.books.infrastructure.persistence.repository.hibernate.HibernateCategoryRepository) categoryJpaRepository).findWorkIdsByCategoryId(categoryId);
+    }
+
+    @Override
+    public void reactivateWorksByCategoryId(Long categoryId) {
+        ((com.library.books.infrastructure.persistence.repository.hibernate.HibernateCategoryRepository) categoryJpaRepository).reactivateWorksByCategoryId(categoryId);
     }
 }

@@ -63,4 +63,27 @@ public class WorkAuthorPersistenceAdapter implements WorkAuthorRepository {
     public void saveWorkAuthor(Long workId, Long authorId, Long authorRoleId) {
         workAuthorRepository.saveWorkAuthor(workId, authorId, authorRoleId);
     }
+
+    @Override
+    public void softDeleteByAuthorId(Long authorId) {
+        workAuthorRepository.softDeleteByAuthorId(authorId);
+    }
+
+    @Override
+    public void reactivateByAuthorId(Long authorId) {
+        workAuthorRepository.reactivateByAuthorId(authorId);
+    }
+    @Override
+    public List<Long> findWorkIdsByAuthorId(Long authorId) {
+        return workAuthorRepository.findWorkIdsByAuthorId(authorId);
+    }
+
+    @Override
+    public long countActiveAuthorsByWorkId(Long workId) {
+        return workAuthorRepository.countActiveAuthorsByWorkId(workId);
+    }
+    @Override
+    public void reactivateByWorkId(Long workId) {
+        workAuthorRepository.reactivateByWorkId(workId);
+    }
 }

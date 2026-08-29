@@ -24,7 +24,11 @@ public class ListWorksUseCase {
     }
 
     public Page<WorkResponseDTO> execute(int page, int size) {
-        List<Work> allWorks = workRepository.findAll();
+        return execute(page, size, "active");
+    }
+
+    public Page<WorkResponseDTO> execute(int page, int size, String status) {
+        List<Work> allWorks = workRepository.findAll(status);
         long totalElements = allWorks.size();
         int totalPages = (int) Math.ceil((double) totalElements / size);
         int start = page * size;

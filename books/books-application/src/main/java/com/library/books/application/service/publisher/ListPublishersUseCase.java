@@ -16,7 +16,13 @@ public class ListPublishersUseCase {
     }
 
     public List<PublisherResponseDTO> execute() {
-        return publisherRepository.findAll().stream()
+        return publisherRepository.findAll("active").stream()
+                .map(PublisherResponseDTO::of)
+                .toList();
+    }
+
+    public List<PublisherResponseDTO> execute(String status) {
+        return publisherRepository.findAll(status).stream()
                 .map(PublisherResponseDTO::of)
                 .toList();
     }

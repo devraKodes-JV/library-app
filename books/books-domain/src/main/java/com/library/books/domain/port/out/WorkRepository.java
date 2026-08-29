@@ -9,6 +9,7 @@ import com.library.books.domain.model.Work;
 public interface WorkRepository {
     Optional<Work> findById(Long id);
     List<Work> findAll();
+    List<Work> findAll(String status);
     List<Work> findByCategoryId(Long categoryId);
     List<Work> findByOriginalLanguageId(Long languageId);
     Work save(Work work);
@@ -22,4 +23,11 @@ public interface WorkRepository {
     WorkWithRelationsDTO findByIdWithRelations(Long id);
     void nullifyOriginalLanguage(Long languageId);
     void nullifyCategory(Long categoryId);
+    void softDeleteEditionsByWorkIds(List<Long> workIds);
+    void softDeleteWorksByIds(List<Long> ids);
+    long countActiveAuthorsByWorkId(Long workId);
+    List<Long> findAuthorIdsByWorkId(Long workId);
+    List<Long> findWorkIdsByCategoryId(Long categoryId);
+    void reactivateById(Long id);
+    void reactivateEditionsByWorkId(Long workId);
 }

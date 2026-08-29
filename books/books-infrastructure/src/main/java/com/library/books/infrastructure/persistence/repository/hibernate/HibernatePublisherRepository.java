@@ -24,7 +24,7 @@ public class HibernatePublisherRepository extends AbstractHibernateRepository im
     public Optional<PublisherEntity> findByCode(String code) {
         try (Session session = sessionFactory.openSession()) {
             PublisherEntity publisher = session.createQuery(
-                    "select p from PublisherEntity p where p.code = :code and p.deletedAt is null",
+                    "select p from PublisherEntity p where p.name = :code and p.deletedAt is null",
                     PublisherEntity.class)
                     .setParameter("code", code)
                     .uniqueResult();
@@ -53,6 +53,17 @@ public class HibernatePublisherRepository extends AbstractHibernateRepository im
                     .getResultList();
         }
     }
+    @Override
+    public List<PublisherEntity> findAll(String status) {
+        try (Session session = sessionFactory.openSession()) {
+            String hql = "select p from PublisherEntity p";
+            if ("active".equals(status)) hql += " where p.deletedAt is null";
+            else if ("inactive".equals(status)) hql += " where p.deletedAt is not null";
+            hql += " order by p.name";
+            return session.createQuery(hql, PublisherEntity.class).getResultList();
+        }
+    }
+
 
     @Override
     public PublisherEntity save(PublisherEntity entity) {
@@ -121,4 +132,32 @@ public class HibernatePublisherRepository extends AbstractHibernateRepository im
                     .toList();
         }
     }
+
+    @Override
+    public void softDeleteEditionsByPublisherId(Long publisherId) {
+        consumeWithSession(session -> session.createMutationQuery(
+                        "update EditionEntity e set e.deletedAt = :now, e.enabled = false where e.publisherId = :publisherId and e.deletedAt is null and e.enabled = true")
+                .setParameter("now", java.time.Instant.now())
+                .setParameter("publisherId", publisherId)
+                .executeUpdate());
+    }
+
+
+    @Override
+    public void reactivateById(Long id) {
+        consumeWithSession(session -> session.createMutationQuery(
+                        "update PublisherEntity p set p.deletedAt = null, p.enabled = true where p.id = :id and p.deletedAt is not null")
+                .setParameter("id", id)
+                .executeUpdate());
+    }
+
+
+    @Override
+    public void reactivateEditionsByPublisherId(Long publisherId) {
+        consumeWithSession(session -> session.createMutationQuery(
+                        "update EditionEntity e set e.deletedAt = null, e.enabled = true where e.publisherId = :publisherId and e.deletedAt is not null")
+                .setParameter("publisherId", publisherId)
+                .executeUpdate());
+    }
+
 }

@@ -9,7 +9,7 @@ import com.library.books.domain.model.Edition;
 import com.library.books.domain.model.EditionAuthor;
 import com.library.books.domain.port.out.EditionRepository;
 
-class FakeEditionRepository implements EditionRepository {
+public class FakeEditionRepository implements EditionRepository {
 
     private final List<Edition> editions = new ArrayList<>();
     private long nextId = 1L;
@@ -20,7 +20,16 @@ class FakeEditionRepository implements EditionRepository {
     }
 
     @Override
+    public Optional<Edition> findByIdIncludingDeleted(Long id) {
+        return editions.stream().filter(e -> e.getId().equals(id)).findFirst();
+    }
+
+    @Override
     public List<Edition> findAll() {
+        return new ArrayList<>(editions);
+    }
+    @Override
+    public List<Edition> findAll(String status) {
         return new ArrayList<>(editions);
     }
 
@@ -84,4 +93,14 @@ class FakeEditionRepository implements EditionRepository {
     public List<EditionAuthor> findEditionAuthorsByEditionId(Long editionId) {
         return List.of();
     }
+    @Override
+    public void softDeleteEditionsByIds(List<Long> ids) {}
+    @Override
+    public void softDeleteEditionAuthorsByEditionId(Long editionId) {}
+
+    @Override
+    public void reactivateById(Long id) {}
+
+    @Override
+    public void reactivateEditionAuthorsByEditionId(Long editionId) {}
 }

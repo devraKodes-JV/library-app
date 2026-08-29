@@ -78,6 +78,17 @@ public class HibernateWorkRepository extends AbstractHibernateRepository impleme
                     .getResultList();
         }
     }
+    @Override
+    public List<WorkEntity> findAll(String status) {
+        try (Session session = sessionFactory.openSession()) {
+            String hql = "select w from WorkEntity w";
+            if ("active".equals(status)) hql += " where w.deletedAt is null";
+            else if ("inactive".equals(status)) hql += " where w.deletedAt is not null";
+            hql += " order by w.title";
+            return session.createQuery(hql, WorkEntity.class).getResultList();
+        }
+    }
+
 
     @Override
     public List<WorkEntity> findByCategoryId(Long categoryId) {
@@ -276,4 +287,85 @@ public class HibernateWorkRepository extends AbstractHibernateRepository impleme
             );
         }
     }
+
+    @Override
+    public void softDeleteEditionsByWorkIds(List<Long> workIds) {
+        if (workIds == null || workIds.isEmpty()) {
+            return;
+        }
+        consumeWithSession(session -> session.createMutationQuery(
+                        "update EditionEntity e set e.deletedAt = :now, e.enabled = false where e.workId in :ids and e.deletedAt is null and e.enabled = true")
+                .setParameter("now", java.time.Instant.now())
+                .setParameter("ids", workIds)
+                .executeUpdate());
+    }
+
+
+    @Override
+    public void softDeleteWorksByIds(List<Long> ids) {
+        if (ids == null || ids.isEmpty()) {
+            return;
+        }
+        consumeWithSession(session -> session.createMutationQuery(
+                        "update WorkEntity w set w.deletedAt = :now, w.enabled = false where w.id in :ids and w.deletedAt is null and w.enabled = true")
+                .setParameter("now", java.time.Instant.now())
+                .setParameter("ids", ids)
+                .executeUpdate());
+    }
+
+
+    @Override
+    public long countActiveAuthorsByWorkId(Long workId) {
+        try (Session session = sessionFactory.openSession()) {
+            Long count = session.createQuery(
+                            "select count(wa) from WorkAuthorEntity wa where wa.workId = :workId and wa.deletedAt is null and wa.enabled = true",
+                            Long.class)
+                    .setParameter("workId", workId)
+                    .uniqueResult();
+            return count != null ? count : 0;
+        }
+    }
+
+
+    @Override
+    public List<Long> findAuthorIdsByWorkId(Long workId) {
+        try (Session session = sessionFactory.openSession()) {
+            return session.createQuery(
+                            "select distinct wa.authorId from WorkAuthorEntity wa where wa.workId = :workId and wa.deletedAt is null",
+                            Long.class)
+                    .setParameter("workId", workId)
+                    .getResultList();
+        }
+    }
+
+
+    @Override
+    public List<Long> findWorkIdsByCategoryId(Long categoryId) {
+        try (Session session = sessionFactory.openSession()) {
+            return session.createQuery(
+                            "select w.id from WorkEntity w where w.categoryId = :categoryId and w.deletedAt is null",
+                            Long.class)
+                    .setParameter("categoryId", categoryId)
+                    .getResultList();
+        }
+    }
+
+
+    @Override
+    public void reactivateById(Long id) {
+        consumeWithSession(session -> session.createMutationQuery(
+                        "update WorkEntity w set w.deletedAt = null, w.enabled = true where w.id = :id and w.deletedAt is not null")
+                .setParameter("id", id)
+                .executeUpdate());
+    }
+
+
+    @Override
+    public void reactivateEditionsByWorkId(Long workId) {
+        consumeWithSession(session -> session.createMutationQuery(
+                        "update EditionEntity e set e.deletedAt = null, e.enabled = true where e.workId = :workId and e.deletedAt is not null")
+                .setParameter("workId", workId)
+                .executeUpdate());
+    }
+
 }

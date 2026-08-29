@@ -25,6 +25,10 @@ class FakeAuthorRepository implements AuthorRepository {
     public List<Author> findAll() {
         return new ArrayList<>(store.values());
     }
+    @Override
+    public List<Author> findAll(String status) {
+        return new ArrayList<>(store.values());
+    }
 
     @Override
     public Author save(Author author) {
@@ -77,4 +81,25 @@ class FakeAuthorRepository implements AuthorRepository {
     public void putWithWorks(Long id, AuthorWithWorksDTO dto) {
         withWorksStore.put(id, dto);
     }
+    @Override
+    public void softDeleteWorkAuthorsByAuthorId(Long authorId) {}
+
+    @Override
+    public void softDeleteEditionAuthorsByAuthorId(Long authorId) {}
+
+    @Override
+    public List<Long> findWorkIdsByAuthorId(Long authorId) { return List.of(); }
+
+    @Override
+    public void softDeleteWorksByIds(List<Long> workIds) {}
+
+    @Override
+    public void softDeleteEditionsByWorkIds(List<Long> workIds) {}
+
+
+    @Override
+    public void reactivateById(Long id) {}
+
+    @Override
+    public void reactivateWorksByAuthorId(Long authorId) {}
 }

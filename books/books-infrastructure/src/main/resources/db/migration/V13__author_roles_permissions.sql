@@ -7,7 +7,8 @@ INSERT INTO permissions (code, name, menu_label, icon, url, sort_order, module_i
     ('authorRoles.create', 'Create Author Roles', NULL, NULL, NULL, 710, 3),
     ('authorRoles.read',   'View Author Roles',   'Author Roles', 'bi-person-badge', '/books/authorRoles', 711, 3),
     ('authorRoles.update', 'Edit Author Roles',   NULL, NULL, NULL, 712, 3),
-    ('authorRoles.delete', 'Delete Author Roles', NULL, NULL, NULL, 713, 3);
+    ('authorRoles.delete', 'Delete Author Roles', NULL, NULL, NULL, 713, 3),
+    ('authorRoles.reactivate', 'Reactivate Author Roles', NULL, NULL, NULL, 714, 3);
 
 INSERT INTO role_permissions (role_id, permission_id)
 SELECT r.id, p.id

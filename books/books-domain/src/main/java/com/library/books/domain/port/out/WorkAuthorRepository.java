@@ -13,4 +13,9 @@ public interface WorkAuthorRepository {
     void deleteByAuthorId(Long authorId);
     java.util.List<com.library.books.domain.model.WorkAuthor> findByWorkIds(java.util.List<Long> workIds);
     void saveWorkAuthor(Long workId, Long authorId, Long authorRoleId);
+    void softDeleteByAuthorId(Long authorId);
+    List<Long> findWorkIdsByAuthorId(Long authorId);
+    long countActiveAuthorsByWorkId(Long workId);
+    void reactivateByAuthorId(Long authorId);
+    void reactivateByWorkId(Long workId);
 }

@@ -25,12 +25,14 @@ public class ListWorksController extends BaseController {
         requireCan(ctx, "works.read");
         int page = ctx.queryParamAsClass("page", Integer.class).getOrDefault(0);
         int size = ctx.queryParamAsClass("size", Integer.class).getOrDefault(20);
+        String status = ctx.queryParamAsClass("status", String.class).getOrDefault("active");
         if (page < 0) page = 0;
         if (size <= 0 || size > 100) size = 20;
-        Page<WorkResponseDTO> workPage = listWorksUseCase.execute(page, size);
+        Page<WorkResponseDTO> workPage = listWorksUseCase.execute(page, size, status);
         ctx.render("books/works/list", buildListModel(ctx, Map.of(
                 "works", workPage.items(),
-                "workPage", workPage)));
+                "workPage", workPage,
+                "status", status)));
     }
 
     private Map<String, Object> buildListModel(Context ctx, Map<String, Object> extra) {
@@ -42,6 +44,7 @@ public class ListWorksController extends BaseController {
         model.put("canCreate", hasPermission(ctx, "works.create"));
         model.put("canUpdate", hasPermission(ctx, "works.update"));
         model.put("canDelete", hasPermission(ctx, "works.delete"));
+        model.put("canReactivate", hasPermission(ctx, "works.reactivate"));
         model.putAll(extra);
         return model;
     }

@@ -55,6 +55,17 @@ public class HibernateBookFormatRepository extends AbstractHibernateRepository i
                     .getResultList();
         }
     }
+    @Override
+    public List<BookFormatEntity> findAll(String status) {
+        try (Session session = sessionFactory.openSession()) {
+            String hql = "select b from BookFormatEntity b";
+            if ("active".equals(status)) hql += " where b.deletedAt is null";
+            else if ("inactive".equals(status)) hql += " where b.deletedAt is not null";
+            hql += " order by b.name";
+            return session.createQuery(hql, BookFormatEntity.class).getResultList();
+        }
+    }
+
 
     @Override
     public BookFormatEntity save(BookFormatEntity entity) {
@@ -124,4 +135,32 @@ public class HibernateBookFormatRepository extends AbstractHibernateRepository i
                     .toList();
         }
     }
+
+    @Override
+    public void softDeleteEditionsByFormatId(Long formatId) {
+        consumeWithSession(session -> session.createMutationQuery(
+                        "update EditionEntity e set e.deletedAt = :now, e.enabled = false where e.formatId = :formatId and e.deletedAt is null and e.enabled = true")
+                .setParameter("now", java.time.Instant.now())
+                .setParameter("formatId", formatId)
+                .executeUpdate());
+    }
+
+
+    @Override
+    public void reactivateById(Long id) {
+        consumeWithSession(session -> session.createMutationQuery(
+                        "update BookFormatEntity b set b.deletedAt = null, b.enabled = true where b.id = :id and b.deletedAt is not null")
+                .setParameter("id", id)
+                .executeUpdate());
+    }
+
+
+    @Override
+    public void reactivateEditionsByFormatId(Long formatId) {
+        consumeWithSession(session -> session.createMutationQuery(
+                        "update EditionEntity e set e.deletedAt = null, e.enabled = true where e.formatId = :formatId and e.deletedAt is not null")
+                .setParameter("formatId", formatId)
+                .executeUpdate());
+    }
+
 }

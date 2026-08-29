@@ -20,19 +20,20 @@ public class WorkAuthorEntity extends AuditableEntity implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "work_id", nullable = false, insertable = false, updatable = false)
+    @Column(name = "work_id", nullable = false)
     private Long workId;
 
-    @Column(name = "author_id", nullable = false, insertable = false, updatable = false)
+    @Column(name = "author_id", nullable = false)
     private Long authorId;
 
-    @Column(name = "author_role_id", nullable = false, insertable = false, updatable = false)
+    @Column(name = "author_role_id", nullable = false)
     private Long authorRoleId;
 
     @Column(nullable = false)
     private boolean enabled = true;
 
     @ManyToOne
+    @JoinColumn(name = "author_id", insertable = false, updatable = false)
     private AuthorEntity author;
 
     @ManyToOne

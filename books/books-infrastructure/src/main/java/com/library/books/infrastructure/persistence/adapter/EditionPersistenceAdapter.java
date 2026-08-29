@@ -25,6 +25,11 @@ public class EditionPersistenceAdapter implements EditionRepository {
     }
 
     @Override
+    public Optional<Edition> findByIdIncludingDeleted(Long id) {
+        return editionJpaRepository.findByIdIncludingDeleted(id);
+    }
+
+    @Override
     public Optional<Edition> findById(Long id) {
         return editionJpaRepository.findById(id)
                 .map(EditionMapper::toDomain);
@@ -33,6 +38,13 @@ public class EditionPersistenceAdapter implements EditionRepository {
     @Override
     public List<Edition> findAll() {
         return editionJpaRepository.findAll().stream()
+                .map(EditionMapper::toDomain)
+                .toList();
+    }
+
+    @Override
+    public List<com.library.books.domain.model.Edition> findAll(String status) {
+        return editionJpaRepository.findAll(status).stream()
                 .map(EditionMapper::toDomain)
                 .toList();
     }
@@ -70,6 +82,24 @@ public class EditionPersistenceAdapter implements EditionRepository {
         editionJpaRepository.deleteById(id);
     }
 
+    @Override
+    public void reactivateById(Long id) {
+        editionJpaRepository.reactivateById(id);
+    }
+    @Override
+    public void softDeleteEditionsByIds(List<Long> ids) {
+        editionJpaRepository.softDeleteEditionsByIds(ids);
+    }
+
+    @Override
+    public void softDeleteEditionAuthorsByEditionId(Long editionId) {
+        editionAuthorJpaRepository.softDeleteByEditionId(editionId);
+    }
+
+    @Override
+    public void reactivateEditionAuthorsByEditionId(Long editionId) {
+        editionAuthorJpaRepository.reactivateByEditionId(editionId);
+    }
     @Override
     public long countActiveByWorkId(Long workId) {
         return editionJpaRepository.countActiveByWorkId(workId);

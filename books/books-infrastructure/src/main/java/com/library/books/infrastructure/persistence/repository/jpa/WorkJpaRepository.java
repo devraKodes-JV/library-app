@@ -15,4 +15,13 @@ public interface WorkJpaRepository<T, ID> extends CrudRepository<T, ID>, Findabl
     boolean existsCategory(Long id);
     void saveWorkAuthor(Long workId, Long authorId, Long authorRoleId);
     void deleteWorkAuthorsByWorkId(Long workId);
+    void softDeleteEditionsByWorkIds(java.util.List<Long> workIds);
+    void softDeleteWorksByIds(java.util.List<Long> ids);
+    long countActiveAuthorsByWorkId(Long workId);
+    List<Long> findAuthorIdsByWorkId(Long workId);
+    List<Long> findWorkIdsByCategoryId(Long categoryId);
+    void reactivateById(Long id);
+    void reactivateEditionsByWorkId(Long workId);
+    List<T> findAll(String status);
+
 }

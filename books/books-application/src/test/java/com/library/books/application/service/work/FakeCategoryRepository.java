@@ -23,6 +23,10 @@ class FakeCategoryRepository implements CategoryRepository {
     public List<Category> findAll() {
         return new ArrayList<>(store.values());
     }
+    @Override
+    public List<Category> findAll(String status) {
+        return new ArrayList<>(store.values());
+    }
 
     @Override
     public Optional<Category> findByCode(String code) {
@@ -62,4 +66,13 @@ class FakeCategoryRepository implements CategoryRepository {
     @Override
     public void nullifyParent(Long parentId) {
     }
+    @Override
+    public List<Long> findWorkIdsByCategoryId(Long categoryId) { return List.of(); }
+
+
+    @Override
+    public void reactivateById(Long id) {}
+
+    @Override
+    public void reactivateWorksByCategoryId(Long categoryId) {}
 }

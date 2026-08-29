@@ -139,4 +139,57 @@ public class HibernateWorkAuthorRepository extends AbstractHibernateRepository i
             return null;
         });
     }
+
+    @Override
+    public void softDeleteByAuthorId(Long authorId) {
+        consumeWithSession(session -> session.createMutationQuery(
+                        "update WorkAuthorEntity w set w.deletedAt = :now, w.enabled = false where w.authorId = :authorId and w.deletedAt is null and w.enabled = true")
+                .setParameter("now", java.time.Instant.now())
+                .setParameter("authorId", authorId)
+                .executeUpdate());
+    }
+
+
+    @Override
+    public List<Long> findWorkIdsByAuthorId(Long authorId) {
+        try (Session session = sessionFactory.openSession()) {
+            return session.createQuery(
+                            "select distinct wa.workId from WorkAuthorEntity wa where wa.authorId = :authorId and wa.deletedAt is null",
+                            Long.class)
+                    .setParameter("authorId", authorId)
+                    .getResultList();
+        }
+    }
+
+
+    @Override
+    public long countActiveAuthorsByWorkId(Long workId) {
+        try (Session session = sessionFactory.openSession()) {
+            Long count = session.createQuery(
+                            "select count(wa) from WorkAuthorEntity wa where wa.workId = :workId and wa.deletedAt is null and wa.enabled = true",
+                            Long.class)
+                    .setParameter("workId", workId)
+                    .uniqueResult();
+            return count != null ? count : 0;
+        }
+    }
+
+
+    @Override
+    public void reactivateByAuthorId(Long authorId) {
+        consumeWithSession(session -> session.createMutationQuery(
+                        "update WorkAuthorEntity w set w.deletedAt = null, w.enabled = true where w.authorId = :authorId and w.deletedAt is not null")
+                .setParameter("authorId", authorId)
+                .executeUpdate());
+    }
+
+
+    @Override
+    public void reactivateByWorkId(Long workId) {
+        consumeWithSession(session -> session.createMutationQuery(
+                        "update WorkAuthorEntity w set w.deletedAt = null, w.enabled = true where w.workId = :workId and w.deletedAt is not null")
+                .setParameter("workId", workId)
+                .executeUpdate());
+    }
+
 }

@@ -57,6 +57,17 @@ public class HibernateAuthorRepository extends AbstractHibernateRepository imple
                     .getResultList();
         }
     }
+    @Override
+    public List<AuthorEntity> findAll(String status) {
+        try (Session session = sessionFactory.openSession()) {
+            String hql = "select a from AuthorEntity a";
+            if ("active".equals(status)) hql += " where a.deletedAt is null";
+            else if ("inactive".equals(status)) hql += " where a.deletedAt is not null";
+            hql += " order by a.lastName, a.firstName";
+            return session.createQuery(hql, AuthorEntity.class).getResultList();
+        }
+    }
+
 
     @Override
     public AuthorEntity save(AuthorEntity entity) {
@@ -196,6 +207,85 @@ public class HibernateAuthorRepository extends AbstractHibernateRepository imple
                     authorEntity.getUpdatedAt(),
                     relatedWorks
             );
+        }
+    }
+
+    @Override
+    public void softDeleteWorkAuthorsByAuthorId(Long authorId) {
+        consumeWithSession(session -> session.createMutationQuery(
+                        "update WorkAuthorEntity w set w.deletedAt = :now, w.enabled = false where w.authorId = :authorId and w.deletedAt is null and w.enabled = true")
+                .setParameter("now", java.time.Instant.now())
+                .setParameter("authorId", authorId)
+                .executeUpdate());
+    }
+
+    @Override
+    public void softDeleteEditionAuthorsByAuthorId(Long authorId) {
+        consumeWithSession(session -> session.createMutationQuery(
+                        "update EditionAuthorEntity e set e.deletedAt = :now, e.enabled = false where e.authorId = :authorId and e.deletedAt is null and e.enabled = true")
+                .setParameter("now", java.time.Instant.now())
+                .setParameter("authorId", authorId)
+                .executeUpdate());
+    }
+
+    @Override
+    public List<Long> findWorkIdsByAuthorId(Long authorId) {
+        try (Session session = sessionFactory.openSession()) {
+            return session.createQuery(
+                            "select distinct wa.workId from WorkAuthorEntity wa where wa.authorId = :authorId and wa.deletedAt is null",
+                            Long.class)
+                    .setParameter("authorId", authorId)
+                    .getResultList();
+        }
+    }
+
+    @Override
+    public void softDeleteWorksByIds(List<Long> workIds) {
+        if (workIds == null || workIds.isEmpty()) {
+            return;
+        }
+        consumeWithSession(session -> session.createMutationQuery(
+                        "update WorkEntity w set w.deletedAt = :now, w.enabled = false where w.id in :ids and w.deletedAt is null and w.enabled = true")
+                .setParameter("now", java.time.Instant.now())
+                .setParameter("ids", workIds)
+                .executeUpdate());
+    }
+
+    @Override
+    public void softDeleteEditionsByWorkIds(List<Long> workIds) {
+        if (workIds == null || workIds.isEmpty()) {
+            return;
+        }
+        consumeWithSession(session -> session.createMutationQuery(
+                        "update EditionEntity e set e.deletedAt = :now, e.enabled = false where e.workId in :ids and e.deletedAt is null and e.enabled = true")
+                .setParameter("now", java.time.Instant.now())
+                .setParameter("ids", workIds)
+                .executeUpdate());
+    }
+
+    @Override
+    public void reactivateById(Long id) {
+        consumeWithSession(session -> session.createMutationQuery(
+                        "update AuthorEntity a set a.deletedAt = null, a.enabled = true where a.id = :id and a.deletedAt is not null")
+                .setParameter("id", id)
+                .executeUpdate());
+    }
+
+    @Override
+    public void reactivateWorksByAuthorId(Long authorId) {
+        List<Long> workIds = findWorkIdsByAuthorId(authorId);
+        for (Long workId : workIds) {
+            Long activeAuthors = sessionFactory.openSession().createQuery(
+                            "select count(wa) from WorkAuthorEntity wa where wa.workId = :workId and wa.deletedAt is null and wa.enabled = true",
+                            Long.class)
+                    .setParameter("workId", workId)
+                    .uniqueResult();
+            if (activeAuthors != null && activeAuthors > 0) {
+                consumeWithSession(session -> session.createMutationQuery(
+                                "update WorkEntity w set w.deletedAt = null, w.enabled = true where w.id = :id and w.deletedAt is not null")
+                        .setParameter("id", workId)
+                        .executeUpdate());
+            }
         }
     }
 }

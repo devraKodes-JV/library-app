@@ -16,7 +16,13 @@ public class ListBookFormatsUseCase {
     }
 
     public List<BookFormatResponseDTO> execute() {
-        return bookFormatRepository.findAll().stream()
+        return bookFormatRepository.findAll("active").stream()
+                .map(BookFormatResponseDTO::of)
+                .toList();
+    }
+
+    public List<BookFormatResponseDTO> execute(String status) {
+        return bookFormatRepository.findAll(status).stream()
                 .map(BookFormatResponseDTO::of)
                 .toList();
     }

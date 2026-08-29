@@ -11,7 +11,7 @@ import com.library.books.domain.model.EditionAuthor;
 import com.library.books.domain.port.out.EditionRepository;
 import com.library.books.domain.dto.response.edition.EditionWithNamesDTO;
 
-class FakeEditionRepository implements EditionRepository {
+public class FakeEditionRepository implements EditionRepository {
 
     private final Map<Long, Edition> store = new LinkedHashMap<>();
     private final Map<Long, List<EditionWithNamesDTO>> detailsStore = new LinkedHashMap<>();
@@ -23,7 +23,16 @@ class FakeEditionRepository implements EditionRepository {
     }
 
     @Override
+    public Optional<Edition> findByIdIncludingDeleted(Long id) {
+        return Optional.ofNullable(store.get(id));
+    }
+
+    @Override
     public List<Edition> findAll() {
+        return new ArrayList<>(store.values());
+    }
+    @Override
+    public List<Edition> findAll(String status) {
         return new ArrayList<>(store.values());
     }
 
@@ -115,4 +124,14 @@ class FakeEditionRepository implements EditionRepository {
     public List<EditionAuthor> findEditionAuthorsByEditionId(Long editionId) {
         return List.of();
     }
+    @Override
+    public void softDeleteEditionsByIds(List<Long> ids) {}
+    @Override
+    public void softDeleteEditionAuthorsByEditionId(Long editionId) {}
+
+    @Override
+    public void reactivateById(Long id) {}
+
+    @Override
+    public void reactivateEditionAuthorsByEditionId(Long editionId) {}
 }

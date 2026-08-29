@@ -38,6 +38,13 @@ public class PublisherPersistenceAdapter implements PublisherRepository {
     }
 
     @Override
+    public List<com.library.books.domain.model.Publisher> findAll(String status) {
+        return publisherJpaRepository.findAll(status).stream()
+                .map(PublisherMapper::toDomain)
+                .toList();
+    }
+
+    @Override
     public Publisher save(Publisher publisher) {
         PublisherEntity entity = PublisherMapper.toEntity(publisher);
         PublisherEntity saved = publisherJpaRepository.save(entity);
@@ -49,6 +56,19 @@ public class PublisherPersistenceAdapter implements PublisherRepository {
         publisherJpaRepository.deleteById(id);
     }
 
+    @Override
+    public void reactivateById(Long id) {
+        publisherJpaRepository.reactivateById(id);
+    }
+    @Override
+    public void softDeleteEditionsByPublisherId(Long publisherId) {
+        publisherJpaRepository.softDeleteEditionsByPublisherId(publisherId);
+    }
+
+    @Override
+    public void reactivateEditionsByPublisherId(Long publisherId) {
+        publisherJpaRepository.reactivateEditionsByPublisherId(publisherId);
+    }
     @Override
     public Map<Long, String> findNamesByIds(List<Long> ids) {
         return publisherJpaRepository.findNamesByIds(ids);

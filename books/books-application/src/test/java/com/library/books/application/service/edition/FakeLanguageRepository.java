@@ -24,6 +24,10 @@ class FakeLanguageRepository implements LanguageRepository {
     public List<Language> findAll() {
         return new ArrayList<>(store.values());
     }
+    @Override
+    public List<Language> findAll(String status) {
+        return new ArrayList<>(store.values());
+    }
 
     @Override
     public Optional<Language> findByCode(String code) {
@@ -63,4 +67,13 @@ class FakeLanguageRepository implements LanguageRepository {
         }
         return result;
     }
+    @Override
+    public void softDeleteEditionsByLanguageId(Long languageId) {}
+
+
+    @Override
+    public void reactivateById(Long id) {}
+
+    @Override
+    public void reactivateEditionsByLanguageId(Long languageId) {}
 }

@@ -16,9 +16,16 @@ public interface EditionJpaRepository<T, ID> extends CrudRepository<T, ID> {
     List<Edition> findSummariesByPublisherId(Long publisherId);
     List<Edition> findSummariesByFormatId(Long workId);
     Optional<Edition> findDetailById(Long id);
+    Optional<Edition> findByIdIncludingDeleted(Long id);
     List<EditionWithNamesDTO> findByWorkIdWithDetails(Long workId);
     long countActiveByWorkId(Long workId);
     long countActiveByPublisherId(Long publisherId);
     long countActiveByFormatId(Long formatId);
     long countActiveByLanguageId(Long languageId);
+    void softDeleteEditionsByIds(java.util.List<Long> ids);
+    void softDeleteEditionAuthorsByEditionId(Long editionId);
+    void reactivateById(Long id);
+    void reactivateEditionAuthorsByEditionId(Long editionId);
+    List<T> findAll(String status);
+
 }

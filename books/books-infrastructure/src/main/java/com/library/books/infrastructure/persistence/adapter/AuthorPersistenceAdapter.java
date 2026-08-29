@@ -36,6 +36,13 @@ public class AuthorPersistenceAdapter implements AuthorRepository {
     }
 
     @Override
+    public List<com.library.books.domain.model.Author> findAll(String status) {
+        return authorJpaRepository.findAll(status).stream()
+                .map(AuthorMapper::toDomain)
+                .toList();
+    }
+
+    @Override
     public Author save(Author author) {
         AuthorEntity entity = AuthorMapper.toEntity(author);
         AuthorEntity saved = authorJpaRepository.save(entity);
@@ -45,6 +52,39 @@ public class AuthorPersistenceAdapter implements AuthorRepository {
     @Override
     public void deleteById(Long id) {
         authorJpaRepository.deleteById(id);
+    }
+
+    @Override
+    public void reactivateById(Long id) {
+        hibernateAuthorRepository.reactivateById(id);
+    }
+    @Override
+    public void softDeleteWorkAuthorsByAuthorId(Long authorId) {
+        hibernateAuthorRepository.softDeleteWorkAuthorsByAuthorId(authorId);
+    }
+
+    @Override
+    public void softDeleteEditionAuthorsByAuthorId(Long authorId) {
+        hibernateAuthorRepository.softDeleteEditionAuthorsByAuthorId(authorId);
+    }
+
+    @Override
+    public List<Long> findWorkIdsByAuthorId(Long authorId) {
+        return hibernateAuthorRepository.findWorkIdsByAuthorId(authorId);
+    }
+
+    @Override
+    public void softDeleteWorksByIds(List<Long> workIds) {
+        hibernateAuthorRepository.softDeleteWorksByIds(workIds);
+    }
+
+    @Override
+    public void reactivateWorksByAuthorId(Long authorId) {
+        hibernateAuthorRepository.reactivateWorksByAuthorId(authorId);
+    }
+    @Override
+    public void softDeleteEditionsByWorkIds(List<Long> workIds) {
+        hibernateAuthorRepository.softDeleteEditionsByWorkIds(workIds);
     }
 
     @Override

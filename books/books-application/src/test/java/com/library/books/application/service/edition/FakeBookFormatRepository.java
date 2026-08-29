@@ -24,6 +24,10 @@ class FakeBookFormatRepository implements BookFormatRepository {
     public List<BookFormat> findAll() {
         return new ArrayList<>(store.values());
     }
+    @Override
+    public List<BookFormat> findAll(String status) {
+        return new ArrayList<>(store.values());
+    }
 
     @Override
     public Optional<BookFormat> findByCode(String code) {
@@ -63,4 +67,13 @@ class FakeBookFormatRepository implements BookFormatRepository {
         }
         return result;
     }
+    @Override
+    public void softDeleteEditionsByFormatId(Long formatId) {}
+
+
+    @Override
+    public void reactivateById(Long id) {}
+
+    @Override
+    public void reactivateEditionsByFormatId(Long formatId) {}
 }

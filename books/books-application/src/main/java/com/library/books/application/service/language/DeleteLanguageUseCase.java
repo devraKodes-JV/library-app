@@ -24,13 +24,7 @@ public class DeleteLanguageUseCase {
         Language existing = languageRepository.findById(command.id())
                 .orElseThrow(() -> new LanguageNotFoundException(String.valueOf(command.id())));
 
-        long activeEditions = editionRepository.countActiveByLanguageId(command.id());
-        if (activeEditions > 0) {
-            throw new ValidationException(java.util.Map.of(
-                    "languageId", "Cannot delete this language because it has active editions. Delete the editions first."
-            ));
-        }
-
+        languageRepository.softDeleteEditionsByLanguageId(command.id());
         languageRepository.deleteById(command.id());
         workRepository.nullifyOriginalLanguage(command.id());
     }

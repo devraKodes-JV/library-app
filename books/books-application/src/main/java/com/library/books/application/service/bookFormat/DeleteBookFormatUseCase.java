@@ -21,13 +21,7 @@ public class DeleteBookFormatUseCase {
         BookFormat existing = bookFormatRepository.findById(command.id())
                 .orElseThrow(() -> new BookFormatNotFoundException(String.valueOf(command.id())));
 
-        long activeEditions = editionRepository.countActiveByFormatId(command.id());
-        if (activeEditions > 0) {
-            throw new ValidationException(java.util.Map.of(
-                    "formatId", "Cannot delete this format because it has active editions. Delete the editions first."
-            ));
-        }
-
+        bookFormatRepository.softDeleteEditionsByFormatId(command.id());
         bookFormatRepository.deleteById(command.id());
     }
 }

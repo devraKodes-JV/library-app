@@ -22,8 +22,11 @@ public class ListAuthorRolesController extends BaseController {
 
     public void listAuthorRoles(Context ctx) {
         requireCan(ctx, "authorRoles.read");
-        List<AuthorRoleResponseDTO> authorRoles = listAuthorRolesUseCase.execute();
-        ctx.render("books/authorRoles/list", buildListModel(ctx, Map.of("authorRoles", authorRoles)));
+        String status = ctx.queryParamAsClass("status", String.class).getOrDefault("active");
+        List<AuthorRoleResponseDTO> authorRoles = listAuthorRolesUseCase.execute(status);
+        ctx.render("books/authorRoles/list", buildListModel(ctx, Map.of(
+                "authorRoles", authorRoles,
+                "status", status)));
     }
 
     private Map<String, Object> buildListModel(Context ctx, Map<String, Object> extra) {
@@ -35,6 +38,7 @@ public class ListAuthorRolesController extends BaseController {
         model.put("canCreate", hasPermission(ctx, "authorRoles.create"));
         model.put("canUpdate", hasPermission(ctx, "authorRoles.update"));
         model.put("canDelete", hasPermission(ctx, "authorRoles.delete"));
+        model.put("canReactivate", hasPermission(ctx, "authorRoles.reactivate"));
         model.putAll(extra);
         return model;
     }

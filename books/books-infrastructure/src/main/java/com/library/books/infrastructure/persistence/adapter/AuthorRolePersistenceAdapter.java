@@ -25,6 +25,13 @@ public class AuthorRolePersistenceAdapter implements AuthorRoleRepository {
     }
 
     @Override
+    public List<com.library.books.domain.model.AuthorRole> findAll(String status) {
+        return authorRoleRepository.findAll(status).stream()
+                .map(AuthorRoleMapper::toDomain)
+                .toList();
+    }
+
+    @Override
     public Optional<AuthorRole> findById(Long id) {
         return authorRoleRepository.findById(id)
                 .map(AuthorRoleMapper::toDomain);
@@ -52,5 +59,27 @@ public class AuthorRolePersistenceAdapter implements AuthorRoleRepository {
     @Override
     public void deleteById(Long id) {
         authorRoleRepository.deleteById(id);
+    }
+
+    @Override
+    public void reactivateById(Long id) {
+        authorRoleRepository.reactivateById(id);
+    }
+    @Override
+    public void softDeleteWorkAuthorsByRoleId(Long roleId) {
+        authorRoleRepository.softDeleteWorkAuthorsByRoleId(roleId);
+    }
+
+    @Override
+    public void reactivateWorkAuthorsByRoleId(Long roleId) {
+        authorRoleRepository.reactivateWorkAuthorsByRoleId(roleId);
+    }
+    @Override
+    public void softDeleteEditionAuthorsByRoleId(Long roleId) {
+        authorRoleRepository.softDeleteEditionAuthorsByRoleId(roleId);
+    }
+    @Override
+    public void reactivateEditionAuthorsByRoleId(Long roleId) {
+        authorRoleRepository.reactivateEditionAuthorsByRoleId(roleId);
     }
 }

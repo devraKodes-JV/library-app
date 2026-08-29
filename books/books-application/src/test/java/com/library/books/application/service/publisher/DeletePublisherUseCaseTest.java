@@ -29,7 +29,7 @@ class DeletePublisherUseCaseTest {
     }
 
     @Test
-    void deletePublisher_throwsWhenHasActiveEditions() {
+    void deletePublisher_cascadesToEditions() {
         FakePublisherRepository publisherRepository = new FakePublisherRepository();
         FakeEditionRepository editionRepository = new FakeEditionRepository();
         DeletePublisherUseCase useCase = new DeletePublisherUseCase(publisherRepository, editionRepository);
@@ -38,10 +38,9 @@ class DeletePublisherUseCaseTest {
         Edition edition = Edition.withoutId(null, saved.getId(), null, null, "ISBN", 100, 2020, "1st");
         editionRepository.save(edition);
 
-        ValidationException ex = assertThrows(ValidationException.class,
-                () -> useCase.execute(new DeletePublisherCommand(saved.getId())));
-        assertEquals("Cannot delete this publisher because it has active editions. Delete the editions first.",
-                ex.getFieldErrors().get("publisherId"));
+        useCase.execute(new DeletePublisherCommand(saved.getId()));
+
+        assertTrue(publisherRepository.findById(saved.getId()).isEmpty());
     }
 
     @Test
