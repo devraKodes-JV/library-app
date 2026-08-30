@@ -1,10 +1,8 @@
 package com.library.books.application.service.language;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
@@ -20,7 +18,7 @@ class DeleteLanguageUseCaseTest {
         FakeLanguageRepository languageRepository = new FakeLanguageRepository();
         FakeEditionRepository editionRepository = new FakeEditionRepository();
         FakeWorkRepository workRepository = new FakeWorkRepository();
-        DeleteLanguageUseCase useCase = new DeleteLanguageUseCase(languageRepository, editionRepository, workRepository);
+        DeleteLanguageUseCase useCase = new DeleteLanguageUseCase(languageRepository, editionRepository);
 
         Language saved = languageRepository.save(Language.withoutId("EN", "English"));
         useCase.execute(new DeleteLanguageCommand(saved.getId()));
@@ -29,11 +27,11 @@ class DeleteLanguageUseCaseTest {
     }
 
     @Test
-    void deleteLanguage_nullifiesWorksOriginalLanguageId() {
+    void deleteLanguage_preservesWorksOriginalLanguageId() {
         FakeLanguageRepository languageRepository = new FakeLanguageRepository();
         FakeEditionRepository editionRepository = new FakeEditionRepository();
         FakeWorkRepository workRepository = new FakeWorkRepository();
-        DeleteLanguageUseCase useCase = new DeleteLanguageUseCase(languageRepository, editionRepository, workRepository);
+        DeleteLanguageUseCase useCase = new DeleteLanguageUseCase(languageRepository, editionRepository);
 
         Language saved = languageRepository.save(Language.withoutId("EN", "English"));
         Work work = Work.withoutId("Test Work", null, saved.getId(), null, null);
@@ -41,11 +39,8 @@ class DeleteLanguageUseCaseTest {
 
         useCase.execute(new DeleteLanguageCommand(saved.getId()));
 
-        List<Work> works = workRepository.findByOriginalLanguageId(saved.getId());
-        assertTrue(works.isEmpty());
-
-        Work updated = workRepository.findById(work.getId()).orElseThrow();
-        assertEquals(null, updated.getOriginalLanguageId());
+        assertTrue(languageRepository.findById(saved.getId()).isEmpty());
+        // Work reference is preserved (not nullified) so it can be restored on reactivation
     }
 
     @Test
@@ -53,7 +48,7 @@ class DeleteLanguageUseCaseTest {
         FakeLanguageRepository languageRepository = new FakeLanguageRepository();
         FakeEditionRepository editionRepository = new FakeEditionRepository();
         FakeWorkRepository workRepository = new FakeWorkRepository();
-        DeleteLanguageUseCase useCase = new DeleteLanguageUseCase(languageRepository, editionRepository, workRepository);
+        DeleteLanguageUseCase useCase = new DeleteLanguageUseCase(languageRepository, editionRepository);
 
         assertThrows(LanguageNotFoundException.class,
                 () -> useCase.execute(new DeleteLanguageCommand(999L)));

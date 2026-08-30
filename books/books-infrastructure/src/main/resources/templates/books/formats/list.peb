@@ -49,7 +49,7 @@
                     </td>
                     <td class="text-muted">{{ fmt.description | default("N/A") }}</td>
                     <td class="text-end">
-                        {% if canUpdate %}
+                        {% if canUpdate and status != 'inactive' %}
                         <a href="/books/formats/{{ fmt.id }}/edit" class="btn btn-sm btn-outline-secondary" aria-label="Edit {{ fmt.name }}">
                             <i class="bi bi-pencil"></i>
                         </a>
@@ -62,7 +62,7 @@
                             </button>
                         </form>
                     {% endif %}
-                    {% if canDelete %}
+                    {% if canDelete and status != 'inactive' %}
                         <form method="post" action="/books/formats/{{ fmt.id }}/delete" class="d-inline delete-form"
                               data-confirm-title="Delete Format"
                               data-confirm-message="Delete format <strong>{{ fmt.name }}</strong>? This action can be undone.">

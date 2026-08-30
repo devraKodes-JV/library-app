@@ -24,6 +24,7 @@ public interface EditionJpaRepository<T, ID> extends CrudRepository<T, ID> {
     long countActiveByLanguageId(Long languageId);
     void softDeleteEditionsByIds(java.util.List<Long> ids);
     void softDeleteEditionAuthorsByEditionId(Long editionId);
+    void softDeleteEditionAuthorsByEditionIds(List<Long> editionIds);
     void reactivateById(Long id);
     void reactivateEditionAuthorsByEditionId(Long editionId);
     List<T> findAll(String status);

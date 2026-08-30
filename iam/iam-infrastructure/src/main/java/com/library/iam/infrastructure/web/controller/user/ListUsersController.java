@@ -38,17 +38,17 @@ public class ListUsersController {
     public void listUsers(Context ctx) {
         requireCan(ctx, "users.read");
         var current = webContext.currentUser(ctx);
-        List<UserDTO> active = listActiveUsersUseCase.execute();
-        List<UserDTO> inactive = listInactiveUsersUseCase.execute();
+        String status = ctx.queryParamAsClass("status", String.class).getOrDefault("active");
+        var users = listActiveUsersUseCase.execute(status);
         List<?> roles = listRolesUseCase.execute();
         List<?> sections = webContext.navSections(ctx);
 
         ctx.render("users/list", Map.of(
                 "user", current,
                 "navSections", sections,
-                "activeUsers", active,
-                "inactiveUsers", inactive,
+                "users", users,
                 "roles", roles,
+                "status", status,
                 "canCreate", webContext.hasPermission(ctx, "users.create"),
                 "canUpdate", webContext.hasPermission(ctx, "users.update"),
                 "canDelete", webContext.hasPermission(ctx, "users.delete"),

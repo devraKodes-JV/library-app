@@ -19,14 +19,17 @@ public final class CurrentUser {
     }
 
     public static String get() {
-        return USERNAME.orElse(null);
+        return USERNAME.orElse("system");
     }
 
     public static String getOrDefault(String defaultValue) {
+        if (defaultValue == null) {
+            return USERNAME.isBound() ? USERNAME.get() : null;
+        }
         return USERNAME.orElse(defaultValue);
     }
 
     public static boolean isBound() {
-        return USERNAME.orElse(null) != null;
+        return USERNAME.isBound();
     }
 }

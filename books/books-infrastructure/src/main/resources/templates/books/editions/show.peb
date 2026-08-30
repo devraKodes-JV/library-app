@@ -94,7 +94,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% for ea in editionAuthors %}
+                    {% for ea in edition.editionAuthors %}
                     <tr>
                         <td>
                             <a href="/books/authors/{{ ea.authorId }}" class="text-decoration-none text-light">

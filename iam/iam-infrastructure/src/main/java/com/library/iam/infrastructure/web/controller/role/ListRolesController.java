@@ -23,16 +23,19 @@ public class ListRolesController {
     public void listRoles(Context ctx) {
         requireCan(ctx, "roles.read");
         var current = webContext.currentUser(ctx);
-        List<RoleDTO> roles = listRolesUseCase.execute();
+        String status = ctx.queryParamAsClass("status", String.class).getOrDefault("active");
+        var roles = listRolesUseCase.execute(status);
         List<?> sections = webContext.navSections(ctx);
 
         ctx.render("roles/list", Map.of(
                 "roles", roles,
                 "user", current,
                 "navSections", sections,
+                "status", status,
                 "canCreate", webContext.hasPermission(ctx, "roles.create"),
                 "canUpdate", webContext.hasPermission(ctx, "roles.update"),
-                "canDelete", webContext.hasPermission(ctx, "roles.delete")));
+                "canDelete", webContext.hasPermission(ctx, "roles.delete"),
+                "canReinstate", webContext.hasPermission(ctx, "roles.reinstate")));
     }
 
     private void requireCan(Context ctx, String permCode) {

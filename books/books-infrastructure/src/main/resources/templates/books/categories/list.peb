@@ -49,7 +49,7 @@
                     </td>
                     <td class="text-muted">{{ cat.parentId | default("N/A") }}</td>
                     <td class="text-end">
-                        {% if canUpdate %}
+                        {% if canUpdate and status != 'inactive' %}
                         <a href="/books/categories/{{ cat.id }}/edit" class="btn btn-sm btn-outline-secondary" aria-label="Edit {{ cat.name }}">
                             <i class="bi bi-pencil"></i>
                         </a>
@@ -62,7 +62,7 @@
                             </button>
                         </form>
                     {% endif %}
-                    {% if canDelete %}
+                    {% if canDelete and status != 'inactive' %}
                         <form method="post" action="/books/categories/{{ cat.id }}/delete" class="d-inline delete-form"
                               data-confirm-title="Delete Category"
                               data-confirm-message="Delete category <strong>{{ cat.name }}</strong>? This action can be undone.">

@@ -15,7 +15,11 @@ class ListEditionsUseCaseTest {
     @Test
     void listEditions_returnsAllEditions() {
         FakeEditionRepository editionRepository = new FakeEditionRepository();
-        ListEditionsUseCase useCase = new ListEditionsUseCase(editionRepository);
+        FakeWorkRepository workRepository = new FakeWorkRepository();
+        FakePublisherRepository publisherRepository = new FakePublisherRepository();
+        FakeBookFormatRepository bookFormatRepository = new FakeBookFormatRepository();
+        FakeLanguageRepository languageRepository = new FakeLanguageRepository();
+        ListEditionsUseCase useCase = new ListEditionsUseCase(editionRepository, workRepository, publisherRepository, bookFormatRepository, languageRepository);
 
         editionRepository.save(Edition.withoutId(1L, 2L, 3L, 4L, "1234567890", 300, 2020, "1st"));
         editionRepository.save(Edition.withoutId(1L, 2L, 3L, 4L, "1234567890123", 350, 2021, "2nd"));
@@ -30,7 +34,11 @@ class ListEditionsUseCaseTest {
     @Test
     void listEditions_returnsEmptyWhenNone() {
         FakeEditionRepository editionRepository = new FakeEditionRepository();
-        ListEditionsUseCase useCase = new ListEditionsUseCase(editionRepository);
+        FakeWorkRepository workRepository = new FakeWorkRepository();
+        FakePublisherRepository publisherRepository = new FakePublisherRepository();
+        FakeBookFormatRepository bookFormatRepository = new FakeBookFormatRepository();
+        FakeLanguageRepository languageRepository = new FakeLanguageRepository();
+        ListEditionsUseCase useCase = new ListEditionsUseCase(editionRepository, workRepository, publisherRepository, bookFormatRepository, languageRepository);
 
         List<EditionResponseDTO> result = useCase.execute();
 

@@ -263,6 +263,7 @@ public class HibernateWorkRepository extends AbstractHibernateRepository impleme
             }
 
             List<FlatAuthorDTO> authorDTOs = workEntity.getWorkAuthors() != null ? workEntity.getWorkAuthors().stream()
+                    .filter(wa -> wa.getDeletedAt() == null)
                     .map(wa -> {
                         AuthorEntity author = wa.getAuthor();
                         String fullName = author != null ? (author.getFirstName() + " " + author.getLastName()).trim() : "";
@@ -318,7 +319,7 @@ public class HibernateWorkRepository extends AbstractHibernateRepository impleme
     public long countActiveAuthorsByWorkId(Long workId) {
         try (Session session = sessionFactory.openSession()) {
             Long count = session.createQuery(
-                            "select count(wa) from WorkAuthorEntity wa where wa.workId = :workId and wa.deletedAt is null and wa.enabled = true",
+                            "select count(wa) from WorkAuthorEntity wa join AuthorEntity a on wa.authorId = a.id where wa.workId = :workId and wa.deletedAt is null and wa.enabled = true and a.deletedAt is null and a.enabled = true",
                             Long.class)
                     .setParameter("workId", workId)
                     .uniqueResult();

@@ -112,6 +112,23 @@ public class HibernateUserRepository implements UserJpaRepository<UserEntity, Lo
     }
 
     @Override
+    public List<UserEntity> findAll(String status) {
+        try (Session session = sessionFactory.openSession()) {
+            String hql = "select distinct u from UserEntity u "
+                    + "left join fetch u.role r "
+                    + "left join fetch r.permissions p "
+                    + "left join fetch p.module ";
+            if ("active".equals(status)) {
+                hql += "where u.deletedAt is null and u.enabled = true ";
+            } else if ("inactive".equals(status)) {
+                hql += "where u.deletedAt is not null or u.enabled = false ";
+            }
+            hql += "order by u.username";
+            return session.createQuery(hql, UserEntity.class).getResultList();
+        }
+    }
+
+    @Override
     public List<UserEntity> findInactive() {
         try (Session session = sessionFactory.openSession()) {
             // Accounts that are disabled (enabled = false) OR logically deleted
@@ -122,7 +139,7 @@ public class HibernateUserRepository implements UserJpaRepository<UserEntity, Lo
                     + "left join fetch u.role r "
                     + "left join fetch r.permissions p "
                     + "left join fetch p.module "
-                    + "where u.deletedAt is not null and u.enabled = false "
+                    +                     "where u.deletedAt is not null or u.enabled = false "
                     + "order by u.username",
                     UserEntity.class)
                     .getResultList();

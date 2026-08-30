@@ -127,6 +127,8 @@ public class FakeEditionRepository implements EditionRepository {
     @Override
     public void softDeleteEditionsByIds(List<Long> ids) {}
     @Override
+    public void softDeleteEditionAuthorsByEditionIds(java.util.List<Long> editionIds) {}
+
     public void softDeleteEditionAuthorsByEditionId(Long editionId) {}
 
     @Override

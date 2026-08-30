@@ -23,7 +23,7 @@ public class HibernateEditionRepository extends AbstractHibernateRepository impl
     public Optional<Edition> findByIdIncludingDeleted(Long id) {
         try (Session session = sessionFactory.openSession()) {
             EditionEntity edition = session.createQuery(
-                    "select e from EditionEntity e where e.id = :id",
+                    "select e from EditionEntity e left join fetch e.editionAuthors where e.id = :id",
                     EditionEntity.class)
                     .setParameter("id", id)
                     .uniqueResult();
@@ -35,7 +35,7 @@ public class HibernateEditionRepository extends AbstractHibernateRepository impl
     public Optional<EditionEntity> findById(Long id) {
         try (Session session = sessionFactory.openSession()) {
             EditionEntity edition = session.createQuery(
-                    "select e from EditionEntity e where e.id = :id and e.deletedAt is null",
+                    "select e from EditionEntity e left join fetch e.editionAuthors where e.id = :id and e.deletedAt is null",
                     EditionEntity.class)
                     .setParameter("id", id)
                     .uniqueResult();
@@ -47,7 +47,7 @@ public class HibernateEditionRepository extends AbstractHibernateRepository impl
     public List<EditionEntity> findAll() {
         try (Session session = sessionFactory.openSession()) {
             return session.createQuery(
-                    "select e from EditionEntity e where e.deletedAt is null order by e.workId, e.editionNumber",
+                    "select e from EditionEntity e left join fetch e.editionAuthors where e.deletedAt is null order by e.workId, e.editionNumber",
                     EditionEntity.class)
                     .getResultList();
         }
@@ -55,9 +55,10 @@ public class HibernateEditionRepository extends AbstractHibernateRepository impl
     @Override
     public List<EditionEntity> findAll(String status) {
         try (Session session = sessionFactory.openSession()) {
-            String hql = "select e from EditionEntity e";
+            String hql = "select e from EditionEntity e left join fetch e.editionAuthors";
             if ("active".equals(status)) hql += " where e.deletedAt is null";
             else if ("inactive".equals(status)) hql += " where e.deletedAt is not null";
+            else hql += " where 1=1";
             hql += " order by e.workId, e.editionNumber";
             return session.createQuery(hql, EditionEntity.class).getResultList();
         }
@@ -68,7 +69,7 @@ public class HibernateEditionRepository extends AbstractHibernateRepository impl
     public List<EditionEntity> findByWorkId(Long workId) {
         try (Session session = sessionFactory.openSession()) {
             return session.createQuery(
-                    "select e from EditionEntity e where e.workId = :workId and e.deletedAt is null order by e.editionNumber",
+                    "select e from EditionEntity e left join fetch e.editionAuthors where e.workId = :workId and e.deletedAt is null order by e.editionNumber",
                     EditionEntity.class)
                     .setParameter("workId", workId)
                     .getResultList();
@@ -79,7 +80,7 @@ public class HibernateEditionRepository extends AbstractHibernateRepository impl
     public List<EditionEntity> findByPublisherId(Long publisherId) {
         try (Session session = sessionFactory.openSession()) {
             return session.createQuery(
-                    "select e from EditionEntity e where e.publisherId = :publisherId and e.deletedAt is null order by e.workId, e.editionNumber",
+                    "select e from EditionEntity e left join fetch e.editionAuthors where e.publisherId = :publisherId and e.deletedAt is null order by e.workId, e.editionNumber",
                     EditionEntity.class)
                     .setParameter("publisherId", publisherId)
                     .getResultList();
@@ -90,7 +91,7 @@ public class HibernateEditionRepository extends AbstractHibernateRepository impl
     public List<EditionEntity> findByFormatId(Long formatId) {
         try (Session session = sessionFactory.openSession()) {
             return session.createQuery(
-                    "select e from EditionEntity e where e.formatId = :formatId and e.deletedAt is null order by e.workId, e.editionNumber",
+                    "select e from EditionEntity e left join fetch e.editionAuthors where e.formatId = :formatId and e.deletedAt is null order by e.workId, e.editionNumber",
                     EditionEntity.class)
                     .setParameter("formatId", formatId)
                     .getResultList();
@@ -138,7 +139,7 @@ public class HibernateEditionRepository extends AbstractHibernateRepository impl
     public List<Edition> findSummariesByPublisherId(Long publisherId) {
         try (Session session = sessionFactory.openSession()) {
             List<EditionEntity> editionEntities = session.createQuery(
-                    "select e from EditionEntity e where e.publisherId = :publisherId and e.deletedAt is null order by e.workId, e.editionNumber",
+                    "select e from EditionEntity e left join fetch e.editionAuthors where e.publisherId = :publisherId and e.deletedAt is null order by e.workId, e.editionNumber",
                     EditionEntity.class)
                     .setParameter("publisherId", publisherId)
                     .getResultList();
@@ -152,7 +153,7 @@ public class HibernateEditionRepository extends AbstractHibernateRepository impl
     public List<Edition> findSummariesByFormatId(Long formatId) {
         try (Session session = sessionFactory.openSession()) {
             List<EditionEntity> editionEntities = session.createQuery(
-                    "select e from EditionEntity e where e.formatId = :formatId and e.deletedAt is null order by e.workId, e.editionNumber",
+                    "select e from EditionEntity e left join fetch e.editionAuthors where e.formatId = :formatId and e.deletedAt is null order by e.workId, e.editionNumber",
                     EditionEntity.class)
                     .setParameter("formatId", formatId)
                     .getResultList();
@@ -166,7 +167,7 @@ public class HibernateEditionRepository extends AbstractHibernateRepository impl
     public Optional<Edition> findDetailById(Long id) {
         try (Session session = sessionFactory.openSession()) {
             EditionEntity editionEntity = session.createQuery(
-                    "select e from EditionEntity e where e.id = :id and e.deletedAt is null",
+                    "select e from EditionEntity e left join fetch e.editionAuthors where e.id = :id and e.deletedAt is null",
                     EditionEntity.class)
                     .setParameter("id", id)
                     .uniqueResult();
@@ -285,6 +286,17 @@ public class HibernateEditionRepository extends AbstractHibernateRepository impl
                 .executeUpdate());
     }
 
+    @Override
+    public void softDeleteEditionAuthorsByEditionIds(List<Long> editionIds) {
+        if (editionIds == null || editionIds.isEmpty()) {
+            return;
+        }
+        consumeWithSession(session -> session.createMutationQuery(
+                        "update EditionAuthorEntity e set e.deletedAt = :now, e.enabled = false where e.editionId in :editionIds and e.deletedAt is null and e.enabled = true")
+                .setParameter("now", java.time.Instant.now())
+                .setParameter("editionIds", editionIds)
+                .executeUpdate());
+    }
 
     @Override
     public void reactivateById(Long id) {

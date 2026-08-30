@@ -43,6 +43,25 @@ public class RolePersistenceAdapter implements RolePort {
     }
 
     @Override
+    public List<Role> findAll(String status) {
+        return roleJpaRepository.findAll(status).stream()
+                .map(RoleMapper::toDomain)
+                .toList();
+    }
+
+    @Override
+    public List<Role> findInactive() {
+        return roleJpaRepository.findInactive().stream()
+                .map(RoleMapper::toDomain)
+                .toList();
+    }
+
+    @Override
+    public void reinstate(Long id) {
+        roleJpaRepository.reinstate(id);
+    }
+
+    @Override
     public Role save(Role role) {
         RoleEntity entity = RoleMapper.toEntity(role);
         RoleEntity saved = roleJpaRepository.save(entity);

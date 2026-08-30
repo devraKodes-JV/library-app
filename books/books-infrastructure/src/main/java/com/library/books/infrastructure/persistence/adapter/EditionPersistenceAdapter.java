@@ -97,6 +97,11 @@ public class EditionPersistenceAdapter implements EditionRepository {
     }
 
     @Override
+    public void softDeleteEditionAuthorsByEditionIds(List<Long> editionIds) {
+        editionAuthorJpaRepository.softDeleteByEditionIds(editionIds);
+    }
+
+    @Override
     public void reactivateEditionAuthorsByEditionId(Long editionId) {
         editionAuthorJpaRepository.reactivateByEditionId(editionId);
     }

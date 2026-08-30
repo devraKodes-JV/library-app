@@ -53,7 +53,7 @@
                     <td class="text-muted">{{ edition.isbn | default("N/A") }}</td>
                     <td class="text-muted">{{ edition.publicationYear | default("N/A") }}</td>
                     <td class="text-end">
-                        {% if canUpdate %}
+                        {% if canUpdate and status != 'inactive' %}
                         <a href="/books/editions/{{ edition.id }}/edit" class="btn btn-sm btn-outline-secondary" aria-label="Edit edition #{{ edition.editionNumber }}">
                             <i class="bi bi-pencil"></i>
                         </a>
@@ -66,7 +66,7 @@
                             </button>
                         </form>
                     {% endif %}
-                    {% if canDelete %}
+                    {% if canDelete and status != 'inactive' %}
                         <form method="post" action="/books/editions/{{ edition.id }}/delete" class="d-inline delete-form"
                               data-confirm-title="Delete Edition"
                               data-confirm-message="Delete edition <strong>{{ edition.editionNumber }}</strong>? This action can be undone.">

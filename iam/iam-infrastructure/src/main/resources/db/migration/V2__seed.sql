@@ -35,7 +35,8 @@ INSERT INTO permissions (code, name, menu_label, icon, url, sort_order, module_i
     ('roles.create',  'Create Roles',   NULL,               NULL,              NULL, 10, 2),
     ('roles.read',    'View Roles',     'Roles',            'bi-person-badge', '/iam/roles', 11, 2),
     ('roles.update',  'Edit Roles',     NULL,               NULL,              NULL, 12, 2),
-    ('roles.delete',  'Delete Roles',   NULL,               NULL,              NULL, 13, 2);
+    ('roles.delete',  'Delete Roles',   NULL,               NULL,              NULL, 13, 2),
+    ('roles.reinstate', 'Reinstate Roles', NULL,             NULL,              NULL, 14, 2);
 
 -- IAM: users (CRUD)
 INSERT INTO permissions (code, name, menu_label, icon, url, sort_order, module_id) VALUES

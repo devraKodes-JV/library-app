@@ -55,7 +55,7 @@
                         {% endif %}
                     </td>
                     <td class="text-end">
-                        {% if canUpdate %}
+                        {% if canUpdate and status != 'inactive' %}
                         <a href="/books/publishers/{{ pub.id }}/edit" class="btn btn-sm btn-outline-secondary" aria-label="Edit {{ pub.name }}">
                             <i class="bi bi-pencil"></i>
                         </a>
@@ -68,7 +68,7 @@
                             </button>
                         </form>
                     {% endif %}
-                    {% if canDelete %}
+                    {% if canDelete and status != 'inactive' %}
                         <form method="post" action="/books/publishers/{{ pub.id }}/delete" class="d-inline delete-form"
                               data-confirm-title="Delete Publisher"
                               data-confirm-message="Delete publisher <strong>{{ pub.name }}</strong>? This action can be undone.">

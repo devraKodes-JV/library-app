@@ -102,6 +102,10 @@ public class CreateEditionController extends BaseController {
             model.putAll(e.getFieldErrors());
             ctx.render("books/editions/form", model);
             return;
+        } catch (RuntimeException e) {
+            flashDanger(ctx, "Could not create edition: " + e.getMessage());
+            ctx.redirect("/books/editions/new");
+            return;
         }
     }
 

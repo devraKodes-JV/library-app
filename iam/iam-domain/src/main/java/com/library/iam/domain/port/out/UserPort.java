@@ -50,6 +50,8 @@ public interface UserPort {
      */
     List<User> findAll();
 
+    List<User> findAll(String status);
+
     /**
      * Finds a non-deleted user by its identifier.
      *

@@ -49,7 +49,9 @@ public final class RateLimitingFilter {
                         "IP rate limit exceeded for " + method + " " + path
                     );
                     ctx.status(429);
-                    ctx.html(rateLimitHtml(path));
+                    long remaining = remainingSeconds(clientIp, ipRateLimitStore, IP_REQUESTS_PER_MINUTE);
+                    ctx.header("Retry-After", String.valueOf(remaining));
+                    ctx.html(rateLimitHtml(path, remaining));
                     ctx.skipRemainingHandlers();
                     return;
                 }
@@ -64,7 +66,9 @@ public final class RateLimitingFilter {
                             "User rate limit exceeded for login"
                         );
                         ctx.status(429);
-                        ctx.html(rateLimitHtml(path));
+                        long remaining = remainingSeconds("user:" + username, userRateLimitStore, USER_REQUESTS_PER_MINUTE);
+                        ctx.header("Retry-After", String.valueOf(remaining));
+                        ctx.html(rateLimitHtml(path, remaining));
                         ctx.skipRemainingHandlers();
                         return;
                     }
@@ -111,6 +115,15 @@ public final class RateLimitingFilter {
             int current = counter.getCount().incrementAndGet();
             return current <= maxRequests;
         }
+    }
+
+    private static long remainingSeconds(String key, ExpiringCache<String, RateLimitCounter> cache, int maxRequests) {
+        RateLimitCounter counter = cache.get(key);
+        if (counter == null) {
+            return TIME_WINDOW_SECONDS;
+        }
+        long elapsed = (System.currentTimeMillis() - counter.getWindowStart()) / 1000;
+        return Math.max(1, TIME_WINDOW_SECONDS - elapsed);
     }
     
     private static String getClientIp(Context ctx) {
@@ -161,8 +174,8 @@ public final class RateLimitingFilter {
                Long.parseLong(parts[3]);
     }
     
-    private static String rateLimitHtml(String path) {
-        return """
+    private static String rateLimitHtml(String path, long remainingSeconds) {
+        String template = """
             <!DOCTYPE html>
             <html lang="en">
             <head>
@@ -172,6 +185,9 @@ public final class RateLimitingFilter {
                 <link rel="stylesheet" href="/css/bootstrap.min.css">
                 <link rel="stylesheet" href="/css/bootstrap-icons.min.css">
                 <link rel="stylesheet" href="/css/app.base.css">
+                <style>
+                    .countdown-number { font-size: 2.5rem; font-weight: bold; color: #ffc107; }
+                </style>
             </head>
             <body class="login-page">
                 <div class="login-card">
@@ -184,13 +200,34 @@ public final class RateLimitingFilter {
                         <i class="bi bi-exclamation-triangle"></i>
                         You have made too many requests. Please wait a moment and try again.
                     </div>
+                    <div class="text-center my-4">
+                        <p class="text-muted mb-2">Retrying in:</p>
+                        <span id="countdown" class="countdown-number">%d</span> <span class="text-muted">seconds</span>
+                    </div>
                     <div class="text-center mt-3">
-                        <a href="/login" class="btn btn-primary">Return to Login</a>
+                        <a href="/login" class="btn btn-primary" id="retry-link" style="display: none;">Return to Login</a>
                     </div>
                 </div>
+                <script>
+                    var secondsLeft = %d;
+                    var countdownEl = document.getElementById('countdown');
+                    var retryLink = document.getElementById('retry-link');
+                    var timer = setInterval(function() {
+                        secondsLeft--;
+                        if (secondsLeft <= 0) {
+                            clearInterval(timer);
+                            countdownEl.textContent = '0';
+                            retryLink.style.display = 'inline-block';
+                            window.location.reload();
+                        } else {
+                            countdownEl.textContent = secondsLeft;
+                        }
+                    }, 1000);
+                </script>
             </body>
             </html>
             """;
+        return String.format(template, remainingSeconds, remainingSeconds);
     }
     
     private static class RateLimitCounter {

@@ -14,6 +14,7 @@ import com.library.iam.application.service.role.CreateRoleUseCase;
 import com.library.iam.application.service.role.DeleteRoleUseCase;
 import com.library.iam.application.service.role.GetRoleDetailUseCase;
 import com.library.iam.application.service.role.ListRolesUseCase;
+import com.library.iam.application.service.role.ReinstateRoleUseCase;
 import com.library.iam.application.service.role.UpdateRoleUseCase;
 import com.library.iam.application.service.user.CreateUserUseCase;
 import com.library.iam.application.service.user.DeleteUserUseCase;
@@ -53,6 +54,7 @@ import com.library.iam.infrastructure.web.controller.permission.ListPermissionsC
 import com.library.iam.infrastructure.web.controller.role.CreateRoleController;
 import com.library.iam.infrastructure.web.controller.role.DeleteRoleController;
 import com.library.iam.infrastructure.web.controller.role.ListRolesController;
+import com.library.iam.infrastructure.web.controller.role.ReinstateRoleController;
 import com.library.iam.infrastructure.web.controller.role.UpdateRoleController;
 import com.library.iam.infrastructure.web.controller.user.CreateUserController;
 import com.library.iam.infrastructure.web.controller.user.DeleteUserController;
@@ -95,6 +97,7 @@ public final class IamFactory {
         CreateRoleUseCase createRoleUseCase = new CreateRoleUseCase(rolePort, permissionPort, notificationService, createRoleCommandValidator);
         UpdateRoleUseCase updateRoleUseCase = new UpdateRoleUseCase(rolePort, permissionPort, notificationService, updateRoleCommandValidator);
         DeleteRoleUseCase deleteRoleUseCase = new DeleteRoleUseCase(rolePort, notificationService);
+        ReinstateRoleUseCase reinstateRoleUseCase = new ReinstateRoleUseCase(rolePort, notificationService);
 
         ListActiveUsersUseCase listActiveUsersUseCase = new ListActiveUsersUseCase(userPort);
         ListInactiveUsersUseCase listInactiveUsersUseCase = new ListInactiveUsersUseCase(userPort);
@@ -123,6 +126,7 @@ public final class IamFactory {
                 listPermissionsGroupedByModuleUseCase,
                 webContext);
         DeleteRoleController deleteRoleController = new DeleteRoleController(deleteRoleUseCase, webContext);
+        ReinstateRoleController reinstateRoleController = new ReinstateRoleController(reinstateRoleUseCase, webContext);
         ListUsersController listUsersController = new ListUsersController(
                 listActiveUsersUseCase,
                 listInactiveUsersUseCase,
@@ -151,6 +155,7 @@ public final class IamFactory {
                 createRoleController,
                 updateRoleController,
                 deleteRoleController,
+                reinstateRoleController,
                 listUsersController,
                 createUserController,
                 updateUserController,

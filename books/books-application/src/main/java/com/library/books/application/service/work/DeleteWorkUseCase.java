@@ -26,9 +26,9 @@ public class DeleteWorkUseCase {
 
         List<Edition> editions = editionRepository.findByWorkId(command.id());
         if (!editions.isEmpty()) {
-            editionRepository.softDeleteEditionsByIds(
-                    editions.stream().map(Edition::getId).toList()
-            );
+            List<Long> editionIds = editions.stream().map(Edition::getId).toList();
+            editionRepository.softDeleteEditionAuthorsByEditionIds(editionIds);
+            editionRepository.softDeleteEditionsByIds(editionIds);
         }
 
         workRepository.deleteById(command.id());

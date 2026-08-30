@@ -47,7 +47,7 @@
                     <td class="text-muted">{{ author.biography | default("N/A") }}</td>
                     <td class="text-muted">{{ author.birthDate | default("N/A") }} - {{ author.deathDate | default("present") }}</td>
                     <td class="text-end">
-                        {% if canUpdate %}
+                        {% if canUpdate and status != 'inactive' %}
                         <a href="/books/authors/{{ author.id }}/edit" class="btn btn-sm btn-outline-secondary" aria-label="Edit {{ author.fullName }}">
                             <i class="bi bi-pencil"></i>
                         </a>
@@ -60,7 +60,7 @@
                             </button>
                         </form>
                     {% endif %}
-                    {% if canDelete %}
+                    {% if canDelete and status != 'inactive' %}
                         <form method="post" action="/books/authors/{{ author.id }}/delete" class="d-inline delete-form"
                               data-confirm-title="Delete Author"
                               data-confirm-message="Delete author <strong>{{ author.fullName }}</strong>? This action can be undone.">

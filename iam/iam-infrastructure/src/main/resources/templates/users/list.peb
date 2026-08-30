@@ -16,11 +16,13 @@
     {% endif %}
 </div>
 
-<!-- Active users -->
+<div class="d-flex gap-2 mb-3">
+    <a href="?status=active" class="btn btn-sm {% if status == 'active' %}btn-primary{% else %}btn-outline-secondary{% endif %}">Active</a>
+    <a href="?status=inactive" class="btn btn-sm {% if status == 'inactive' %}btn-primary{% else %}btn-outline-secondary{% endif %}">Inactive</a>
+    <a href="?status=all" class="btn btn-sm {% if status == 'all' %}btn-primary{% else %}btn-outline-secondary{% endif %}">All</a>
+</div>
+
 <div class="card mt-3 bg-dark border-secondary">
-    <div class="card-header bg-dark border-secondary text-light">
-        <i class="bi bi-people"></i> Active Users
-    </div>
     <div class="table-responsive container">
         <table class="table table-hover align-middle mb-0 data-table text-light">
             <thead>
@@ -34,27 +36,39 @@
             </tr>
             </thead>
             <tbody>
-            {% for u in activeUsers %}
+            {% for u in users %}
             <tr>
                 <td><strong>{{ u.username }}</strong></td>
                 <td>{{ u.fullName }}</td>
                 <td>{{ u.email }}</td>
-                <td><span class="badge bg-primary">{{ u.role.name }}</span></td>
+                <td><span class="badge bg-primary">{{ u.roleName }}</span></td>
                 <td>
-                    {% if u.enabled %}
-                    <span class="badge bg-success">Active</span>
-                    {% else %}
+                    {% if u.deletedAt is not null %}
+                    <span class="badge bg-danger">Deleted</span>
+                    {% elseif not u.enabled %}
                     <span class="badge bg-warning text-dark">Disabled</span>
+                    {% else %}
+                    <span class="badge bg-success">Active</span>
                     {% endif %}
                 </td>
                 <td class="text-end">
-                    {% if canUpdate %}
+                    {% if canUpdate and status != 'inactive' %}
                     <a href="/iam/users/{{ u.id }}/edit" class="btn btn-sm btn-outline-secondary"
                        aria-label="Edit {{ u.username }}">
                         <i class="bi bi-pencil"></i>
                     </a>
                     {% endif %}
-                    {% if canDelete %}
+                    {% if status == 'inactive' and canReinstate %}
+                    <form method="post" action="/iam/users/{{ u.id }}/reinstate" class="d-inline reactivate-form"
+                          data-confirm-title="Reinstate User"
+                          data-confirm-message="Reinstate user <strong>{{ u.username }}</strong>?">
+                        {{ csrf.token(csrfToken) }}
+                        <button type="submit" class="btn btn-sm btn-outline-success" aria-label="Reinstate {{ u.username }}">
+                            <i class="bi bi-arrow-counterclockwise"></i> Reinstate
+                        </button>
+                    </form>
+                    {% endif %}
+                    {% if canDelete and status != 'inactive' %}
                     <form method="post" action="/iam/users/{{ u.id }}/delete" class="d-inline delete-form"
                           data-confirm-title="Delete User"
                           data-confirm-message="Delete user <strong>{{ u.username }}</strong>? This action can be undone by reinstating the user.">
@@ -67,66 +81,10 @@
                 </td>
             </tr>
             {% endfor %}
-            {% if activeUsers is empty %}
-            <tr class="d-none"></tr>
-            {% endif %}
             </tbody>
         </table>
     </div>
 </div>
-
-<!-- Inactive (disabled / deleted) users section -->
-{% if canReinstate %}
-<div class="card mt-4 bg-dark border-secondary">
-    <div class="card-header bg-dark border-secondary text-light">
-        <i class="bi bi-person-dash"></i> Inactive Accounts
-    </div>
-    <div class="table-responsive container">
-        <table class="table table-hover align-middle mb-0 data-table text-light">
-            <thead>
-            <tr>
-                <th>Username</th>
-                <th>Full Name</th>
-                <th>Email</th>
-                <th>Role</th>
-                <th>Reason</th>
-                <th class="text-end">Actions</th>
-            </tr>
-            </thead>
-            <tbody>
-            {% for u in inactiveUsers %}
-            <tr>
-                <td><strong>{{ u.username }}</strong></td>
-                <td>{{ u.fullName }}</td>
-                <td>{{ u.email }}</td>
-                <td><span class="badge bg-secondary">{{ u.role.name }}</span></td>
-                <td>
-                    {% if u.isDeleted %}
-                    <span class="badge bg-danger">Deleted</span>
-                    {% else %}
-                    <span class="badge bg-warning text-dark">Disabled</span>
-                    {% endif %}
-                </td>
-                <td class="text-end">
-                    <form method="post" action="/iam/users/{{ u.id }}/reinstate" class="d-inline delete-form"
-                          data-confirm-title="Reinstate User"
-                          data-confirm-message="Reinstate user <strong>{{ u.username }}</strong>?">
-                        {{ csrf.token(csrfToken) }}
-                        <button type="submit" class="btn btn-sm btn-outline-success" aria-label="Reinstate {{ u.username }}">
-                            <i class="bi bi-arrow-counterclockwise"></i> Reinstate
-                        </button>
-                    </form>
-                </td>
-            </tr>
-            {% endfor %}
-            {% if inactiveUsers is empty %}
-            <tr class="d-none"></tr>
-            {% endif %}
-            </tbody>
-        </table>
-    </div>
-</div>
-{% endif %}
 {% endblock %}
 
 {% block scripts %}

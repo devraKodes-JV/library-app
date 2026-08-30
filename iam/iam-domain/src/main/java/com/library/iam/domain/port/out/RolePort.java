@@ -36,6 +36,12 @@ public interface RolePort {
      */
     List<Role> findAll();
 
+    List<Role> findAll(String status);
+
+    List<Role> findInactive();
+
+    void reinstate(Long id);
+
     /**
      * Persists a role.
      *

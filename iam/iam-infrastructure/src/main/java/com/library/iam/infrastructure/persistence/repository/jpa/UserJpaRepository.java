@@ -56,6 +56,14 @@ public interface UserJpaRepository<T, ID> extends CrudRepository<T, ID>, Findabl
     List<T> findInactive();
 
     /**
+     * Lists users filtered by status.
+     *
+     * @param status "active", "inactive", or "all"
+     * @return the list of user entities matching the status
+     */
+    List<T> findAll(String status);
+
+    /**
      * Reinstate a user account (double-check).
      *
      * <p>Clears BOTH the {@code enabled} flag (sets it to true) and the

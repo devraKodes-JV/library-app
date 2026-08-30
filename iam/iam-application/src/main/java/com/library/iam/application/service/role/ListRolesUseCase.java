@@ -14,7 +14,11 @@ public class ListRolesUseCase {
     }
 
     public List<RoleDTO> execute() {
-        return rolePort.findAll().stream()
+        return execute("active");
+    }
+
+    public List<RoleDTO> execute(String status) {
+        return rolePort.findAll(status).stream()
                 .map(RoleDTO::of)
                 .toList();
     }

@@ -72,6 +72,49 @@ public class HibernateRoleRepository implements RoleJpaRepository<RoleEntity, Lo
     }
 
     @Override
+    public List<RoleEntity> findAll(String status) {
+        try (Session session = sessionFactory.openSession()) {
+            String hql = "select distinct r from RoleEntity r "
+                    + "left join fetch r.permissions p "
+                    + "left join fetch p.module ";
+            if ("active".equals(status)) {
+                hql += "where r.deletedAt is null and r.enabled = true ";
+            } else if ("inactive".equals(status)) {
+                hql += "where r.deletedAt is not null or r.enabled = false ";
+            }
+            hql += "order by r.name";
+            return session.createQuery(hql, RoleEntity.class).getResultList();
+        }
+    }
+
+    @Override
+    public List<RoleEntity> findInactive() {
+        try (Session session = sessionFactory.openSession()) {
+            return session.createQuery(
+                    "select distinct r from RoleEntity r "
+                    + "left join fetch r.permissions p "
+                    + "left join fetch p.module "
+                    + "where r.deletedAt is not null or r.enabled = false "
+                    + "order by r.name",
+                    RoleEntity.class)
+                    .getResultList();
+        }
+    }
+
+    @Override
+    public void reinstate(Long id) {
+        try (Session session = sessionFactory.openSession()) {
+            session.beginTransaction();
+            session.createMutationQuery(
+                    "update RoleEntity r set r.deletedAt = null, r.enabled = true "
+                    + "where r.id = :id")
+                    .setParameter("id", id)
+                    .executeUpdate();
+            session.getTransaction().commit();
+        }
+    }
+
+    @Override
     public RoleEntity save(RoleEntity role) {
         try (Session session = sessionFactory.openSession()) {
             session.beginTransaction();

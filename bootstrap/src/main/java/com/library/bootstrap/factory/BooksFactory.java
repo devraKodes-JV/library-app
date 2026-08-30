@@ -198,7 +198,7 @@ public final class BooksFactory {
 
         CreateCategoryUseCase createCategoryUseCase = new CreateCategoryUseCase(categoryRepository, categoryValidator);
         UpdateCategoryUseCase updateCategoryUseCase = new UpdateCategoryUseCase(categoryRepository, categoryValidator);
-        DeleteCategoryUseCase deleteCategoryUseCase = new DeleteCategoryUseCase(categoryRepository, workRepository);
+        DeleteCategoryUseCase deleteCategoryUseCase = new DeleteCategoryUseCase(categoryRepository);
         GetCategoryUseCase getCategoryUseCase = new GetCategoryUseCase(categoryRepository);
         ListCategoriesUseCase listCategoriesUseCase = new ListCategoriesUseCase(categoryRepository);
 
@@ -206,14 +206,14 @@ public final class BooksFactory {
         UpdateEditionUseCase updateEditionUseCase = new UpdateEditionUseCase(editionRepository, editionValidator, publisherRepository, bookFormatRepository, languageRepository, editionAuthorRepository);
         DeleteEditionUseCase deleteEditionUseCase = new DeleteEditionUseCase(editionRepository, editionAuthorRepository);
         GetEditionUseCase getEditionUseCase = new GetEditionUseCase(editionRepository, workRepository, publisherRepository, bookFormatRepository, languageRepository);
-        ListEditionsUseCase listEditionsUseCase = new ListEditionsUseCase(editionRepository);
+        ListEditionsUseCase listEditionsUseCase = new ListEditionsUseCase(editionRepository, workRepository, publisherRepository, bookFormatRepository, languageRepository);
         ListEditionsByPublisherUseCase listEditionsByPublisherUseCase = new ListEditionsByPublisherUseCase(editionRepository);
         ListEditionsByFormatUseCase listEditionsByFormatUseCase = new ListEditionsByFormatUseCase(editionRepository);
         ListEditionsByWorkUseCase listEditionsByWorkUseCase = new ListEditionsByWorkUseCase(editionRepository);
 
         CreateLanguageUseCase createLanguageUseCase = new CreateLanguageUseCase(languageRepository, languageValidator);
         UpdateLanguageUseCase updateLanguageUseCase = new UpdateLanguageUseCase(languageRepository, languageValidator);
-        DeleteLanguageUseCase deleteLanguageUseCase = new DeleteLanguageUseCase(languageRepository, editionRepository, workRepository);
+        DeleteLanguageUseCase deleteLanguageUseCase = new DeleteLanguageUseCase(languageRepository, editionRepository);
         GetLanguageUseCase getLanguageUseCase = new GetLanguageUseCase(languageRepository);
         ListLanguagesUseCase listLanguagesUseCase = new ListLanguagesUseCase(languageRepository);
 

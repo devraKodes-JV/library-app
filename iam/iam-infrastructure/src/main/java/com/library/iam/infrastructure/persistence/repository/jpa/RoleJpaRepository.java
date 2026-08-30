@@ -1,5 +1,7 @@
 package com.library.iam.infrastructure.persistence.repository.jpa;
 
+import java.util.List;
+
 import com.library.iam.infrastructure.persistence.entity.RoleEntity;
 import com.library.kernel.jpa.CrudRepository;
 import com.library.kernel.jpa.FindableByName;
@@ -14,5 +16,10 @@ import com.library.kernel.jpa.FindableByName;
  * implementation lives in {@code repository.hibernate.HibernateRoleRepository}.</p>
  */
 public interface RoleJpaRepository<T, ID> extends CrudRepository<T, ID>, FindableByName<T> {
-    // Types fixed to RoleEntity / Long only.
+
+    List<T> findAll(String status);
+
+    List<T> findInactive();
+
+    void reinstate(ID id);
 }

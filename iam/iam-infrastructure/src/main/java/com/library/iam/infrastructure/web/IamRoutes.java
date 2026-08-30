@@ -10,6 +10,7 @@ import com.library.iam.infrastructure.web.controller.permission.ListPermissionsC
 import com.library.iam.infrastructure.web.controller.role.CreateRoleController;
 import com.library.iam.infrastructure.web.controller.role.DeleteRoleController;
 import com.library.iam.infrastructure.web.controller.role.ListRolesController;
+import com.library.iam.infrastructure.web.controller.role.ReinstateRoleController;
 import com.library.iam.infrastructure.web.controller.role.UpdateRoleController;
 import com.library.iam.infrastructure.web.controller.user.CreateUserController;
 import com.library.iam.infrastructure.web.controller.user.DeleteUserController;
@@ -36,7 +37,8 @@ public final class IamRoutes {
                                 ListRolesController listRolesController,
                                 CreateRoleController createRoleController,
                                 UpdateRoleController updateRoleController,
-                                DeleteRoleController deleteRoleController,
+                                 DeleteRoleController deleteRoleController,
+                                 ReinstateRoleController reinstateRoleController,
                                 ListUsersController listUsersController,
                                 CreateUserController createUserController,
                                 UpdateUserController updateUserController,
@@ -61,6 +63,7 @@ public final class IamRoutes {
         config.routes.get("/iam/roles/{id}/edit", updateRoleController::showEditForm);
         config.routes.post("/iam/roles/{id}", updateRoleController::updateRole);
         config.routes.post("/iam/roles/{id}/delete", deleteRoleController::deleteRole);
+        config.routes.post("/iam/roles/{id}/reinstate", reinstateRoleController::reinstateRole);
 
         config.routes.get("/iam/users", listUsersController::listUsers);
         config.routes.get("/iam/users/new", createUserController::showCreateForm);

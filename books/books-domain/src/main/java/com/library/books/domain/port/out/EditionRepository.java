@@ -25,6 +25,7 @@ public interface EditionRepository {
     List<EditionAuthor> findEditionAuthorsByEditionId(Long editionId);
     void softDeleteEditionsByIds(List<Long> ids);
     void softDeleteEditionAuthorsByEditionId(Long editionId);
+    void softDeleteEditionAuthorsByEditionIds(List<Long> editionIds);
     void reactivateById(Long id);
     void reactivateEditionAuthorsByEditionId(Long editionId);
 }

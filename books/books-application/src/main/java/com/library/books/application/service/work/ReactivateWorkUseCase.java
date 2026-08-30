@@ -25,13 +25,12 @@ public class ReactivateWorkUseCase {
     }
 
     public void execute(ReactivateWorkCommand command) {
-        workAuthorRepository.reactivateByWorkId(command.id());
-
         long activeAuthors = workRepository.countActiveAuthorsByWorkId(command.id());
         if (activeAuthors == 0) {
             throw new ReactivationException("Cannot reactivate work: at least one associated author must be active.");
         }
 
+        workAuthorRepository.reactivateByWorkId(command.id());
         workRepository.reactivateById(command.id());
         workRepository.reactivateEditionsByWorkId(command.id());
 

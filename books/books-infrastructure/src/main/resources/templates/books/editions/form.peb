@@ -71,7 +71,7 @@
             </div>
             <div class="row g-3 mt-0">
                 <div class="col-md-4">
-                    <label class="form-label" for="editionNumber">Edition Number</label>
+                    <label class="form-label" for="editionNumber">Edition Name</label>
                     <input type="text" id="editionNumber" name="editionNumber" class="form-control bg-dark border-secondary text-light {% if editionNumber is defined and editionNumber %}is-invalid{% else %}{% if edition is not null %}is-valid{% endif %}{% endif %}" required
                            value="{% if edition is not null %}{{ edition.editionNumber }}{% endif %}">
                     <div class="invalid-feedback" id="editionNumberError">{% if editionNumber is defined and editionNumber %}{{ editionNumber }}{% endif %}</div>

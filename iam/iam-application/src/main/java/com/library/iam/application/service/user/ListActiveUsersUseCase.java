@@ -14,7 +14,11 @@ public class ListActiveUsersUseCase {
     }
 
     public List<UserDTO> execute() {
-        return userPort.findAll().stream()
+        return execute("active");
+    }
+
+    public List<UserDTO> execute(String status) {
+        return userPort.findAll(status).stream()
                 .map(UserDTO::of)
                 .toList();
     }

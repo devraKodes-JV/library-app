@@ -47,7 +47,8 @@ INSERT INTO permissions (code, name, menu_label, icon, url, sort_order, module_i
      ('categories.create', 'Create Categories', NULL,            NULL,    NULL,   710, 3),
      ('categories.read',   'View Categories',   'Categories',   'bi-folder',         '/books/categories',711, 3),
      ('categories.update', 'Edit Categories',   NULL,            NULL,    NULL,   712, 3),
-     ('categories.delete', 'Delete Categories', NULL,            NULL,    NULL,   713, 3);
+     ('categories.delete', 'Delete Categories', NULL,            NULL,    NULL,   713, 3),
+     ('categories.reactivate', 'Reactivate Categories', NULL,            NULL,    NULL,   714, 3);
 
 INSERT INTO role_permissions (role_id, permission_id)
 SELECT r.id, p.id

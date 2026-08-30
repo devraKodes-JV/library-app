@@ -55,7 +55,6 @@ public class CreateWorkController extends BaseController {
                     "authorRoles", authorRoles)));
         } catch (Exception e) {
             java.util.logging.Logger.getLogger(CreateWorkController.class.getName()).severe("Error in showCreateForm: " + e.getMessage());
-            e.printStackTrace();
             throw e;
         }
     }
