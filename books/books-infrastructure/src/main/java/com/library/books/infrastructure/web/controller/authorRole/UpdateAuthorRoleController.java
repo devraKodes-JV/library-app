@@ -35,7 +35,6 @@ public class UpdateAuthorRoleController extends BaseController {
         requireCan(ctx, "authorRoles.update");
         UpdateAuthorRoleCommand command = new UpdateAuthorRoleCommand(
                 ctx.pathParamAsClass("id", Long.class).get(),
-                ctx.formParam("code"),
                 ctx.formParam("name"),
                 ctx.formParam("description"));
 

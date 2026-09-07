@@ -47,20 +47,10 @@ class CategoryValidatorTest {
     }
 
     @Test
-    void validate_fails_whenCodeHasInvalidCharacters() {
-        Category category = Category.withoutId("FIC-001", "Fiction", null, null);
+    void validate_success_whenCodeHasHyphen() {
+        Category category = Category.withoutId("CAT-a1b2c3D4", "Fiction", null, null);
 
-        ValidationException ex = assertThrows(ValidationException.class, () -> validator.validate(category));
-        assertEquals("Code must be alphanumeric and 50 characters or less.", ex.getFieldErrors().get("code"));
-    }
-
-    @Test
-    void validate_fails_whenCodeIsTooLong() {
-        String longCode = "A".repeat(51);
-        Category category = Category.withoutId(longCode, "Fiction", null, null);
-
-        ValidationException ex = assertThrows(ValidationException.class, () -> validator.validate(category));
-        assertEquals("Code must be alphanumeric and 50 characters or less.", ex.getFieldErrors().get("code"));
+        validator.validate(category);
     }
 
     @Test

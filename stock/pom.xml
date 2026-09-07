@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.library</groupId>
+        <artifactId>library-ultimate</artifactId>
+        <version>1.0.0</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>stock</artifactId>
+    <packaging>pom</packaging>
+    <name>Stock Feature</name>
+    <description>
+        Stock feature. Aggregator POM that groups the three hexagonal layers
+        as separate Maven modules: stock-domain, stock-application and
+        stock-infrastructure.
+    </description>
+
+    <modules>
+        <module>stock-domain</module>
+        <module>stock-application</module>
+        <module>stock-infrastructure</module>
+    </modules>
+</project>

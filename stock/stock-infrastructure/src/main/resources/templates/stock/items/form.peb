@@ -1,0 +1,90 @@
+{%- extends "layout" -%}
+
+{% block title %}
+    {% if mode == 'create' %}Create Stock Item{% else %}Edit Stock Item{% endif %}
+{% endblock %}
+
+{% block content %}
+{% import "_macros/csrf" as csrf %}
+<div class="page-header">
+    <h1 class="mb-0">{% if mode == 'create' %}New Stock Item{% else %}Edit Stock Item{% endif %}</h1>
+    <p class="text-muted">{% if mode == 'create' %}Create a new physical copy{% else %}Update stock item details{% endif %}</p>
+</div>
+
+<form method="post" action="{% if mode == 'create' %}/stock/items{% else %}/stock/items/{{ item.id }}{% endif %}">
+    {{ csrf.token(csrfToken) }}
+
+    <div class="card bg-dark border-secondary mt-3">
+        <div class="card-body">
+            <div class="mb-3">
+                <label for="code" class="form-label">Code</label>
+                <input type="text" class="form-control bg-secondary text-light"
+                       id="code" name="code" value="{% if item is not null %}{{ item.code }}{% endif %}" readonly>
+            </div>
+
+            <div class="mb-3">
+                <label for="editionId" class="form-label">Edition</label>
+                <select class="form-select bg-dark border-secondary text-light {% if validationError and editionId %}is-invalid{% endif %}"
+                        id="editionId" name="editionId" required>
+                    <option value="">Select an edition</option>
+                    {% for entry in editions.entrySet() %}
+                    <option value="{{ entry.key }}" {% if item is not null and item.editionId == entry.key %}selected{% endif %}>
+                        {{ entry.value }}
+                    </option>
+                    {% endfor %}
+                </select>
+                {% if validationError and editionId %}
+                <div class="invalid-feedback">{{ editionId }}</div>
+                {% endif %}
+            </div>
+
+            <div class="mb-3">
+                <label for="locationId" class="form-label">Location</label>
+                <select class="form-select bg-dark border-secondary text-light {% if validationError and locationId %}is-invalid{% endif %}"
+                        id="locationId" name="locationId" required>
+                    <option value="">Select a location</option>
+                    {% for loc in locations %}
+                    <option value="{{ loc.id }}" {% if item is not null and item.locationId == loc.id %}selected{% endif %}>
+                        {{ loc.code }} - {{ loc.name }}
+                    </option>
+                    {% endfor %}
+                </select>
+                {% if validationError and locationId %}
+                <div class="invalid-feedback">{{ locationId }}</div>
+                {% endif %}
+            </div>
+
+            {% if mode == 'edit' %}
+            <div class="mb-3">
+                <label for="state" class="form-label">State</label>
+                <select class="form-select bg-dark border-secondary text-light" id="state" name="state">
+                    <option value="AVAILABLE" {% if item.state == 'AVAILABLE' %}selected{% endif %}>Available</option>
+                    <option value="RESERVED" {% if item.state == 'RESERVED' %}selected{% endif %}>Reserved</option>
+                    <option value="BORROWED" {% if item.state == 'BORROWED' %}selected{% endif %}>Borrowed</option>
+                    <option value="REVIEW" {% if item.state == 'REVIEW' %}selected{% endif %}>In Review</option>
+                    <option value="DAMAGED" {% if item.state == 'DAMAGED' %}selected{% endif %}>Damaged</option>
+                    <option value="RETIRED" {% if item.state == 'RETIRED' %}selected{% endif %}>Retired</option>
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label for="condition" class="form-label">Condition</label>
+                <select class="form-select bg-dark border-secondary text-light" id="condition" name="condition">
+                    <option value="GOOD" {% if item.condition == 'GOOD' %}selected{% endif %}>Good</option>
+                    <option value="WORN" {% if item.condition == 'WORN' %}selected{% endif %}>Worn</option>
+                    <option value="DAMAGED" {% if item.condition == 'DAMAGED' %}selected{% endif %}>Damaged</option>
+                </select>
+            </div>
+            {% else %}
+            <input type="hidden" name="state" value="AVAILABLE">
+            <input type="hidden" name="condition" value="GOOD">
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="mt-4">
+        <button type="submit" class="btn btn-primary">{% if mode == 'create' %}Create{% else %}Save{% endif %}</button>
+        <a href="/stock/items" class="btn btn-outline-secondary">Cancel</a>
+    </div>
+</form>
+{% endblock %}

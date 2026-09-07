@@ -6,6 +6,7 @@ import com.library.iam.infrastructure.web.controller.dashboard.ShowDashboardCont
 import com.library.iam.infrastructure.web.controller.login.LoginController;
 import com.library.iam.infrastructure.web.controller.login.LogoutController;
 import com.library.iam.infrastructure.web.controller.module.ListModulesController;
+import com.library.iam.infrastructure.web.controller.notification.NotificationController;
 import com.library.iam.infrastructure.web.controller.permission.ListPermissionsController;
 import com.library.iam.infrastructure.web.controller.role.CreateRoleController;
 import com.library.iam.infrastructure.web.controller.role.DeleteRoleController;
@@ -47,6 +48,7 @@ public final class IamRoutes {
                                 ReinstateUserController reinstateUserController,
                                 ListPermissionsController listPermissionsController,
                                 ListModulesController listModulesController,
+                                NotificationController notificationController,
                                 SseNotificationService notificationService,
                                 SecurityAuditService auditService) {
         SessionAuthFilter.register(config, auditService);
@@ -80,6 +82,10 @@ public final class IamRoutes {
 
         config.routes.get("/api/notifications/stream", new SseHandler(streamClient ->
                 requirePermissionThenConnect(notificationService, streamClient)));
+
+        config.routes.get("/api/notifications", notificationController::getNotifications);
+        config.routes.post("/api/notifications/read", notificationController::markAsRead);
+        config.routes.delete("/api/notifications", notificationController::deleteNotification);
     }
 
     private static void requirePermissionThenConnect(SseNotificationService notificationService,

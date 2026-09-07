@@ -1,0 +1,72 @@
+{%- extends "layout" -%}
+
+{% block title %}Expenses - Accounting{% endblock %}
+
+{% block content %}
+{% import "_macros/csrf" as csrf %}
+<div class="page-header d-flex justify-content-between align-items-center">
+    <div>
+        <h1 class="mb-0">Expenses</h1>
+        <p class="text-muted">Local operating expenses.</p>
+    </div>
+    {% if canCreate %}
+    <a href="/accounting/expenses/new" class="btn btn-primary">
+        <i class="bi bi-plus-lg"></i> Record Expense
+    </a>
+    {% endif %}
+</div>
+
+<div class="card bg-dark border-secondary mt-3">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-dark table-striped data-table" id="expensesTable">
+                <thead>
+                    <tr>
+                        <th>Code</th>
+                        <th>Date</th>
+                        <th>Category</th>
+                        <th>Description</th>
+                        <th>Vendor</th>
+                        <th>Method</th>
+                        <th class="text-end">Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for e in expenses %}
+                    <tr>
+                        <td>{{ e.code }}</td>
+                        <td>{{ e.expenseDate }}</td>
+                        <td><span class="badge bg-secondary">{{ e.category }}</span></td>
+                        <td>{{ e.description }}</td>
+                        <td>{{ e.vendor | default("-") }}</td>
+                        <td>{{ e.paymentMethod | default("-") }}</td>
+                        <td class="text-end">$ {{ e.amount }}</td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="7" class="text-center text-muted py-4">No expenses recorded yet.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script nonce="{{ securityNonce }}">
+document.addEventListener('DOMContentLoaded', function() {
+    if (typeof $.fn.DataTable !== 'undefined') {
+        $('#expensesTable').DataTable({
+            pageLength: 10,
+            order: [[1, 'desc']],
+            language: {
+                search: 'Search:',
+                lengthMenu: 'Show _MENU_ entries'
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

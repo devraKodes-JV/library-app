@@ -25,7 +25,11 @@ public class JavalinStart {
     
     public static void run(SessionFactory sessionFactory, Logger log){
         Javalin.create(config -> {
-            config.staticFiles.add("/static");
+            config.staticFiles.add(staticConfig -> {
+                staticConfig.hostedPath = "/";
+                staticConfig.directory = "static";
+                staticConfig.location = io.javalin.http.staticfiles.Location.CLASSPATH;
+            });
             config.fileRenderer(new PebbleFileRenderer());
             
             config.jetty.modifyServletContextHandler(handler -> {

@@ -36,7 +36,6 @@ public class UpdateLanguageController extends BaseController {
         requireCan(ctx, "languages.update");
         UpdateLanguageCommand command = new UpdateLanguageCommand(
                 ctx.pathParamAsClass("id", Long.class).get(),
-                ctx.formParam("code"),
                 ctx.formParam("name"));
 
         try {

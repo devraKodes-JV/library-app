@@ -28,7 +28,6 @@ public class CreateAuthorRoleController extends BaseController {
     public void createAuthorRole(Context ctx) {
         requireCan(ctx, "authorRoles.create");
         CreateAuthorRoleCommand command = new CreateAuthorRoleCommand(
-                ctx.formParam("code"),
                 ctx.formParam("name"),
                 ctx.formParam("description"));
 

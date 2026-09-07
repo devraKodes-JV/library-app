@@ -3,6 +3,7 @@ package com.library.books.application.service.bookFormat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 import org.junit.jupiter.api.Test;
 
@@ -22,7 +23,7 @@ class UpdateBookFormatUseCaseTest {
         UpdateBookFormatUseCase useCase = new UpdateBookFormatUseCase(bookFormatRepository, validator);
 
         BookFormat saved = bookFormatRepository.save(BookFormat.withoutId("HARDBACK", "Hardback", "Old desc"));
-        UpdateBookFormatCommand command = new UpdateBookFormatCommand(saved.getId(), "HARDBACK", "Hardback Updated", "New desc");
+        UpdateBookFormatCommand command = new UpdateBookFormatCommand(saved.getId(), "Hardback Updated", "New desc");
         BookFormatResponseDTO result = useCase.execute(command);
 
         assertEquals("HARDBACK", result.code());
@@ -36,7 +37,7 @@ class UpdateBookFormatUseCaseTest {
         BookFormatValidator validator = new BookFormatValidator();
         UpdateBookFormatUseCase useCase = new UpdateBookFormatUseCase(bookFormatRepository, validator);
 
-        UpdateBookFormatCommand command = new UpdateBookFormatCommand(999L, "HARDBACK", "Hardback", null);
+        UpdateBookFormatCommand command = new UpdateBookFormatCommand(999L, "Hardback", null);
 
         assertThrows(BookFormatNotFoundException.class, () -> useCase.execute(command));
     }
@@ -48,23 +49,10 @@ class UpdateBookFormatUseCaseTest {
         UpdateBookFormatUseCase useCase = new UpdateBookFormatUseCase(bookFormatRepository, validator);
 
         BookFormat saved = bookFormatRepository.save(BookFormat.withoutId("HARDBACK", "Hardback", null));
-        UpdateBookFormatCommand command = new UpdateBookFormatCommand(saved.getId(), "", "", null);
+        UpdateBookFormatCommand command = new UpdateBookFormatCommand(saved.getId(), "", null);
 
         ValidationException ex = assertThrows(ValidationException.class, () -> useCase.execute(command));
-        assertTrue(ex.getFieldErrors().containsKey("code"));
+        assertFalse(ex.getFieldErrors().containsKey("code"));
         assertTrue(ex.getFieldErrors().containsKey("name"));
-    }
-
-    @Test
-    void updateBookFormat_failsOnInvalidCode() {
-        FakeBookFormatRepository bookFormatRepository = new FakeBookFormatRepository();
-        BookFormatValidator validator = new BookFormatValidator();
-        UpdateBookFormatUseCase useCase = new UpdateBookFormatUseCase(bookFormatRepository, validator);
-
-        BookFormat saved = bookFormatRepository.save(BookFormat.withoutId("HARDBACK", "Hardback", null));
-        UpdateBookFormatCommand command = new UpdateBookFormatCommand(saved.getId(), "INVALID-CODE", "Hardback", null);
-
-        ValidationException ex = assertThrows(ValidationException.class, () -> useCase.execute(command));
-        assertTrue(ex.getFieldErrors().containsKey("code"));
     }
 }

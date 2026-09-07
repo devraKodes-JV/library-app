@@ -55,4 +55,16 @@ public abstract class BaseController {
         }
         return model;
     }
+
+    protected String currentUserName(Context ctx) {
+        Object user = currentUser(ctx);
+        if (user == null) return "system";
+        try {
+            var m = user.getClass().getMethod("getUsername");
+            Object value = m.invoke(user);
+            return value != null ? value.toString() : "system";
+        } catch (Exception e) {
+            return "system";
+        }
+    }
 }

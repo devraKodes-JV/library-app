@@ -16,6 +16,7 @@ import java.time.Instant;
  * @param message  a human-readable description of what happened
  * @param actorId  the id of the user who performed the change (may be null)
  * @param actorName the username of the user who performed the change
+ * @param targetId the id of the entity related to the event (e.g. reservation id)
  * @param at       the instant when the change occurred
  */
 public record NotificationEvent(
@@ -23,6 +24,7 @@ public record NotificationEvent(
         String message,
         Long actorId,
         String actorName,
+        String targetId,
         Instant at) {
 
     /**
@@ -36,6 +38,11 @@ public record NotificationEvent(
      */
     public static NotificationEvent of(String type, String message,
                                        Long actorId, String actorName) {
-        return new NotificationEvent(type, message, actorId, actorName, Instant.now());
+        return new NotificationEvent(type, message, actorId, actorName, null, Instant.now());
+    }
+
+    public static NotificationEvent of(String type, String message,
+                                       Long actorId, String actorName, String targetId) {
+        return new NotificationEvent(type, message, actorId, actorName, targetId, Instant.now());
     }
 }

@@ -42,7 +42,6 @@ public class UpdateCategoryController extends BaseController {
         requireCan(ctx, "categories.update");
         UpdateCategoryCommand command = new UpdateCategoryCommand(
                 ctx.pathParamAsClass("id", Long.class).get(),
-                ctx.formParam("code"),
                 ctx.formParam("name"),
                 ctx.formParam("description"),
                 parseLong(ctx.formParam("parentId")));

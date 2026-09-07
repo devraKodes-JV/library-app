@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Library - Login</title>
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/css/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="/css/app.base.css">
+</head>
+
+<body class="login-page">
+    <div class="login-card text-bg-dark">
+        <div class="login-brand">
+            <i class="bi bi-book-half"></i>
+            <h1>Library</h1>
+            <p>Click to continue</p>
+        </div>
+
+        <div class="mb-3">
+            <a href="/catalog" class="btn btn-sm btn-info text-center">Client</a>
+        </div>
+        <div class="mb-3">
+            <a href="/login" class="btn btn-sm btn-light text-center">Employee</a>
+        </div>
+    </div>
+</body>
+
+</html>

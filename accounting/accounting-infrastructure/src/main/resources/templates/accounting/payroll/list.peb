@@ -1,0 +1,79 @@
+{%- extends "layout" -%}
+
+{% block title %}Payroll - Accounting{% endblock %}
+
+{% block content %}
+{% import "_macros/csrf" as csrf %}
+<div class="page-header d-flex justify-content-between align-items-center">
+    <div>
+        <h1 class="mb-0">Payroll</h1>
+        <p class="text-muted">Employee salary payments.</p>
+    </div>
+    {% if canCreate %}
+    <a href="/accounting/payroll/new" class="btn btn-primary">
+        <i class="bi bi-plus-lg"></i> Record Payment
+    </a>
+    {% endif %}
+</div>
+
+<div class="card bg-dark border-secondary mt-3">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-dark table-striped data-table" id="payrollTable">
+                <thead>
+                    <tr>
+                        <th>Code</th>
+                        <th>Date</th>
+                        <th>Employee</th>
+                        <th>Period</th>
+                        <th>Method</th>
+                        <th>Status</th>
+                        <th class="text-end">Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in payrolls %}
+                    <tr>
+                        <td>{{ p.code }}</td>
+                        <td>{{ p.paymentDate }}</td>
+                        <td>{{ p.employeeName | default("User #" + p.employeeId) }}</td>
+                        <td>{{ p.periodMonth }}/{{ p.periodYear }}</td>
+                        <td>{{ p.paymentMethod }}</td>
+                        <td>
+                            <span class="badge
+                                {% if p.status == 'PAID' %}bg-success
+                                {% elseif p.status == 'PENDING' %}bg-warning text-dark
+                                {% else %}bg-secondary{% endif %}">
+                                {{ p.status }}
+                            </span>
+                        </td>
+                        <td class="text-end">$ {{ p.amount }}</td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="7" class="text-center text-muted py-4">No payroll payments recorded yet.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script nonce="{{ securityNonce }}">
+document.addEventListener('DOMContentLoaded', function() {
+    if (typeof $.fn.DataTable !== 'undefined') {
+        $('#payrollTable').DataTable({
+            pageLength: 10,
+            order: [[1, 'desc']],
+            language: {
+                search: 'Search:',
+                lengthMenu: 'Show _MENU_ entries'
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

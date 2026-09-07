@@ -1,0 +1,288 @@
+{%- extends "layout" -%}
+
+{% block title %}Reservation - Library{% endblock %}
+
+{% block content %}
+{% import "_macros/csrf" as csrf %}
+<div class="page-header d-flex justify-content-between align-items-center">
+    <div>
+        <h1 class="mb-0">Reservation: {{ reservation.code }}</h1>
+        <p class="text-muted">Reservation details and status.</p>
+    </div>
+</div>
+
+{% if showClientModal %}
+<div class="alert alert-warning bg-dark border-warning text-warning">
+    <i class="bi bi-exclamation-triangle"></i> Client data is incomplete. Please complete the client information before fulfilling.
+</div>
+{% endif %}
+<div class="card bg-dark border-secondary mt-3">
+    <div class="card-body">
+        <table class="table table-borderless text-light">
+            <tbody>
+                <tr>
+                    <th>Code</th><td>{{ reservation.code }}</td>
+                    <th>Status</th>
+                    <td>
+                        <span class="badge
+                            {% if reservation.status == 'DEPOSIT_PENDING' %}bg-warning text-dark
+                            {% elseif reservation.status == 'ACTIVE' %}bg-success
+                            {% elseif reservation.status == 'OVERDUE' %}bg-danger
+                            {% elseif reservation.status == 'RETURNED' %}bg-info
+                            {% elseif reservation.status == 'CANCELLED' %}bg-secondary
+                            {% endif %}">
+                            {{ reservation.statusLabel }}
+                        </span>
+                    </td>
+                </tr>
+                <tr>
+                    <th>Client</th><td>{{ reservation.clientName | default("N/A") }}</td>
+                    <th>DNI</th><td>{{ reservation.clientDni | default("N/A") }}</td>
+                </tr>
+                <tr>
+                    <th>Edition</th><td>{{ reservation.editionName | default("N/A") }}</td>
+                    <th>Total Amount</th><td>{{ reservation.totalAmount | default("N/A") }}</td>
+                </tr>
+                <tr>
+                    <th>Deposit</th><td>{{ reservation.depositPercentage }}% ({{ reservation.depositAmount | default("N/A") }})</td>
+                    <th>Deposit Paid</th><td>{{ reservation.depositPaid ? "Yes" : "No" }}</td>
+                </tr>
+                <tr>
+                    <th>Reservation Date</th><td>{{ reservation.reservationDate | default("N/A") }}</td>
+                    <th>Pickup Deadline</th><td>{{ reservation.pickupDeadline | default("N/A") }}</td>
+                </tr>
+                <tr>
+                    <th>Due Date</th><td>{{ reservation.dueDate | default("N/A") }}</td>
+                    <th></th><td></td>
+                </tr>
+                {% if reservation.notes %}
+                <tr>
+                    <th>Notes</th><td colspan="3">{{ reservation.notes }}</td>
+                </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="mt-4 d-flex gap-2">
+    {% if canFulfill and reservation.status == 'DEPOSIT_PENDING' %}
+    <button type="button" class="btn btn-success" id="fulfillBtn"
+            data-reservation-id="{{ reservation.id }}"
+            data-client-id="{{ reservation.clientId }}"
+            data-needs-client="{{ showClientModal ? 'true' : 'false' }}">
+        <i class="bi bi-magic"></i> Fulfill
+    </button>
+    {% endif %}
+    {% if canReturn and (reservation.status == 'ACTIVE' or reservation.status == 'OVERDUE') %}
+    <button type="button" class="btn btn-info" id="returnBtn"
+            data-reservation-id="{{ reservation.id }}">
+        <i class="bi bi-arrow-return-left"></i> Return
+    </button>
+    {% endif %}
+    {% if canRenew and reservation.status == 'ACTIVE' %}
+    <form method="post" action="/reservations/{{ reservation.id }}/renew">
+        {{ csrf.token(csrfToken) }}
+        <button type="submit" class="btn btn-primary">Renew</button>
+    </form>
+    {% endif %}
+    {% if canCancel and reservation.status != 'RETURNED' and reservation.status != 'CANCELLED' %}
+    <form method="post" action="/reservations/{{ reservation.id }}/cancel" class="cancel-form"
+          data-confirm-title="Cancel Reservation"
+          data-confirm-message="Cancel reservation <strong>{{ reservation.code }}</strong>?">
+        {{ csrf.token(csrfToken) }}
+        <button type="submit" class="btn btn-danger">Cancel</button>
+    </form>
+    {% endif %}
+    <a href="/reservations" class="btn btn-outline-secondary">Back to List</a>
+</div>
+
+{% if canFulfill and reservation.status == 'DEPOSIT_PENDING' %}
+<div class="modal fade" id="fulfillWizardModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content bg-dark border-secondary">
+            <div class="modal-header border-secondary">
+                <h5 class="modal-title text-light">
+                    <i class="bi bi-magic"></i> Fulfill Reservation {{ reservation.code }}
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <ol class="list-group list-group-numbered list-group-horizontal mb-4" id="fulfillStepper">
+                    <li class="list-group-item bg-secondary text-light flex-fill active" data-step="1">Client</li>
+                    <li class="list-group-item bg-dark text-muted border-secondary flex-fill" data-step="2">Payment</li>
+                    <li class="list-group-item bg-dark text-muted border-secondary flex-fill" data-step="3">Confirm</li>
+                </ol>
+
+                <div id="fulfillError" class="alert alert-danger bg-dark border-danger text-danger d-none" role="alert"></div>
+
+                <section class="fulfill-step" data-step="1">
+                    <h6 class="text-light">Step 1 — Client Information</h6>
+                    <p class="text-muted small">Confirm or complete the client data before proceeding.</p>
+                    <form id="clientDataForm" autocomplete="off">
+                        <input type="hidden" name="clientId" value="{{ reservation.clientId }}">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="clientFullName" class="form-label text-light">Full Name *</label>
+                                <input type="text" class="form-control bg-dark border-secondary text-light" id="clientFullName" name="fullName" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="clientEmail" class="form-label text-light">Email</label>
+                                <input type="email" class="form-control bg-dark border-secondary text-light" id="clientEmail" name="email">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="clientPhone" class="form-label text-light">Phone</label>
+                                <input type="text" class="form-control bg-dark border-secondary text-light" id="clientPhone" name="phone">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="clientAddress" class="form-label text-light">Address</label>
+                                <input type="text" class="form-control bg-dark border-secondary text-light" id="clientAddress" name="address">
+                            </div>
+                        </div>
+                    </form>
+                </section>
+
+                <section class="fulfill-step d-none" data-step="2">
+                    <h6 class="text-light">Step 2 — Deposit Payment</h6>
+                    <p class="text-muted small">Select the payment method. The deposit amount is fixed.</p>
+                    <form id="paymentForm" autocomplete="off">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="depositAmount" class="form-label text-light">Deposit Amount</label>
+                                <input type="text" class="form-control bg-dark border-secondary text-light" id="depositAmount" name="depositAmount" value="$ {{ reservation.depositAmount is defined ? reservation.depositAmount : '0.00' }}" data-raw="{{ reservation.depositAmount is defined ? reservation.depositAmount : '0.00' }}" readonly>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="paymentMethod" class="form-label text-light">Payment Method *</label>
+                                <select class="form-select bg-dark border-secondary text-light" id="paymentMethod" name="paymentMethod" required>
+                                    <option value="">Select…</option>
+                                    <option value="CASH">Cash</option>
+                                    <option value="CARD">Card</option>
+                                    <option value="TRANSFER">Transfer</option>
+                                    <option value="OTHER">Other</option>
+                                </select>
+                            </div>
+                        </div>
+                    </form>
+                </section>
+
+                <section class="fulfill-step d-none" data-step="3">
+                    <h6 class="text-light">Step 3 — Review & Confirm</h6>
+                    <p class="text-muted small">Verify the payment has been received and the data is correct before fulfilling.</p>
+                    <table class="table table-borderless text-light">
+                        <tbody>
+                            <tr><th>Reservation</th><td>{{ reservation.code }}</td></tr>
+                            <tr><th>Client</th><td><span id="confirmClientName">—</span></td></tr>
+                            <tr><th>Edition</th><td>{{ reservation.editionName | default("N/A") }}</td></tr>
+                            <tr><th>Deposit</th><td>$<span id="confirmAmount">0.00</span></td></tr>
+                            <tr><th>Method</th><td><span id="confirmMethod">—</span></td></tr>
+                        </tbody>
+                    </table>
+                    <div class="form-check mt-3">
+                        <input class="form-check-input" type="checkbox" id="fulfillPaymentConfirmed">
+                        <label class="form-check-label text-light" for="fulfillPaymentConfirmed">
+                            I confirm the deposit has been received from the client.
+                        </label>
+                    </div>
+                </section>
+            </div>
+            <div class="modal-footer border-secondary">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-secondary d-none" id="wizardPrev">Back</button>
+                <button type="button" class="btn btn-primary" id="wizardNext">Next</button>
+                <button type="button" class="btn btn-success d-none" id="wizardConfirm" disabled>Confirm & Fulfill</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+{% if canReturn and (reservation.status == 'ACTIVE' or reservation.status == 'OVERDUE') %}
+<div class="modal fade" id="returnWizardModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content bg-dark border-secondary">
+            <div class="modal-header border-secondary">
+                <h5 class="modal-title text-light">
+                    <i class="bi bi-arrow-return-left"></i> Return Reservation {{ reservation.code }}
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <ol class="list-group list-group-numbered list-group-horizontal mb-4" id="returnStepper">
+                    <li class="list-group-item bg-secondary text-light flex-fill active" data-step="1">Breakdown</li>
+                    <li class="list-group-item bg-dark text-muted border-secondary flex-fill" data-step="2">Payment</li>
+                    <li class="list-group-item bg-dark text-muted border-secondary flex-fill" data-step="3">Confirm</li>
+                </ol>
+
+                <div id="returnError" class="alert alert-danger bg-dark border-danger text-danger d-none" role="alert"></div>
+
+                <section class="return-step" data-step="1">
+                    <h6 class="text-light">Step 1 — Return Breakdown</h6>
+                    <p class="text-muted small">Amounts are calculated by the system. They are not editable.</p>
+                    <table class="table table-borderless text-light">
+                        <tbody>
+                            <tr><th>Deposit on file</th><td><span id="returnDeposit">—</span></td></tr>
+                            <tr><th>Late fee</th><td><span id="returnLateFee">—</span></td></tr>
+                            <tr class="table-active"><th>Outstanding settlement</th><td><strong><span id="returnSettlement">—</span></strong></td></tr>
+                        </tbody>
+                    </table>
+                </section>
+
+                <section class="return-step d-none" data-step="2">
+                    <h6 class="text-light">Step 2 — Payment Method</h6>
+                    <p class="text-muted small">Select how the outstanding settlement is paid.</p>
+                    <form id="returnPaymentForm" autocomplete="off">
+                        <div class="row g-3">
+                            <div class="col-md-12">
+                                <label for="returnPaymentMethod" class="form-label text-light">Payment Method *</label>
+                                <select class="form-select bg-dark border-secondary text-light" id="returnPaymentMethod" name="paymentMethod" required>
+                                    <option value="">Select…</option>
+                                    <option value="CASH">Cash</option>
+                                    <option value="CARD">Card</option>
+                                    <option value="TRANSFER">Transfer</option>
+                                    <option value="OTHER">Other</option>
+                                </select>
+                            </div>
+                        </div>
+                    </form>
+                </section>
+
+                <section class="return-step d-none" data-step="3">
+                    <h6 class="text-light">Step 3 — Review & Confirm</h6>
+                    <p class="text-muted small">Verify the settlement is paid before processing the return.</p>
+                    <table class="table table-borderless text-light">
+                        <tbody>
+                            <tr><th>Reservation</th><td>{{ reservation.code }}</td></tr>
+                            <tr><th>Deposit on file</th><td><span id="confirmReturnDeposit">—</span></td></tr>
+                            <tr><th>Late fee</th><td><span id="confirmReturnLateFee">—</span></td></tr>
+                            <tr><th>Settlement</th><td><strong><span id="confirmReturnSettlement">—</span></strong></td></tr>
+                            <tr><th>Method</th><td><span id="confirmReturnMethod">—</span></td></tr>
+                        </tbody>
+                    </table>
+                    <div class="form-check mt-3">
+                        <input class="form-check-input" type="checkbox" id="returnPaymentConfirmed">
+                        <label class="form-check-label text-light" for="returnPaymentConfirmed">
+                            I confirm the settlement has been received from the client.
+                        </label>
+                    </div>
+                </section>
+            </div>
+            <div class="modal-footer border-secondary">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-secondary d-none" id="returnPrev">Back</button>
+                <button type="button" class="btn btn-primary" id="returnNext" disabled>Next</button>
+                <button type="button" class="btn btn-success d-none" id="returnConfirm" disabled>Confirm & Return</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+{% if canFulfill and reservation.status == 'DEPOSIT_PENDING' %}
+<script src="/js/reservation-fulfill.js" nonce="{{ securityNonce }}"></script>
+{% endif %}
+{% if canReturn and (reservation.status == 'ACTIVE' or reservation.status == 'OVERDUE') %}
+<script src="/js/reservation-return.js" nonce="{{ securityNonce }}"></script>
+{% endif %}
+{% endblock %}

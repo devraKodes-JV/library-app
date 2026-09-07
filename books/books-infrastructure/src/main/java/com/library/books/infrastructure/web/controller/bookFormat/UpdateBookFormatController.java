@@ -36,7 +36,6 @@ public class UpdateBookFormatController extends BaseController {
         requireCan(ctx, "formats.update");
         UpdateBookFormatCommand command = new UpdateBookFormatCommand(
                 ctx.pathParamAsClass("id", Long.class).get(),
-                ctx.formParam("code"),
                 ctx.formParam("name"),
                 ctx.formParam("description"));
 

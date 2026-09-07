@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Library</title>
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/css/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="/css/app.base.css">
+    <style>
+        .landing-body {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%) !important;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .landing-container {
+            text-align: center;
+            padding: 2rem;
+        }
+        .landing-logo {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 2rem;
+        }
+        .landing-logo i {
+            font-size: 2.5rem;
+            color: #fff;
+        }
+        .landing-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 2rem;
+        }
+        .landing-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+        }
+        .landing-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem 2.5rem;
+            border-radius: 0.75rem;
+            font-size: 1.125rem;
+            font-weight: 600;
+            text-decoration: none;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            min-width: 140px;
+        }
+        .btn-client {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        }
+        .btn-client:hover {
+            background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4);
+            color: #fff;
+        }
+        .btn-employee {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        }
+        .btn-employee:hover {
+            background: linear-gradient(135deg, #34d399 0%, #10b981 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
+            color: #fff;
+        }
+    </style>
+</head>
+<body class="landing-body">
+    <div class="landing-container">
+        <div class="landing-logo">
+            <i class="bi bi-book-half"></i>
+        </div>
+        <h1 class="landing-title">Library</h1>
+        <div class="landing-buttons">
+            <a href="/catalog" class="landing-btn btn-client">Client</a>
+            <a href="/login" class="landing-btn btn-employee">Employee</a>
+        </div>
+    </div>
+</body>
+</html>

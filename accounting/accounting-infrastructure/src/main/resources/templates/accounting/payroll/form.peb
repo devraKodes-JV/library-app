@@ -1,0 +1,80 @@
+{%- extends "layout" -%}
+
+{% block title %}Record Payroll - Accounting{% endblock %}
+
+{% block content %}
+{% import "_macros/csrf" as csrf %}
+<div class="page-header">
+    <h1 class="mb-0">Record Payroll Payment</h1>
+    <p class="text-muted">Register an employee salary payment.</p>
+</div>
+
+{% if error is defined %}
+<div class="alert alert-danger bg-dark border-danger text-danger mt-3">
+    <i class="bi bi-exclamation-triangle"></i> {{ error }}
+</div>
+{% endif %}
+
+<div class="card bg-dark border-secondary mt-3">
+    <div class="card-body">
+        <form method="post" action="/accounting/payroll">
+            {{ csrf.token(csrfToken) }}
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="paymentDate" class="form-label">Payment Date *</label>
+                    <input type="date" class="form-control bg-dark border-secondary text-light" id="paymentDate" name="paymentDate" required>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="employeeId" class="form-label">Employee *</label>
+                    <select class="form-select bg-dark border-secondary text-light" id="employeeId" name="employeeId" required>
+                        <option value="">-- Select employee --</option>
+                        {% for e in employees %}
+                        <option value="{{ e.id }}">{{ e.username }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label for="amount" class="form-label">Amount *</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-dark border-secondary text-muted">$</span>
+                        <input type="number" step="0.01" min="0.01" class="form-control bg-dark border-secondary text-light" id="amount" name="amount" required>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="periodMonth" class="form-label">Period Month *</label>
+                    <select class="form-select bg-dark border-secondary text-light" id="periodMonth" name="periodMonth" required>
+                        {% for m in [1,2,3,4,5,6,7,8,9,10,11,12] %}
+                        <option value="{{ m }}" {% if m == 1 %}selected{% endif %}>{{ m }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="periodYear" class="form-label">Period Year *</label>
+                    <input type="number" class="form-control bg-dark border-secondary text-light" id="periodYear" name="periodYear" value="2026" required>
+                </div>
+            </div>
+            <div class="mb-3">
+                <label for="paymentMethod" class="form-label">Payment Method</label>
+                <select class="form-select bg-dark border-secondary text-light" id="paymentMethod" name="paymentMethod">
+                    <option value="BANK_TRANSFER">Bank Transfer</option>
+                    <option value="CASH">Cash</option>
+                    <option value="OTHER">Other</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label for="notes" class="form-label">Notes</label>
+                <textarea class="form-control bg-dark border-secondary text-light" id="notes" name="notes" rows="2"></textarea>
+            </div>
+            <div class="mt-4">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-check-lg"></i> Save Payment
+                </button>
+                <a href="/accounting/payroll" class="btn btn-outline-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

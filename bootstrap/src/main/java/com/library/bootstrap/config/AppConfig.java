@@ -15,7 +15,9 @@ public final class AppConfig {
     public static final int PORT = 8080;
 
     // H2 database file location (fields are created next to the app).
-    public static final String DB_URL = "jdbc:h2:file:./data/library;MODE=PostgreSQL;DB_CLOSE_ON_EXIT=FALSE";
+    // FILE_LOCK=NO + LOCK_TIMEOUT avoid the "Database may be already in use" error
+    // when the JVM is killed without graceful shutdown (Ctrl+C, IDE stop, etc.).
+    public static final String DB_URL = "jdbc:h2:file:./data/library;MODE=PostgreSQL;DB_CLOSE_ON_EXIT=FALSE;FILE_LOCK=NO;LOCK_TIMEOUT=10000";
 
     // public static String APP_URL = "http://" + InetAddress.getLocalHost().getHostAddress() + ":" + PORT + "/login";
     

@@ -50,6 +50,7 @@ import com.library.iam.infrastructure.web.controller.dashboard.ShowDashboardCont
 import com.library.iam.infrastructure.web.controller.login.LoginController;
 import com.library.iam.infrastructure.web.controller.login.LogoutController;
 import com.library.iam.infrastructure.web.controller.module.ListModulesController;
+import com.library.iam.infrastructure.web.controller.notification.NotificationController;
 import com.library.iam.infrastructure.web.controller.permission.ListPermissionsController;
 import com.library.iam.infrastructure.web.controller.role.CreateRoleController;
 import com.library.iam.infrastructure.web.controller.role.DeleteRoleController;
@@ -71,8 +72,17 @@ public final class IamFactory {
     private IamFactory() {
     }
 
+    private static UserPort sharedUserPort;
+
+    public static UserPort userPort(SessionFactory sessionFactory) {
+        if (sharedUserPort == null) {
+            sharedUserPort = new UserPersistenceAdapter(new HibernateUserRepository(sessionFactory));
+        }
+        return sharedUserPort;
+    }
+
     public static WebControllerContext register(JavalinConfig config, SessionFactory sessionFactory) {
-        UserPort userPort = new UserPersistenceAdapter(new HibernateUserRepository(sessionFactory));
+        UserPort userPort = userPort(sessionFactory);
         RolePort rolePort = new RolePersistenceAdapter(new HibernateRoleRepository(sessionFactory));
         PermissionPort permissionPort = new PermissionPersistenceAdapter(new HibernatePermissionRepository(sessionFactory));
         ModulePort modulePort = new ModulePersistenceAdapter(new HibernateModuleRepository(sessionFactory));
@@ -146,6 +156,7 @@ public final class IamFactory {
         ReinstateUserController reinstateUserController = new ReinstateUserController(reinstateUserUseCase, webContext);
         ListPermissionsController listPermissionsController = new ListPermissionsController(listPermissionsFlatUseCase, webContext);
         ListModulesController listModulesController = new ListModulesController(listModulesUseCase, webContext);
+        NotificationController notificationController = new NotificationController(webContext);
 
         IamRoutes.register(config,
                 loginController,
@@ -164,6 +175,7 @@ public final class IamFactory {
                 reinstateUserController,
                 listPermissionsController,
                 listModulesController,
+                notificationController,
                 (SseNotificationService) notificationService,
                 auditService);
 

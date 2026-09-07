@@ -34,7 +34,6 @@ public class CreateCategoryController extends BaseController {
     public void createCategory(Context ctx) {
         requireCan(ctx, "categories.create");
         CreateCategoryCommand command = new CreateCategoryCommand(
-                ctx.formParam("code"),
                 ctx.formParam("name"),
                 ctx.formParam("description"),
                 parseLong(ctx.formParam("parentId")));

@@ -1,0 +1,71 @@
+{%- extends "layout" -%}
+
+{% block title %}Stock Item - Library{% endblock %}
+
+{% block content %}
+{% import "_macros/csrf" as csrf %}
+<div class="page-header d-flex justify-content-between align-items-center">
+    <div>
+        <h1 class="mb-0">Stock Item: {{ item.code }}</h1>
+        <p class="text-muted">Physical copy details.</p>
+    </div>
+    <div>
+        <a href="/stock/items/{{ item.id }}/edit" class="btn btn-sm btn-outline-secondary">
+            <i class="bi bi-pencil"></i> Edit
+        </a>
+    </div>
+</div>
+
+<div class="card bg-dark border-secondary mt-3">
+    <div class="card-body">
+        <table class="table table-borderless text-light">
+            <tbody>
+                <tr>
+                    <th>Code</th><td>{{ item.code }}</td>
+                    <th>Edition</th><td>{{ item.editionName }}</td>
+                </tr>
+                <tr>
+                    <th>Location</th><td>{{ item.locationName }}</td>
+                    <th>State</th><td>{{ item.stateLabel }}</td>
+                </tr>
+                <tr>
+                    <th>Condition</th><td>{{ item.conditionLabel }}</td>
+                    <th>Created</th><td>{{ item.createdAt }}</td>
+                </tr>
+                <tr>
+                    <th>Updated</th><td>{{ item.updatedAt }}</td><td></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% if canUpdate %}
+<div class="card bg-dark border-secondary mt-3">
+    <div class="card-header text-light">Change State</div>
+    <div class="card-body">
+        <form method="post" action="/stock/items/{{ item.id }}/change-state" class="d-flex gap-2 align-items-center">
+            {{ csrf.token(csrfToken) }}
+            <select class="form-select bg-dark border-secondary text-light" name="state" required>
+                <option value="AVAILABLE">Available</option>
+                <option value="RESERVED">Reserved</option>
+                <option value="BORROWED">Borrowed</option>
+                <option value="REVIEW">In Review</option>
+                <option value="DAMAGED">Damaged</option>
+                <option value="RETIRED">Retired</option>
+            </select>
+            <button type="submit" class="btn btn-sm btn-primary">Update</button>
+        </form>
+    </div>
+</div>
+{% endif %}
+
+<div class="mt-4">
+    <a href="/stock/items" class="btn btn-outline-secondary">Back to List</a>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/js/iam.js" nonce="{{ securityNonce }}"></script>
+<script src="/js/books.js" nonce="{{ securityNonce }}"></script>
+{% endblock %}

@@ -29,7 +29,6 @@ public class CreateLanguageController extends BaseController {
     public void createLanguage(Context ctx) {
         requireCan(ctx, "languages.create");
         CreateLanguageCommand command = new CreateLanguageCommand(
-                ctx.formParam("code"),
                 ctx.formParam("name"));
 
         try {

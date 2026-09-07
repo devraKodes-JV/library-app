@@ -19,6 +19,10 @@ public class ShowDashboardController {
 
     public void showDashboard(Context ctx) {
         User user = ctx.sessionAttribute("user");
+        if (user == null) {
+            ctx.redirect("/landing.html");
+            return;
+        }
         List<NavSection> sections = buildNavigationUseCase.execute(user);
 
         ctx.render("dashboard", Map.of(

@@ -52,10 +52,14 @@ public class SessionAuthFilter {
     }
 
     private static boolean isPublicPath(String path) {
-        return path.equals("/login")
+        return path.equals("/")
+                || path.equals("/login")
+                || path.equals("/landing.html")
+                || path.startsWith("/catalog")
                 || path.startsWith("/css/")
                 || path.startsWith("/js/")
                 || path.startsWith("/vendor/")
+                || path.startsWith("/static/")
                 || path.equals("/favicon.ico");
     }
 

@@ -35,6 +35,7 @@ public class GlobalExceptionHandler implements ExceptionHandler<Exception> {
             if (message == null || message.isBlank()) {
                 message = error.getClass().getName();
             }
+            error.printStackTrace();
             renderError(ctx, 500, "errors/500", "Server Error", "Something went wrong: " + message);
         } catch (Exception e) {
             ctx.status(500);

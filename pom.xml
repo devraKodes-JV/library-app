@@ -27,6 +27,10 @@
         <module>security</module>
         <module>iam</module>
         <module>books</module>
+        <module>stock</module>
+        <module>client</module>
+        <module>reservation</module>
+        <module>accounting</module>
         <module>bootstrap</module>
     </modules>
 

@@ -52,21 +52,11 @@ class BookFormatValidatorTest {
         assertEquals("Code is required.", ex.getFieldErrors().get("code"));
     }
 
-    @Test
-    void validate_fails_whenCodeHasInvalidCharacters() {
-        BookFormat format = BookFormat.withoutId("HARD_BACK", "Hardback", null);
+     @Test
+    void validate_success_whenCodeHasHyphen() {
+        BookFormat format = BookFormat.withoutId("FMT-a1b2c3D4", "Hardback", null);
 
-        ValidationException ex = assertThrows(ValidationException.class, () -> validator.validate(format));
-        assertEquals("Code must be alphanumeric and 20 characters or less.", ex.getFieldErrors().get("code"));
-    }
-
-    @Test
-    void validate_fails_whenCodeIsTooLong() {
-        String longCode = "A".repeat(21);
-        BookFormat format = BookFormat.withoutId(longCode, "Hardback", null);
-
-        ValidationException ex = assertThrows(ValidationException.class, () -> validator.validate(format));
-        assertEquals("Code must be alphanumeric and 20 characters or less.", ex.getFieldErrors().get("code"));
+        validator.validate(format);
     }
 
     @Test

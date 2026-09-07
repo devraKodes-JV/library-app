@@ -29,7 +29,6 @@ public class CreateBookFormatController extends BaseController {
     public void createFormat(Context ctx) {
         requireCan(ctx, "formats.create");
         CreateBookFormatCommand command = new CreateBookFormatCommand(
-                ctx.formParam("code"),
                 ctx.formParam("name"),
                 ctx.formParam("description"));
 

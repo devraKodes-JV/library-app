@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 
 import com.library.iam.domain.model.NotificationEvent;
 import com.library.iam.domain.port.out.NotificationService;
+import com.library.iam.infrastructure.web.controller.notification.NotificationController;
 
 import io.javalin.http.sse.SseClient;
 
@@ -61,6 +62,10 @@ public class SseNotificationService implements NotificationService {
      */
     @Override
     public void publish(NotificationEvent event) {
+        // Store notification for polling (regardless of SSE clients)
+        String link = buildLink(event);
+        NotificationController.addNotification(event.type(), event.message(), link);
+
         if (clients.isEmpty()) {
             return; // No one connected; nothing to send.
         }
@@ -110,6 +115,13 @@ public class SseNotificationService implements NotificationService {
               .append(e.getValue().replace("\"", "\\\"")).append('"');
         }
         return sb.append('}').toString();
+    }
+
+    private static String buildLink(NotificationEvent event) {
+        if ("reservation.created".equals(event.type()) && event.targetId() != null) {
+            return "/reservations/" + event.targetId();
+        }
+        return "";
     }
 }
 

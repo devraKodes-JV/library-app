@@ -32,6 +32,10 @@ public class HibernateConfiguration {
         // Register the JPA-mapped entities.
         IamAnnotatedClases.annotate(cfg);
         BooksAnnotatedClases.annotate(cfg);
+        StockAnnotatedClases.annotate(cfg);
+        ClientAnnotatedClases.annotate(cfg);
+        ReservationAnnotatedClases.annotate(cfg);
+        AccountingAnnotatedClases.annotate(cfg);
 
         return cfg;
     }

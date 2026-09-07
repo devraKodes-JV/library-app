@@ -1,0 +1,54 @@
+{%- extends "layout" -%}
+
+{% block title %}Reserve Book{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <a href="/catalog" class="back-link mb-3"><i class="bi bi-arrow-left"></i> Back</a>
+            <div class="card bg-dark border-secondary">
+                <div class="card-body p-4">
+                    <h4 class="card-title text-light mb-3">{{ bookTitle }}</h4>
+                    {% if editionNumber %}
+                    <p class="text-muted mb-3"><i class="bi bi-bookmark"></i> {{ editionNumber }}</p>
+                    {% endif %}
+
+                    <form method="post" action="/catalog/reserve/{{ editionId }}">
+                        <input type="hidden" name="_csrf" value="{{ csrfToken }}">
+
+                        <div class="mb-3">
+                            <label for="dni" class="form-label">DNI</label>
+                            <input type="text" class="form-control bg-dark border-secondary text-light" id="dni" name="dni" required autofocus placeholder="Enter your DNI">
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="loanDays" class="form-label">Loan Days</label>
+                            <input type="number" class="form-control bg-dark border-secondary text-light" id="loanDays" name="loanDays" value="7" min="1" max="30" required>
+                            <div class="form-text text-muted">How many days do you want to borrow?</div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100">
+                            Reserve
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block styles %}
+<style>
+    .back-link {
+        color: #94a3b8;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: color 0.2s;
+    }
+    .back-link:hover { color: #fff; }
+</style>
+{% endblock %}

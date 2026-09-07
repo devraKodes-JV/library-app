@@ -2,38 +2,57 @@ package com.library.bootstrap.factory;
 
 import org.hibernate.SessionFactory;
 
+import com.library.accounting.application.service.payment.RecordClientPaymentUseCase;
+import com.library.accounting.domain.port.out.PaymentRepository;
+import com.library.accounting.infrastructure.persistence.adapter.PaymentPersistenceAdapter;
+import com.library.accounting.infrastructure.persistence.repository.hibernate.HibernatePaymentRepository;
+import com.library.bootstrap.generation.ShortUuidCodeGenerationService;
+import com.library.client.domain.port.out.ClientRepository;
+import com.library.iam.infrastructure.notification.SseNotificationService;
+import com.library.kernel.generation.CodeGenerationService;
 import com.library.kernel.web.WebControllerContext;
+import com.library.reservation.domain.port.out.PaymentRecorder;
+import com.library.reservation.infrastructure.payment.AccountingPaymentRecorder;
 import com.library.security.SecurityFactory;
-import com.library.bootstrap.factory.IamFactory;
-import com.library.bootstrap.factory.BooksFactory;
+import com.library.stock.domain.port.out.StockItemRepository;
+import com.library.stock.domain.port.out.StockLocationRepository;
+import com.library.stock.infrastructure.persistence.adapter.StockItemPersistenceAdapter;
+import com.library.stock.infrastructure.persistence.adapter.StockLocationPersistenceAdapter;
+import com.library.stock.infrastructure.persistence.repository.hibernate.HibernateStockItemRepository;
+import com.library.stock.infrastructure.persistence.repository.hibernate.HibernateStockLocationRepository;
 
 import io.javalin.config.JavalinConfig;
 
-/**
- * Orchestrator of the application's feature factories.
- *
- * <p>This is the single composition point for the whole monolith. Each feature
- * (IAM today, books tomorrow) exposes a {@code register(Javalin,
- * SessionFactory)} method and is wired here. The {@code LibraryApplication}
- * entry point only calls {@link #create(SessionFactory, Javalin)} and does not
- * know about any concrete dependency.</p>
- */
 public final class AppFactory {
 
-    private AppFactory() {
-        // Utility class: no instantiation.
-    }
+    private AppFactory() {}
 
-    /**
-     * Bootstraps every feature on the given Javalin config.
-     *
-     * @param sessionFactory the Hibernate session factory shared by all features
-     * @param config         the Javalin configuration (routes are added here)
-     */
     public static void create(SessionFactory sessionFactory, JavalinConfig config) {
         SecurityFactory.register(config, sessionFactory);
 
+        SseNotificationService notificationService = new SseNotificationService();
+
         WebControllerContext webContext = IamFactory.register(config, sessionFactory);
         BooksFactory.register(config, sessionFactory, webContext);
+        StockFactory.register(config, sessionFactory, webContext, notificationService);
+        ClientFactory.register(config, sessionFactory, webContext);
+
+        StockItemRepository stockItemRepository = new StockItemPersistenceAdapter(
+                new HibernateStockItemRepository(sessionFactory));
+        StockLocationRepository stockLocationRepository = new StockLocationPersistenceAdapter(
+                new HibernateStockLocationRepository(sessionFactory));
+        ClientRepository clientRepository = ClientFactory.clientRepository(sessionFactory);
+
+        PaymentRepository paymentRepository = new PaymentPersistenceAdapter(
+                new HibernatePaymentRepository(sessionFactory));
+        CodeGenerationService codeGenerationService = new ShortUuidCodeGenerationService();
+        RecordClientPaymentUseCase recordClientPaymentUseCase = new RecordClientPaymentUseCase(
+                paymentRepository, codeGenerationService);
+        PaymentRecorder paymentRecorder = new AccountingPaymentRecorder(recordClientPaymentUseCase);
+
+        ReservationFactory.register(config, sessionFactory, webContext,
+                stockItemRepository, stockLocationRepository, clientRepository,
+                notificationService, paymentRecorder);
+        AccountingFactory.register(config, sessionFactory, webContext, clientRepository);
     }
 }

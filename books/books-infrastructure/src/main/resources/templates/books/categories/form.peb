@@ -19,19 +19,11 @@
         <div class="card-body bg-dark">
             <div class="row g-3">
                 <div class="col-md-6">
-                    <label class="form-label" for="code">Code</label>
-                    <input type="text" id="code" name="code" class="form-control bg-dark border-secondary text-light {% if code is defined and code %}is-invalid{% else %}{% if category is not null %}is-valid{% endif %}{% endif %}" required
-                           value="{% if category is not null %}{{ category.code }}{% endif %}">
-                    <div class="invalid-feedback" id="codeError">{% if code is defined and code %}{{ code }}{% endif %}</div>
-                </div>
-                <div class="col-md-6">
                     <label class="form-label" for="name">Name</label>
                     <input type="text" id="name" name="name" class="form-control bg-dark border-secondary text-light {% if name is defined and name %}is-invalid{% else %}{% if category is not null %}is-valid{% endif %}{% endif %}" required
                            value="{% if category is not null %}{{ category.name }}{% endif %}">
                     <div class="invalid-feedback" id="nameError">{% if name is defined and name %}{{ name }}{% endif %}</div>
                 </div>
-            </div>
-            <div class="row g-3 mt-0">
                 <div class="col-md-6">
                     <label class="form-label" for="parentId">Parent Category</label>
                     <select id="parentId" name="parentId" class="form-select form-select-sm w-auto bg-dark border-secondary text-light">
@@ -69,20 +61,12 @@ document.addEventListener('DOMContentLoaded', function() {
     var form = document.querySelector('form[novalidate]');
     if (!form) return;
     
-    var code = document.getElementById('code');
     var name = document.getElementById('name');
     var description = document.getElementById('description');
-    var codeError = document.getElementById('codeError');
     var nameError = document.getElementById('nameError');
     var descriptionError = document.getElementById('descriptionError');
     var submitBtn = document.getElementById('submitBtn');
     var alphaRegex = /^[a-zA-ZÀ-ÿ\s'-]+$/;
-    
-    function isCodeValid() {
-        if (!code.value.trim()) return false;
-        if (!/^[a-zA-Z0-9]+$/.test(code.value.trim()) || code.value.trim().length > 50) return false;
-        return true;
-    }
     
     function isNameValid() {
         if (!name.value.trim()) return false;
@@ -92,23 +76,6 @@ document.addEventListener('DOMContentLoaded', function() {
     
     function isDescriptionValid() {
         if (description.value.trim() && description.value.trim().length > 1000) return false;
-        return true;
-    }
-    
-    function validateCode() {
-        if (!isCodeValid()) {
-            if (!code.value.trim()) {
-                codeError.textContent = 'Code is required.';
-            } else {
-                codeError.textContent = 'Code must be alphanumeric and 50 characters or less.';
-            }
-            code.classList.add('is-invalid');
-            code.classList.remove('is-valid');
-            return false;
-        }
-        codeError.textContent = '';
-        code.classList.remove('is-invalid');
-        code.classList.add('is-valid');
         return true;
     }
     
@@ -143,23 +110,10 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     function updateSubmitButton() {
-        var valid = isCodeValid() && isNameValid() && isDescriptionValid();
+        var valid = isNameValid() && isDescriptionValid();
         submitBtn.disabled = !valid;
         return valid;
     }
-    
-    code.addEventListener('input', function() {
-        validateCode();
-        updateSubmitButton();
-    });
-    code.addEventListener('change', function() {
-        validateCode();
-        updateSubmitButton();
-    });
-    code.addEventListener('blur', function() {
-        validateCode();
-        updateSubmitButton();
-    });
     
     name.addEventListener('input', function() {
         validateName();

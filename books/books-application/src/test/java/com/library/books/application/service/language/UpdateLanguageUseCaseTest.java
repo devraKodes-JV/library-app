@@ -22,7 +22,7 @@ class UpdateLanguageUseCaseTest {
         UpdateLanguageUseCase useCase = new UpdateLanguageUseCase(languageRepository, validator);
 
         Language saved = languageRepository.save(Language.withoutId("EN", "English"));
-        UpdateLanguageCommand command = new UpdateLanguageCommand(saved.getId(), "EN", "English Updated");
+        UpdateLanguageCommand command = new UpdateLanguageCommand(saved.getId(), "English Updated");
         LanguageResponseDTO result = useCase.execute(command);
 
         assertEquals("EN", result.code());
@@ -35,7 +35,7 @@ class UpdateLanguageUseCaseTest {
         LanguageValidator validator = new LanguageValidator();
         UpdateLanguageUseCase useCase = new UpdateLanguageUseCase(languageRepository, validator);
 
-        UpdateLanguageCommand command = new UpdateLanguageCommand(999L, "EN", "English");
+        UpdateLanguageCommand command = new UpdateLanguageCommand(999L, "English");
 
         assertThrows(LanguageNotFoundException.class, () -> useCase.execute(command));
     }
@@ -47,23 +47,9 @@ class UpdateLanguageUseCaseTest {
         UpdateLanguageUseCase useCase = new UpdateLanguageUseCase(languageRepository, validator);
 
         Language saved = languageRepository.save(Language.withoutId("EN", "English"));
-        UpdateLanguageCommand command = new UpdateLanguageCommand(saved.getId(), "", "");
+        UpdateLanguageCommand command = new UpdateLanguageCommand(saved.getId(), "");
 
         ValidationException ex = assertThrows(ValidationException.class, () -> useCase.execute(command));
-        assertTrue(ex.getFieldErrors().containsKey("code"));
         assertTrue(ex.getFieldErrors().containsKey("name"));
-    }
-
-    @Test
-    void updateLanguage_failsOnInvalidCode() {
-        FakeLanguageRepository languageRepository = new FakeLanguageRepository();
-        LanguageValidator validator = new LanguageValidator();
-        UpdateLanguageUseCase useCase = new UpdateLanguageUseCase(languageRepository, validator);
-
-        Language saved = languageRepository.save(Language.withoutId("EN", "English"));
-        UpdateLanguageCommand command = new UpdateLanguageCommand(saved.getId(), "INVALID-CODE", "English");
-
-        ValidationException ex = assertThrows(ValidationException.class, () -> useCase.execute(command));
-        assertTrue(ex.getFieldErrors().containsKey("code"));
     }
 }

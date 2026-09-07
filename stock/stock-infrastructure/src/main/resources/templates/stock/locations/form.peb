@@ -1,0 +1,54 @@
+{%- extends "layout" -%}
+
+{% block title %}
+    {% if mode == 'create' %}Create Stock Location{% else %}Edit Stock Location{% endif %}
+{% endblock %}
+
+{% block content %}
+{% import "_macros/csrf" as csrf %}
+<div class="page-header">
+    <h1 class="mb-0">{% if mode == 'create' %}New Stock Location{% else %}Edit Stock Location{% endif %}</h1>
+    <p class="text-muted">{% if mode == 'create' %}Create a new storage location{% else %}Update location details{% endif %}</p>
+</div>
+
+<form method="post" action="{% if mode == 'create' %}/stock/locations{% else %}/stock/locations/{{ location.id }}{% endif %}">
+    {{ csrf.token(csrfToken) }}
+
+    <div class="card bg-dark border-secondary mt-3">
+        <div class="card-body">
+            <div class="mb-3">
+                <label for="code" class="form-label">Code <span class="text-muted">(auto-generated)</span></label>
+                <input type="text" class="form-control bg-secondary text-light"
+                       id="code" name="code" value="{% if location is not null %}{{ location.code }}{% endif %}" readonly>
+            </div>
+
+            <div class="mb-3">
+                <label for="name" class="form-label">Name</label>
+                <input type="text" class="form-control {% if validationError and name %}is-invalid{% endif %}"
+                        id="name" name="name" value="{% if location is not null %}{{ location.name }}{% endif %}" required>
+                {% if validationError and name %}
+                <div class="invalid-feedback">{{ name }}</div>
+                {% endif %}
+            </div>
+
+            <div class="mb-3">
+                <label for="description" class="form-label">Description</label>
+                <textarea class="form-control bg-dark border-secondary text-light"
+                          id="description" name="description" rows="3">{% if location is not null %}{{ location.description }}{% endif %}</textarea>
+            </div>
+
+            <div class="mb-3">
+                <label for="capacity" class="form-label">Capacity</label>
+                <input type="number" class="form-control"
+                        id="capacity" name="capacity" value="{% if location is not null %}{{ location.capacity }}{% endif %}" min="1">
+                <div class="form-text">Leave blank for unlimited capacity.</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-4">
+        <button type="submit" class="btn btn-primary">{% if mode == 'create' %}Create{% else %}Save{% endif %}</button>
+        <a href="/stock/locations" class="btn btn-outline-secondary">Cancel</a>
+    </div>
+</form>
+{% endblock %}

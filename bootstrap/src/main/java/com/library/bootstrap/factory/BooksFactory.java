@@ -3,6 +3,8 @@ package com.library.bootstrap.factory;
 import org.hibernate.SessionFactory;
 
 import com.library.security.SecurityFactory;
+import com.library.kernel.generation.CodeGenerationService;
+import com.library.bootstrap.generation.ShortUuidCodeGenerationService;
 import com.library.books.application.service.author.CreateAuthorUseCase;
 import com.library.books.application.service.author.DeleteAuthorUseCase;
 import com.library.books.application.service.author.GetAuthorDetailUseCase;
@@ -174,6 +176,7 @@ public final class BooksFactory {
         AuthorRoleRepository authorRoleRepository = new AuthorRolePersistenceAdapter(new HibernateAuthorRoleRepository(sessionFactory));
 
         Transactional transactional = new com.library.books.infrastructure.transaction.HibernateTransactionExecutor(sessionFactory);
+        CodeGenerationService codeGenerationService = new ShortUuidCodeGenerationService();
         AuthorValidator authorValidator = new AuthorValidator();
         BookFormatValidator bookFormatValidator = new BookFormatValidator();
         CategoryValidator categoryValidator = new CategoryValidator();
@@ -190,13 +193,13 @@ public final class BooksFactory {
         ListAuthorsUseCase listAuthorsUseCase = new ListAuthorsUseCase(authorRepository);
         GetAuthorDetailUseCase getAuthorDetailUseCase = new GetAuthorDetailUseCase(authorRepository);
 
-        CreateBookFormatUseCase createBookFormatUseCase = new CreateBookFormatUseCase(bookFormatRepository, bookFormatValidator);
+        CreateBookFormatUseCase createBookFormatUseCase = new CreateBookFormatUseCase(bookFormatRepository, bookFormatValidator, codeGenerationService);
         UpdateBookFormatUseCase updateBookFormatUseCase = new UpdateBookFormatUseCase(bookFormatRepository, bookFormatValidator);
         DeleteBookFormatUseCase deleteBookFormatUseCase = new DeleteBookFormatUseCase(bookFormatRepository, editionRepository);
         GetBookFormatUseCase getBookFormatUseCase = new GetBookFormatUseCase(bookFormatRepository);
         ListBookFormatsUseCase listBookFormatsUseCase = new ListBookFormatsUseCase(bookFormatRepository);
 
-        CreateCategoryUseCase createCategoryUseCase = new CreateCategoryUseCase(categoryRepository, categoryValidator);
+        CreateCategoryUseCase createCategoryUseCase = new CreateCategoryUseCase(categoryRepository, categoryValidator, codeGenerationService);
         UpdateCategoryUseCase updateCategoryUseCase = new UpdateCategoryUseCase(categoryRepository, categoryValidator);
         DeleteCategoryUseCase deleteCategoryUseCase = new DeleteCategoryUseCase(categoryRepository);
         GetCategoryUseCase getCategoryUseCase = new GetCategoryUseCase(categoryRepository);
@@ -211,7 +214,7 @@ public final class BooksFactory {
         ListEditionsByFormatUseCase listEditionsByFormatUseCase = new ListEditionsByFormatUseCase(editionRepository);
         ListEditionsByWorkUseCase listEditionsByWorkUseCase = new ListEditionsByWorkUseCase(editionRepository);
 
-        CreateLanguageUseCase createLanguageUseCase = new CreateLanguageUseCase(languageRepository, languageValidator);
+        CreateLanguageUseCase createLanguageUseCase = new CreateLanguageUseCase(languageRepository, languageValidator, codeGenerationService);
         UpdateLanguageUseCase updateLanguageUseCase = new UpdateLanguageUseCase(languageRepository, languageValidator);
         DeleteLanguageUseCase deleteLanguageUseCase = new DeleteLanguageUseCase(languageRepository, editionRepository);
         GetLanguageUseCase getLanguageUseCase = new GetLanguageUseCase(languageRepository);
@@ -233,7 +236,7 @@ public final class BooksFactory {
         ListWorksByAuthorUseCase listWorksByAuthorUseCase = new ListWorksByAuthorUseCase(workRepository, languageRepository, categoryRepository);
         GetWorkDetailUseCase getWorkDetailUseCase = new GetWorkDetailUseCase(workRepository);
 
-        CreateAuthorRoleUseCase createAuthorRoleUseCase = new CreateAuthorRoleUseCase(authorRoleRepository);
+        CreateAuthorRoleUseCase createAuthorRoleUseCase = new CreateAuthorRoleUseCase(authorRoleRepository, codeGenerationService);
         UpdateAuthorRoleUseCase updateAuthorRoleUseCase = new UpdateAuthorRoleUseCase(authorRoleRepository);
         DeleteAuthorRoleUseCase deleteAuthorRoleUseCase = new DeleteAuthorRoleUseCase(authorRoleRepository);
         ReactivateAuthorRoleUseCase reactivateAuthorRoleUseCase = new ReactivateAuthorRoleUseCase(authorRoleRepository);

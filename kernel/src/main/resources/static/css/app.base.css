@@ -43,6 +43,7 @@ a:hover {
 
 .app-aside {
     width: 240px;
+    min-width: 240px;
     flex-shrink: 0;
     background: var(--bs-body-bg-secondary) !important;
     color: var(--bs-body-color) !important;
@@ -51,6 +52,7 @@ a:hover {
     position: sticky;
     top: 0;
     height: 100vh;
+    overflow: hidden;
 }
 
 .app-aside .brand {
@@ -62,6 +64,7 @@ a:hover {
     font-weight: 600;
     color: #fff !important;
     border-bottom: 1px solid var(--bs-border-color);
+    flex-shrink: 0;
 }
 
 .app-aside .brand i {
@@ -69,13 +72,20 @@ a:hover {
 }
 
 .app-aside nav {
-    flex: 1;
+    flex: 1 1 auto;
     overflow-y: auto;
+    overflow-x: hidden;
     padding: 0.75rem 0;
+    min-height: 0;
+    display: block;
+    flex-wrap: nowrap;
+    flex-direction: column;
 }
 
 .nav-section {
     margin-bottom: 0.5rem;
+    flex-shrink: 0;
+    width: 100%;
 }
 
 .nav-section-title {
@@ -115,11 +125,17 @@ a:hover {
 .nav-section-items {
     display: none;
     padding: 0;
+    margin: 0;
     list-style: none;
+    width: 100%;
 }
 
 .nav-section.open > .nav-section-items {
     display: block;
+}
+
+.nav-section-items li {
+    width: 100%;
 }
 
 .nav-section-items .nav-link {
@@ -130,6 +146,9 @@ a:hover {
     text-decoration: none;
     font-size: 0.9rem;
     box-sizing: border-box;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .nav-section-items .nav-link:hover {
@@ -144,6 +163,7 @@ a:hover {
     align-items: center;
     justify-content: space-between;
     gap: 0.5rem;
+    flex-shrink: 0;
 }
 
 .user-chip {

@@ -18,23 +18,23 @@ CREATE TABLE author_roles (
 );
 
 -- Seed author_roles ----------------------------------------------------------
-INSERT INTO author_roles (code, name, description, created_at, updated_at) VALUES ('LEAD_AUTHOR', 'Lead Author', 'Primary author of the work', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO author_roles (code, name, description, created_at, updated_at) VALUES ('CO_AUTHOR', 'Co-Author', 'Contributing author', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO author_roles (code, name, description, created_at, updated_at) VALUES ('EDITOR', 'Editor', 'Editor of the work', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO author_roles (code, name, description, created_at, updated_at) VALUES ('TRANSLATOR', 'Translator', 'Translator of the work', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO author_roles (code, name, description, created_at, updated_at) VALUES ('CONTRIBUTOR', 'Contributor', 'Contributor to the work', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO author_roles (code, name, description, created_at, updated_at) VALUES ('ROLE-ldAu4kQ7', 'Lead Author', 'Primary author of the work', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO author_roles (code, name, description, created_at, updated_at) VALUES ('ROLE-coAu9mP2', 'Co-Author', 'Contributing author', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO author_roles (code, name, description, created_at, updated_at) VALUES ('ROLE-edtR3xV8', 'Editor', 'Editor of the work', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO author_roles (code, name, description, created_at, updated_at) VALUES ('ROLE-trlS7nB4', 'Translator', 'Translator of the work', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO author_roles (code, name, description, created_at, updated_at) VALUES ('ROLE-conT2wQ5', 'Contributor', 'Contributor to the work', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 -- Modify work_authors --------------------------------------------------------
 ALTER TABLE work_authors ADD COLUMN IF NOT EXISTS author_role_id BIGINT;
 ALTER TABLE work_authors ALTER COLUMN role DROP NOT NULL;
-UPDATE work_authors SET author_role_id = (SELECT id FROM author_roles WHERE code = 'LEAD_AUTHOR') WHERE author_role_id IS NULL;
+UPDATE work_authors SET author_role_id = (SELECT id FROM author_roles WHERE code = 'ROLE-ldAu4kQ7') WHERE author_role_id IS NULL;
 ALTER TABLE work_authors ALTER COLUMN author_role_id SET NOT NULL;
 ALTER TABLE work_authors ADD CONSTRAINT fk_work_authors_role FOREIGN KEY (author_role_id) REFERENCES author_roles (id);
 
 -- Modify edition_authors -----------------------------------------------------
 ALTER TABLE edition_authors ADD COLUMN IF NOT EXISTS author_role_id BIGINT;
 ALTER TABLE edition_authors ALTER COLUMN role DROP NOT NULL;
-UPDATE edition_authors SET author_role_id = (SELECT id FROM author_roles WHERE code = 'LEAD_AUTHOR') WHERE author_role_id IS NULL;
+UPDATE edition_authors SET author_role_id = (SELECT id FROM author_roles WHERE code = 'ROLE-ldAu4kQ7') WHERE author_role_id IS NULL;
 ALTER TABLE edition_authors ALTER COLUMN author_role_id SET NOT NULL;
 ALTER TABLE edition_authors ADD CONSTRAINT fk_edition_authors_role FOREIGN KEY (author_role_id) REFERENCES author_roles (id);
 

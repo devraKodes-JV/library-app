@@ -3,6 +3,9 @@ package com.library.bootstrap;
 import java.awt.Desktop;
 import java.net.InetAddress;
 import java.net.URI;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 
 import org.hibernate.SessionFactory;
@@ -13,6 +16,8 @@ import com.library.bootstrap.config.AppConfig;
 import com.library.bootstrap.config.FlywayMigrations;
 import com.library.bootstrap.config.JavalinStart;
 import com.library.bootstrap.config.hibernate.HibernateConfiguration;
+import com.library.bootstrap.factory.AppFactory;
+import com.library.bootstrap.scheduler.MembershipExpiryScheduler;
 import com.library.bootstrap.upload.ImageStorage;
 
 public class LibraryApplication {
@@ -29,7 +34,16 @@ public class LibraryApplication {
         SessionFactory sessionFactory
                 = HibernateConfiguration.buildHibernateConfiguration().buildSessionFactory();
 
-        JavalinStart.run(sessionFactory, log); 
+        JavalinStart.run(sessionFactory, log);
+
+        ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor(r -> {
+            Thread t = new Thread(r, "membership-expiry-scheduler");
+            t.setDaemon(true);
+            return t;
+        });
+        scheduler.scheduleAtFixedRate(
+                () -> MembershipExpiryScheduler.run(sessionFactory),
+                1, 60, TimeUnit.MINUTES);
 
         String host = InetAddress.getLocalHost().getHostAddress();
         String url = "http://" + host + ":" + AppConfig.PORT + "/login";

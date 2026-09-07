@@ -46,20 +46,10 @@ class LanguageValidatorTest {
     }
 
     @Test
-    void validate_fails_whenCodeHasInvalidCharacters() {
-        Language language = Language.withoutId("EN-US", "English");
+    void validate_success_whenCodeHasHyphen() {
+        Language language = Language.withoutId("LANG-a1b2c3D4", "English");
 
-        ValidationException ex = assertThrows(ValidationException.class, () -> validator.validate(language));
-        assertEquals("Code must be alphanumeric and 20 characters or less.", ex.getFieldErrors().get("code"));
-    }
-
-    @Test
-    void validate_fails_whenCodeIsTooLong() {
-        String longCode = "A".repeat(21);
-        Language language = Language.withoutId(longCode, "English");
-
-        ValidationException ex = assertThrows(ValidationException.class, () -> validator.validate(language));
-        assertEquals("Code must be alphanumeric and 20 characters or less.", ex.getFieldErrors().get("code"));
+        validator.validate(language);
     }
 
     @Test

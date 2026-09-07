@@ -50,6 +50,41 @@
             <version>${project.version}</version>
         </dependency>
 
+        <!-- Stock infrastructure (controllers, routes, templates). -->
+        <dependency>
+            <groupId>com.library</groupId>
+            <artifactId>stock-infrastructure</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <!-- Client infrastructure (controllers, routes, templates). -->
+        <dependency>
+            <groupId>com.library</groupId>
+            <artifactId>client-infrastructure</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <!-- Reservation infrastructure (controllers, routes, templates). -->
+        <dependency>
+            <groupId>com.library</groupId>
+            <artifactId>reservation-infrastructure</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <!-- Accounting infrastructure (controllers, routes, templates). -->
+        <dependency>
+            <groupId>com.library</groupId>
+            <artifactId>accounting-infrastructure</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <!-- Accounting application (use cases). -->
+        <dependency>
+            <groupId>com.library</groupId>
+            <artifactId>accounting-application</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
         <!-- SLF4J API. -->
         <dependency>
             <groupId>org.slf4j</groupId>

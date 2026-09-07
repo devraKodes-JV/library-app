@@ -1,0 +1,102 @@
+{%- extends "layout" -%}
+
+{% block title %}
+    {% if mode == 'create' %}Create Client{% else %}Edit Client{% endif %}
+{% endblock %}
+
+{% block content %}
+{% import "_macros/csrf" as csrf %}
+<div class="page-header">
+    <h1 class="mb-0">{% if mode == 'create' %}New Client{% else %}Edit Client{% endif %}</h1>
+    <p class="text-muted">{% if mode == 'create' %}Register a new library client{% else %}Update client details{% endif %}</p>
+</div>
+
+<form method="post" action="{% if mode == 'create' %}/clients{% else %}/clients/{{ client.id }}{% endif %}">
+    {{ csrf.token(csrfToken) }}
+
+    <div class="card bg-dark border-secondary mt-3">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="dni" class="form-label">DNI *</label>
+                    <input type="text" class="form-control bg-dark border-secondary text-light {% if validationError and dni %}is-invalid{% endif %}"
+                           id="dni" name="dni" value="{% if client is not null %}{{ client.dni }}{% endif %}"
+                           {% if mode == 'edit' %}readonly{% else %}required{% endif %}>
+                    {% if validationError and dni %}
+                    <div class="invalid-feedback">{{ dni }}</div>
+                    {% endif %}
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="fullName" class="form-label">Full Name *</label>
+                    <input type="text" class="form-control bg-dark border-secondary text-light {% if validationError and fullName %}is-invalid{% endif %}"
+                           id="fullName" name="fullName" value="{% if client is not null %}{{ client.fullName }}{% endif %}" required>
+                    {% if validationError and fullName %}
+                    <div class="invalid-feedback">{{ fullName }}</div>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="email" class="form-label">Email</label>
+                    <input type="email" class="form-control bg-dark border-secondary text-light {% if validationError and email %}is-invalid{% endif %}"
+                           id="email" name="email" value="{% if client is not null %}{{ client.email }}{% endif %}">
+                    {% if validationError and email %}
+                    <div class="invalid-feedback">{{ email }}</div>
+                    {% endif %}
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="phone" class="form-label">Phone</label>
+                    <input type="text" class="form-control bg-dark border-secondary text-light {% if validationError and phone %}is-invalid{% endif %}"
+                           id="phone" name="phone" value="{% if client is not null %}{{ client.phone }}{% endif %}">
+                    {% if validationError and phone %}
+                    <div class="invalid-feedback">{{ phone }}</div>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="mb-3">
+                <label for="address" class="form-label">Address</label>
+                <input type="text" class="form-control bg-dark border-secondary text-light"
+                       id="address" name="address" value="{% if client is not null %}{{ client.address }}{% endif %}">
+            </div>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="type" class="form-label">Client Type *</label>
+                    <select class="form-select bg-dark border-secondary text-light" id="type" name="type" required>
+                        {% for type in clientTypes %}
+                        <option value="{{ type.name }}" {% if client is not null and client.type == type.name %}selected{% endif %}>
+                            {{ type.label }} - {{ type.description }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="memberUntil" class="form-label">Member Until</label>
+                    <input type="date" class="form-control bg-dark border-secondary text-light"
+                           id="memberUntil" name="memberUntil" value="{% if client is not null %}{{ client.memberUntil }}{% endif %}">
+                    <div class="form-text text-muted">Only applicable for MEMBER type clients.</div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="birthDate" class="form-label">Birth Date</label>
+                    <input type="date" class="form-control bg-dark border-secondary text-light"
+                           id="birthDate" name="birthDate" value="{% if client is not null %}{{ client.birthDate }}{% endif %}">
+                </div>
+            </div>
+            <div class="mb-3">
+                <label for="notes" class="form-label">Notes</label>
+                <textarea class="form-control bg-dark border-secondary text-light {% if validationError and notes %}is-invalid{% endif %}"
+                          id="notes" name="notes" rows="3">{% if client is not null %}{{ client.notes }}{% endif %}</textarea>
+                {% if validationError and notes %}
+                <div class="invalid-feedback">{{ notes }}</div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-4">
+        <button type="submit" class="btn btn-primary">{% if mode == 'create' %}Create{% else %}Save{% endif %}</button>
+        <a href="/clients" class="btn btn-outline-secondary">Cancel</a>
+    </div>
+</form>
+{% endblock %}

@@ -1,0 +1,110 @@
+{%- extends "layout" -%}
+
+{% block title %}Reservations - Library{% endblock %}
+
+{% block content %}
+{% import "_macros/csrf" as csrf %}
+<div class="page-header d-flex justify-content-between align-items-center">
+    <div>
+        <h1 class="mb-0">Reservations</h1>
+        <p class="text-muted">Manage book reservations and returns.</p>
+    </div>
+    {% if canCreate %}
+    <a href="/reservations/new" class="btn btn-primary text-white">
+        <i class="bi bi-plus-lg"></i> New Reservation
+    </a>
+    {% endif %}
+</div>
+
+<div class="d-flex gap-2 mb-3 flex-wrap">
+    <a href="?status=active" class="btn btn-sm {% if status == 'active' %}btn-primary{% else %}btn-outline-secondary{% endif %}">Active</a>
+    <a href="?status=DEPOSIT_PENDING" class="btn btn-sm {% if status == 'DEPOSIT_PENDING' %}btn-warning text-dark{% else %}btn-outline-secondary{% endif %}">Deposit Pending</a>
+    <a href="?status=ACTIVE" class="btn btn-sm {% if status == 'ACTIVE' %}btn-success{% else %}btn-outline-secondary{% endif %}">Fulfilled</a>
+    <a href="?status=OVERDUE" class="btn btn-sm {% if status == 'OVERDUE' %}btn-danger{% else %}btn-outline-secondary{% endif %}">Overdue</a>
+    <a href="?status=RETURNED" class="btn btn-sm {% if status == 'RETURNED' %}btn-info{% else %}btn-outline-secondary{% endif %}">Returned</a>
+    <a href="?status=CANCELLED" class="btn btn-sm {% if status == 'CANCELLED' %}btn-secondary{% else %}btn-outline-secondary{% endif %}">Cancelled</a>
+    <a href="?status=all" class="btn btn-sm {% if status == 'all' %}btn-primary{% else %}btn-outline-secondary{% endif %}">All</a>
+</div>
+
+{% if reservations is empty %}
+<div class="alert alert-info bg-dark border-secondary text-light">No reservations found.</div>
+{% else %}
+<div class="card mt-3 bg-dark border-secondary">
+    <div class="table-responsive container">
+        <table class="table table-hover align-middle mb-0 data-table text-light">
+            <thead>
+                <tr>
+                    <th>Code</th>
+                    <th>Client</th>
+                    <th>Edition</th>
+                    <th>Status</th>
+                    <th>Deposit</th>
+                    <th>Due Date</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for reservation in reservations %}
+                <tr>
+                    <td><strong>{{ reservation.code }}</strong></td>
+                    <td>{{ reservation.clientName | default("N/A") }}</td>
+                    <td>{{ reservation.editionName | default("N/A") }}</td>
+                    <td>
+                        <span class="badge
+                            {% if reservation.status == 'DEPOSIT_PENDING' %}bg-warning text-dark
+                            {% elseif reservation.status == 'ACTIVE' %}bg-success
+                            {% elseif reservation.status == 'OVERDUE' %}bg-danger
+                            {% elseif reservation.status == 'RETURNED' %}bg-info
+                            {% elseif reservation.status == 'CANCELLED' %}bg-secondary
+                            {% endif %}">
+                            {{ reservation.statusLabel }}
+                        </span>
+                    </td>
+                    <td>{{ reservation.depositPercentage }}%</td>
+                    <td>{{ reservation.dueDate | default("N/A") }}</td>
+                    <td class="text-end">
+                        <a href="/reservations/{{ reservation.id }}" class="btn btn-sm btn-outline-secondary" aria-label="View {{ reservation.code }}">
+                            <i class="bi bi-eye"></i>
+                        </a>
+                        {% if canFulfill and reservation.status == 'DEPOSIT_PENDING' %}
+                        <a href="/reservations/{{ reservation.id }}?wizard=fulfill" class="btn btn-sm btn-outline-success" aria-label="Fulfill {{ reservation.code }}">
+                            <i class="bi bi-check-lg"></i>
+                        </a>
+                        {% endif %}
+                        {% if canReturn and (reservation.status == 'ACTIVE' or reservation.status == 'OVERDUE') %}
+                        <a href="/reservations/{{ reservation.id }}?wizard=return" class="btn btn-sm btn-outline-info" aria-label="Return {{ reservation.code }}">
+                            <i class="bi bi-arrow-return-left"></i>
+                        </a>
+                        {% endif %}
+                        {% if canRenew and reservation.status == 'ACTIVE' %}
+                        <form method="post" action="/reservations/{{ reservation.id }}/renew" class="d-inline">
+                            {{ csrf.token(csrfToken) }}
+                            <button type="submit" class="btn btn-sm btn-outline-primary" aria-label="Renew {{ reservation.code }}">
+                                <i class="bi bi-arrow-clockwise"></i>
+                            </button>
+                        </form>
+                        {% endif %}
+                        {% if canCancel and reservation.status != 'RETURNED' and reservation.status != 'CANCELLED' %}
+                        <form method="post" action="/reservations/{{ reservation.id }}/cancel" class="d-inline cancel-form"
+                              data-confirm-title="Cancel Reservation"
+                              data-confirm-message="Cancel reservation <strong>{{ reservation.code }}</strong>?">
+                            {{ csrf.token(csrfToken) }}
+                            <button type="submit" class="btn btn-sm btn-outline-danger" aria-label="Cancel {{ reservation.code }}">
+                                <i class="bi bi-x-lg"></i>
+                            </button>
+                        </form>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script src="/js/iam.js" nonce="{{ securityNonce }}"></script>
+<script src="/js/books.js" nonce="{{ securityNonce }}"></script>
+{% endblock %}

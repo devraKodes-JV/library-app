@@ -1,0 +1,215 @@
+{%- extends "layout" -%}
+
+{% block title %}Balance - Accounting{% endblock %}
+
+{% block content %}
+<div class="page-header d-flex justify-content-between align-items-center">
+    <div>
+        <h1 class="mb-0">Accounting Balance</h1>
+        <p class="text-muted">Financial overview with filters by date range and payment method.</p>
+    </div>
+</div>
+
+<div class="card bg-dark border-secondary mt-3">
+    <div class="card-body">
+        <form method="get" action="/accounting/balance" class="row g-3 align-items-end">
+            <div class="col-md-3">
+                <label for="from" class="form-label text-light">From</label>
+                <input type="date" class="form-control bg-dark border-secondary text-light" id="from" name="from" value="{{ from }}">
+            </div>
+            <div class="col-md-3">
+                <label for="to" class="form-label text-light">To</label>
+                <input type="date" class="form-control bg-dark border-secondary text-light" id="to" name="to" value="{{ to }}">
+            </div>
+            <div class="col-md-3">
+                <label for="method" class="form-label text-light">Payment Method</label>
+                <select class="form-select bg-dark border-secondary text-light" id="method" name="method">
+                    <option value="">All</option>
+                    <option value="CASH" {% if method == 'CASH' %}selected{% endif %}>Cash</option>
+                    <option value="CARD" {% if method == 'CARD' %}selected{% endif %}>Card</option>
+                    <option value="TRANSFER" {% if method == 'TRANSFER' %}selected{% endif %}>Transfer</option>
+                    <option value="OTHER" {% if method == 'OTHER' %}selected{% endif %}>Other</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="bi bi-funnel"></i> Apply Filter
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="row g-3 mt-1">
+    <div class="col-md-3">
+        <div class="card bg-dark border-success">
+            <div class="card-body text-center">
+                <h6 class="text-muted">Gross Income</h6>
+                <h3 class="text-success">$ {{ balance.totalIncome }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-dark border-danger">
+            <div class="card-body text-center">
+                <h6 class="text-muted">Expenses</h6>
+                <h3 class="text-danger">$ {{ balance.totalExpenses }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-dark border-warning">
+            <div class="card-body text-center">
+                <h6 class="text-muted">Payroll</h6>
+                <h3 class="text-warning">$ {{ balance.totalPayroll }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-dark border-info">
+            <div class="card-body text-center">
+                <h6 class="text-muted">Net Balance</h6>
+                <h3 class="text-info">$ {{ balance.netBalance }}</h3>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if balance.incomeByMethod is not empty %}
+<div class="card bg-dark border-secondary mt-3">
+    <div class="card-header border-secondary">
+        <h5 class="mb-0 text-light">Income by Payment Method</h5>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-dark table-striped data-table" id="incomeByMethodTable">
+                <thead>
+                    <tr>
+                        <th>Method</th>
+                        <th class="text-end">Amount</th>
+                        <th class="text-end">% of Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in balance.incomeByMethod %}
+                    <tr>
+                        <td>{{ row.method }}</td>
+                        <td class="text-end">$ {{ row.amount }}</td>
+                        <td class="text-end">
+                            {% set total = balance.totalIncome %}
+                            {% if total > 0 %}
+                            {{ ((row.amount / total) * 100) }}%
+                            {% else %}
+                            0.0%
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<div class="row g-3 mt-1">
+    <div class="col-md-6">
+        <div class="card bg-dark border-secondary">
+            <div class="card-header border-secondary">
+                <h5 class="mb-0 text-light">Recent Payments</h5>
+            </div>
+            <div class="card-body">
+                {% if balance.recentPayments is empty %}
+                <p class="text-muted text-center py-3">No payments for the selected period.</p>
+                {% else %}
+                <div class="table-responsive">
+                    <table class="table table-dark table-striped data-table" id="recentPaymentsTable">
+                        <thead>
+                            <tr>
+                                <th>Code</th>
+                                <th>Date</th>
+                                <th>Client</th>
+                                <th>Method</th>
+                                <th class="text-end">Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for p in balance.recentPayments %}
+                            <tr>
+                                <td>{{ p.code }}</td>
+                                <td>{{ p.date }}</td>
+                                <td>{{ p.clientName | default("N/A") }}</td>
+                                <td>{{ p.method }}</td>
+                                <td class="text-end">$ {{ p.amount }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card bg-dark border-secondary">
+            <div class="card-header border-secondary">
+                <h5 class="mb-0 text-light">Recent Expenses</h5>
+            </div>
+            <div class="card-body">
+                {% if balance.recentExpenses is empty %}
+                <p class="text-muted text-center py-3">No expenses for the selected period.</p>
+                {% else %}
+                <div class="table-responsive">
+                    <table class="table table-dark table-striped data-table" id="recentExpensesTable">
+                        <thead>
+                            <tr>
+                                <th>Code</th>
+                                <th>Date</th>
+                                <th>Category</th>
+                                <th>Description</th>
+                                <th class="text-end">Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for e in balance.recentExpenses %}
+                            <tr>
+                                <td>{{ e.code }}</td>
+                                <td>{{ e.date }}</td>
+                                <td><span class="badge bg-secondary">{{ e.category }}</span></td>
+                                <td>{{ e.description | default("-") }}</td>
+                                <td class="text-end">$ {{ e.amount }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script nonce="{{ securityNonce }}">
+document.addEventListener('DOMContentLoaded', function() {
+    if (typeof $.fn.DataTable !== 'undefined') {
+        $('#incomeByMethodTable').DataTable({
+            pageLength: 10,
+            order: [[1, 'desc']],
+            language: { search: 'Search:', lengthMenu: 'Show _MENU_ entries' }
+        });
+        $('#recentPaymentsTable').DataTable({
+            pageLength: 10,
+            order: [[1, 'desc']],
+            language: { search: 'Search:', lengthMenu: 'Show _MENU_ entries' }
+        });
+        $('#recentExpensesTable').DataTable({
+            pageLength: 10,
+            order: [[1, 'desc']],
+            language: { search: 'Search:', lengthMenu: 'Show _MENU_ entries' }
+        });
+    }
+});
+</script>
+{% endblock %}
