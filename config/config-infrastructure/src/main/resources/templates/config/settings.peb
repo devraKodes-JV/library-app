@@ -1,0 +1,140 @@
+{%- extends "layout" -%}
+{% import "_macros/csrf" as csrf %}
+
+{% block title %}Settings - Configuration{% endblock %}
+
+{% block content %}
+<div class="page-header d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <h1 class="mb-0">System Configuration</h1>
+        <p class="text-muted">Global settings by module. Edit inline if you have permission.</p>
+    </div>
+</div>
+
+{% if modules is empty %}
+<p class="text-muted">No settings available.</p>
+{% else %}
+{% for module in modules %}
+<h5 class="text-light mt-4 mb-3">{{ module | capitalize }}</h5>
+<div class="row g-3">
+    {% set moduleSettings = settingsByModule[module] %}
+    {% if moduleSettings is empty %}
+    <div class="col-12">
+        <p class="text-muted mb-0">No settings for this module.</p>
+    </div>
+    {% endif %}
+    {% for item in moduleSettings %}
+    {% set key = item[0] %}
+    {% set value = item[1] %}
+    {% set type = item[2] %}
+    {% set isBool = (type == 'BOOLEAN') %}
+    {% set isCurrency = (key == 'accounting.currency') %}
+    {% set isDateFormat = (type == 'DATE_FORMAT') %}
+    {% set isInteger = (type == 'INTEGER') %}
+    {% set isDecimal = (type == 'DECIMAL') %}
+    <div class="col-md-6 col-lg-4">
+        <div class="card bg-dark border-secondary h-100">
+            <div class="card-body">
+                <label class="form-label text-uppercase text-muted small mb-1">{{ key }}</label>
+                {% if canUpdate %}
+                {% if isBool %}
+                <form method="post" action="/config/settings" class="d-flex gap-2">
+                    <input type="hidden" name="module" value="{{ module }}">
+                    <input type="hidden" name="key" value="{{ key }}">
+                    <select class="form-select form-select-sm bg-dark border-secondary text-light" name="value" style="min-width:180px;">
+                        <option value="true" {{ value == 'true' ? 'selected' : '' }}>Yes</option>
+                        <option value="false" {{ value == 'false' ? 'selected' : '' }}>No</option>
+                    </select>
+                    <button type="submit" class="btn btn-sm btn-primary">Save</button>
+                    {{ csrf.token(csrfToken) }}
+                </form>
+                {% elseif isCurrency %}
+                <form method="post" action="/config/settings" class="d-flex gap-2">
+                    <input type="hidden" name="module" value="{{ module }}">
+                    <input type="hidden" name="key" value="{{ key }}">
+                    <select class="form-select form-select-sm bg-dark border-secondary text-light" name="value" id="currencySelect_{{ key }}" style="min-width:180px;">
+                        <option value="USD" {{ value == 'USD' ? 'selected' : '' }}>USD - US Dollar</option>
+                        <option value="EUR" {{ value == 'EUR' ? 'selected' : '' }}>EUR - Euro</option>
+                        <option value="ARS" {{ value == 'ARS' ? 'selected' : '' }}>ARS - Argentine Peso</option>
+                        <option value="MXN" {{ value == 'MXN' ? 'selected' : '' }}>MXN - Mexican Peso</option>
+                        <option value="BRL" {{ value == 'BRL' ? 'selected' : '' }}>BRL - Brazilian Real</option>
+                        <option value="CLP" {{ value == 'CLP' ? 'selected' : '' }}>CLP - Chilean Peso</option>
+                        <option value="COP" {{ value == 'COP' ? 'selected' : '' }}>COP - Colombian Peso</option>
+                        <option value="PEN" {{ value == 'PEN' ? 'selected' : '' }}>PEN - Peruvian Sol</option>
+                        <option value="UYU" {{ value == 'UYU' ? 'selected' : '' }}>UYU - Uruguayan Peso</option>
+                        <option value="OTHER"{% if value != 'USD' and value != 'EUR' and value != 'ARS' and value != 'MXN' and value != 'BRL' and value != 'CLP' and value != 'COP' and value != 'PEN' and value != 'UYU' %} selected{% endif %}>Other</option>
+                    </select>
+                    <input type="text" class="form-control form-control-sm bg-dark border-secondary text-light d-none" name="customValue" id="currencyCustom_{{ key }}" placeholder="Enter currency code" style="min-width:120px;">
+                    <button type="submit" class="btn btn-sm btn-primary">Save</button>
+                    {{ csrf.token(csrfToken) }}
+                </form>
+                {% elseif isDateFormat %}
+                <form method="post" action="/config/settings" class="d-flex gap-2">
+                    <input type="hidden" name="module" value="{{ module }}">
+                    <input type="hidden" name="key" value="{{ key }}">
+                    <select class="form-select form-select-sm bg-dark border-secondary text-light" name="value" style="min-width:180px;">
+                        <option value="dd/MM/yyyy" {{ value == 'dd/MM/yyyy' ? 'selected' : '' }}>dd/MM/yyyy</option>
+                        <option value="MM/dd/yyyy" {{ value == 'MM/dd/yyyy' ? 'selected' : '' }}>MM/dd/yyyy</option>
+                        <option value="yyyy-MM-dd" {{ value == 'yyyy-MM-dd' ? 'selected' : '' }}>yyyy-MM-dd</option>
+                        <option value="dd-MM-yyyy" {{ value == 'dd-MM-yyyy' ? 'selected' : '' }}>dd-MM-yyyy</option>
+                        <option value="dd.LL.yyyy" {{ value == 'dd.LL.yyyy' ? 'selected' : '' }}>dd.LL.yyyy</option>
+                    </select>
+                    <button type="submit" class="btn btn-sm btn-primary">Save</button>
+                    {{ csrf.token(csrfToken) }}
+                </form>
+                {% elseif isInteger %}
+                <form method="post" action="/config/settings" class="d-flex gap-2">
+                    <input type="hidden" name="module" value="{{ module }}">
+                    <input type="hidden" name="key" value="{{ key }}">
+                    <input type="number" class="form-control form-control-sm bg-dark border-secondary text-light" name="value" value="{{ value }}" min="0" inputmode="numeric" style="min-width:180px;">
+                    <button type="submit" class="btn btn-sm btn-primary">Save</button>
+                    {{ csrf.token(csrfToken) }}
+                </form>
+                {% elseif isDecimal %}
+                <form method="post" action="/config/settings" class="d-flex gap-2">
+                    <input type="hidden" name="module" value="{{ module }}">
+                    <input type="hidden" name="key" value="{{ key }}">
+                    <input type="number" class="form-control form-control-sm bg-dark border-secondary text-light" name="value" value="{{ value }}" min="0" step="0.01" inputmode="decimal" style="min-width:180px;">
+                    <button type="submit" class="btn btn-sm btn-primary">Save</button>
+                    {{ csrf.token(csrfToken) }}
+                </form>
+                {% else %}
+                <form method="post" action="/config/settings" class="d-flex gap-2">
+                    <input type="hidden" name="module" value="{{ module }}">
+                    <input type="hidden" name="key" value="{{ key }}">
+                    <input type="text" class="form-control form-control-sm bg-dark border-secondary text-light" name="value" value="{{ value }}" style="min-width:180px;">
+                    <button type="submit" class="btn btn-sm btn-primary">Save</button>
+                    {{ csrf.token(csrfToken) }}
+                </form>
+                {% endif %}
+                {% else %}
+                <span class="form-control-plaintext text-light">{{ value }}</span>
+                {% endif %}
+                {% if type != 'STRING' and type %}
+                <p class="text-muted small mt-2 mb-0">Type: {{ type }}</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endfor %}
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script nonce="{{ securityNonce }}">
+document.addEventListener('DOMContentLoaded', function() {
+    var selects = document.querySelectorAll('select[id^="currencySelect_"]');
+    selects.forEach(function(select) {
+        var customInput = document.getElementById('currencyCustom_' + select.id.split('_').pop());
+        if (!customInput) return;
+        function toggleCustom() {
+            customInput.classList.toggle('d-none', select.value !== 'OTHER');
+        }
+        toggleCustom();
+        select.addEventListener('change', toggleCustom);
+    });
+});
+</script>
+{% endblock %}

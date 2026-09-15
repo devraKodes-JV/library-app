@@ -29,6 +29,7 @@ public final class EditionMapper {
                 e.getPages(),
                 e.getPublicationYear(),
                 e.getEditionNumber(),
+                e.getDailyPrice(),
                 e.getCreatedAt(),
                 e.getUpdatedAt(),
                 authors);
@@ -48,6 +49,7 @@ public final class EditionMapper {
                 e.getPages(),
                 e.getPublicationYear(),
                 e.getEditionNumber(),
+                e.getDailyPrice(),
                 true);
     }
 }

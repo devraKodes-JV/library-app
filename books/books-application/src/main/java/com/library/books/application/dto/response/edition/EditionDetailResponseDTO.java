@@ -1,5 +1,6 @@
 package com.library.books.application.dto.response.edition;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
@@ -20,6 +21,7 @@ public record EditionDetailResponseDTO(
         Integer pages,
         Integer publicationYear,
         String editionNumber,
+        BigDecimal dailyPrice,
         Instant createdAt,
         Instant updatedAt,
         List<String> editionAuthors,
@@ -41,6 +43,7 @@ public record EditionDetailResponseDTO(
                 edition.getPages(),
                 edition.getPublicationYear(),
                 edition.getEditionNumber(),
+                edition.getDailyPrice(),
                 edition.getCreatedAt(),
                 edition.getUpdatedAt(),
                 editionAuthors != null ? editionAuthors : List.of(),
@@ -50,11 +53,12 @@ public record EditionDetailResponseDTO(
     public static EditionDetailResponseDTO of(Long id, Long workId, String workTitle, Long publisherId, String publisherName,
                                       Long formatId, String formatName, Long languageId, String languageName,
                                       String isbn, Integer pages, Integer publicationYear, String editionNumber,
+                                      BigDecimal dailyPrice,
                                       java.time.Instant createdAt, java.time.Instant updatedAt,
                                       List<String> editionAuthors, Map<Long, String> authorNames) {
         return new EditionDetailResponseDTO(
                 id, workId, workTitle, publisherId, publisherName, formatId, formatName, languageId, languageName,
-                isbn, pages, publicationYear, editionNumber, createdAt, updatedAt,
+                isbn, pages, publicationYear, editionNumber, dailyPrice, createdAt, updatedAt,
                 editionAuthors != null ? editionAuthors : List.of(),
                 authorNames != null ? authorNames : Map.of());
     }

@@ -9,21 +9,27 @@ import com.library.client.application.service.client.GetClientUseCase;
 import com.library.client.application.service.client.ListClientsUseCase;
 import com.library.client.application.service.client.ReactivateClientUseCase;
 import com.library.client.application.service.client.UpdateClientUseCase;
+import com.library.client.application.service.client.UpgradeToMemberUseCase;
 import com.library.client.application.validation.ClientValidator;
 import com.library.client.domain.port.out.ClientRepository;
 import com.library.client.infrastructure.loan.ClientLoanPolicy;
 import com.library.client.infrastructure.persistence.adapter.ClientPersistenceAdapter;
 import com.library.client.infrastructure.persistence.repository.hibernate.HibernateClientRepository;
 import com.library.client.infrastructure.web.ClientRoutes;
+import com.library.accounting.application.service.payment.RecordClientPaymentUseCase;
+import com.library.bootstrap.generation.ShortUuidCodeGenerationService;
 import com.library.client.infrastructure.web.controller.client.AjaxUpdateClientController;
 import com.library.client.infrastructure.web.controller.client.CreateClientController;
 import com.library.client.infrastructure.web.controller.client.DeleteClientController;
 import com.library.client.infrastructure.web.controller.client.ListClientsController;
 import com.library.client.infrastructure.web.controller.client.ReactivateClientController;
 import com.library.client.infrastructure.web.controller.client.ShowClientController;
+import com.library.client.infrastructure.web.controller.client.UpgradeClientController;
 import com.library.client.infrastructure.web.controller.client.UpdateClientController;
 import com.library.kernel.generation.CodeGenerationService;
-import com.library.bootstrap.generation.ShortUuidCodeGenerationService;
+import com.library.config.application.service.ConfigService;
+import com.library.config.infrastructure.persistence.adapter.SettingPersistenceAdapter;
+import com.library.config.infrastructure.persistence.repository.hibernate.HibernateSettingRepository;
 import com.library.kernel.loan.LoanPolicy;
 import com.library.kernel.web.WebControllerContext;
 
@@ -48,6 +54,10 @@ public final class ClientFactory {
         CodeGenerationService codeGenerationService = new ShortUuidCodeGenerationService();
         ClientValidator clientValidator = new ClientValidator();
 
+        SettingPersistenceAdapter settingPersistenceAdapter = new SettingPersistenceAdapter(
+                new HibernateSettingRepository(sessionFactory));
+        ConfigService configService = new ConfigService(settingPersistenceAdapter);
+
         LoanPolicy loanPolicy = new ClientLoanPolicy();
         GetClientBenefitsUseCase getClientBenefitsUseCase = new GetClientBenefitsUseCase(loanPolicy);
 
@@ -57,13 +67,16 @@ public final class ClientFactory {
         GetClientUseCase getClientUseCase = new GetClientUseCase(clientRepository);
         ListClientsUseCase listClientsUseCase = new ListClientsUseCase(clientRepository);
         ReactivateClientUseCase reactivateClientUseCase = new ReactivateClientUseCase(clientRepository);
+        UpgradeToMemberUseCase upgradeToMemberUseCase = new UpgradeToMemberUseCase(clientRepository);
+        RecordClientPaymentUseCase recordPaymentUseCase = AccountingFactory.recordClientPaymentUseCase(sessionFactory);
 
-        ListClientsController listClientsController = new ListClientsController(listClientsUseCase, webContext);
+        ListClientsController listClientsController = new ListClientsController(listClientsUseCase, configService, webContext);
         ShowClientController showClientController = new ShowClientController(getClientUseCase, getClientBenefitsUseCase, webContext);
         CreateClientController createClientController = new CreateClientController(createClientUseCase, listClientsUseCase, webContext);
         UpdateClientController updateClientController = new UpdateClientController(updateClientUseCase, getClientUseCase, listClientsUseCase, webContext);
         DeleteClientController deleteClientController = new DeleteClientController(deleteClientUseCase, webContext);
         ReactivateClientController reactivateClientController = new ReactivateClientController(reactivateClientUseCase, webContext);
+        UpgradeClientController upgradeClientController = new UpgradeClientController(upgradeToMemberUseCase, recordPaymentUseCase, configService, webContext);
         AjaxUpdateClientController ajaxUpdateClientController = new AjaxUpdateClientController(clientRepository, webContext);
 
         ClientRoutes.register(config,
@@ -73,6 +86,7 @@ public final class ClientFactory {
                 updateClientController,
                 deleteClientController,
                 reactivateClientController,
+                upgradeClientController,
                 ajaxUpdateClientController);
     }
 }

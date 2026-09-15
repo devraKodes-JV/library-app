@@ -24,6 +24,7 @@ import com.library.stock.application.service.stocklocation.ReactivateStockLocati
 import com.library.stock.application.service.stocklocation.UpdateStockLocationUseCase;
 import com.library.stock.application.service.stockmovement.CreateStockMovementUseCase;
 import com.library.stock.application.service.stockmovement.ListStockMovementsUseCase;
+import com.library.stock.application.service.stockmovement.MoveStockItemUseCase;
 import com.library.books.application.service.edition.ListEditionsUseCase;
 import com.library.books.domain.port.out.EditionRepository;
 import com.library.books.infrastructure.persistence.repository.hibernate.HibernateEditionRepository;
@@ -63,12 +64,14 @@ import com.library.stock.infrastructure.web.controller.stockitem.ListStockItemsC
 import com.library.stock.infrastructure.web.controller.stockitem.ReactivateStockItemController;
 import com.library.stock.infrastructure.web.controller.stockitem.ShowStockItemController;
 import com.library.stock.infrastructure.web.controller.stockitem.UpdateStockItemController;
+import com.library.stock.infrastructure.web.controller.stockitem.MoveStockItemController;
 import com.library.stock.infrastructure.web.controller.stocklocation.CreateStockLocationController;
 import com.library.stock.infrastructure.web.controller.stocklocation.DeleteStockLocationController;
 import com.library.stock.infrastructure.web.controller.stocklocation.ListStockLocationsController;
 import com.library.stock.infrastructure.web.controller.stocklocation.ReactivateStockLocationController;
 import com.library.stock.infrastructure.web.controller.stocklocation.ShowStockLocationController;
 import com.library.stock.infrastructure.web.controller.stocklocation.UpdateStockLocationController;
+import com.library.stock.infrastructure.web.controller.stockmovement.ListStockMovementsController;
 import com.library.kernel.generation.CodeGenerationService;
 import com.library.bootstrap.generation.ShortUuidCodeGenerationService;
 import com.library.kernel.transaction.Transactional;
@@ -86,9 +89,9 @@ public final class StockFactory {
                                 WebControllerContext webContext,
                                 SseNotificationService notificationService) {
 
-        StockItemRepository stockItemRepository = new StockItemPersistenceAdapter(new HibernateStockItemRepository(sessionFactory));
-        StockLocationRepository stockLocationRepository = new StockLocationPersistenceAdapter(new HibernateStockLocationRepository(sessionFactory));
-        StockMovementRepository stockMovementRepository = new StockMovementPersistenceAdapter(new HibernateStockMovementRepository(sessionFactory));
+        StockItemRepository stockItemRepository = stockItemRepository(sessionFactory);
+        StockLocationRepository stockLocationRepository = stockLocationRepository(sessionFactory);
+        StockMovementRepository stockMovementRepository = stockMovementRepository(sessionFactory);
         EditionRepository editionRepository = new EditionPersistenceAdapter(new HibernateEditionRepository(sessionFactory), new HibernateEditionAuthorRepository(sessionFactory));
         PublisherRepository publisherRepository = new PublisherPersistenceAdapter(new HibernatePublisherRepository(sessionFactory));
         BookFormatRepository bookFormatRepository = new BookFormatPersistenceAdapter(new HibernateBookFormatRepository(sessionFactory));
@@ -102,7 +105,7 @@ public final class StockFactory {
 
         StockNotificationService stockNotificationService = new StockNotificationServiceImpl(notificationService);
 
-        CreateStockItemUseCase createStockItemUseCase = new CreateStockItemUseCase(stockItemRepository, codeGenerationService);
+        CreateStockItemUseCase createStockItemUseCase = new CreateStockItemUseCase(stockItemRepository, codeGenerationService, editionRepository);
         UpdateStockItemUseCase updateStockItemUseCase = new UpdateStockItemUseCase(stockItemRepository);
         DeleteStockItemUseCase deleteStockItemUseCase = new DeleteStockItemUseCase(stockItemRepository);
         GetStockItemUseCase getStockItemUseCase = new GetStockItemUseCase(stockItemRepository);
@@ -119,6 +122,7 @@ public final class StockFactory {
 
         CreateStockMovementUseCase createStockMovementUseCase = new CreateStockMovementUseCase(stockItemRepository, stockMovementRepository);
         ListStockMovementsUseCase listStockMovementsUseCase = new ListStockMovementsUseCase(stockMovementRepository);
+        MoveStockItemUseCase moveStockItemUseCase = new MoveStockItemUseCase(stockItemRepository, stockMovementRepository);
 
         ListEditionsUseCase listEditionsUseCase = new ListEditionsUseCase(editionRepository, workRepository, publisherRepository, bookFormatRepository, languageRepository);
 
@@ -140,6 +144,7 @@ public final class StockFactory {
         ListStockItemsController listStockItemsController = new ListStockItemsController(
                 listStockItemsUseCase,
                 editionNamesProvider,
+                stockLocationRepository,
                 webContext);
 
         ShowStockItemController showStockItemController = new ShowStockItemController(
@@ -171,6 +176,16 @@ public final class StockFactory {
 
         ChangeStockItemStateController changeStockItemStateController = new ChangeStockItemStateController(
                 changeStockItemStateUseCase,
+                webContext);
+
+        MoveStockItemController moveStockItemController = new MoveStockItemController(
+                moveStockItemUseCase,
+                stockItemRepository,
+                stockLocationRepository,
+                webContext);
+
+        ListStockMovementsController listStockMovementsController = new ListStockMovementsController(
+                listStockMovementsUseCase,
                 webContext);
 
         ListStockLocationsController listStockLocationsController = new ListStockLocationsController(
@@ -208,13 +223,28 @@ public final class StockFactory {
                 deleteStockItemController,
                 reactivateStockItemController,
                 changeStockItemStateController,
+                moveStockItemController,
+                listStockMovementsController,
                 listStockLocationsController,
                 showStockLocationController,
                 createStockLocationController,
                 updateStockLocationController,
                 deleteStockLocationController,
                 reactivateStockLocationController,
-                notificationService,
-                auditService);
+                 notificationService,
+                 auditService);
+    }
+
+    public static StockItemRepository stockItemRepository(SessionFactory sessionFactory) {
+        return new StockItemPersistenceAdapter(new HibernateStockItemRepository(sessionFactory));
+    }
+
+    public static StockLocationRepository stockLocationRepository(SessionFactory sessionFactory) {
+        return new StockLocationPersistenceAdapter(new HibernateStockLocationRepository(sessionFactory));
+    }
+
+    public static StockMovementRepository stockMovementRepository(SessionFactory sessionFactory) {
+        return new StockMovementPersistenceAdapter(new HibernateStockMovementRepository(sessionFactory));
     }
 }
+

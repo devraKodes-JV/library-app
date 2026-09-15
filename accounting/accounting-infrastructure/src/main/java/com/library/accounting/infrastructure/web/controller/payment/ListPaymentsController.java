@@ -6,9 +6,12 @@ import java.util.List;
 import java.util.Map;
 
 import com.library.accounting.application.dto.command.payment.CreatePaymentCommand;
+import com.library.accounting.application.dto.response.payment.PaymentResponseDTO;
 import com.library.accounting.application.service.payment.CreatePaymentUseCase;
+import com.library.accounting.application.service.paymentmethod.ListPaymentMethodsUseCase;
 import com.library.accounting.application.service.payment.ListPaymentsUseCase;
 import com.library.accounting.domain.model.Payment;
+import com.library.accounting.infrastructure.persistence.mapper.PaymentMapper;
 import com.library.client.application.dto.response.client.ClientResponseDTO;
 import com.library.client.application.service.client.ListClientsUseCase;
 import com.library.kernel.web.BaseController;
@@ -21,29 +24,37 @@ public class ListPaymentsController extends BaseController {
     private final ListPaymentsUseCase listPaymentsUseCase;
     private final ListClientsUseCase listClientsUseCase;
     private final CreatePaymentUseCase createPaymentUseCase;
+    private final ListPaymentMethodsUseCase listPaymentMethodsUseCase;
 
     public ListPaymentsController(ListPaymentsUseCase listPaymentsUseCase,
-                                  ListClientsUseCase listClientsUseCase,
-                                  CreatePaymentUseCase createPaymentUseCase,
-                                  WebControllerContext webContext) {
+                                   ListClientsUseCase listClientsUseCase,
+                                   CreatePaymentUseCase createPaymentUseCase,
+                                   ListPaymentMethodsUseCase listPaymentMethodsUseCase,
+                                   WebControllerContext webContext) {
         super(webContext);
         this.listPaymentsUseCase = listPaymentsUseCase;
         this.listClientsUseCase = listClientsUseCase;
         this.createPaymentUseCase = createPaymentUseCase;
+        this.listPaymentMethodsUseCase = listPaymentMethodsUseCase;
     }
 
     public void listPayments(Context ctx) {
         requireCan(ctx, "accounting.payments.read");
         List<Payment> payments = listPaymentsUseCase.execute();
-        ctx.render("accounting/payments/list", buildModel(ctx, Map.of(
-                "payments", payments,
+        List<PaymentResponseDTO> paymentDTOs = payments.stream()
+                .map(PaymentMapper::toDTO)
+                .toList();
+        ctx.render("accounting/payments/list", buildListModel(ctx, Map.of(
+                "payments", paymentDTOs,
                 "canCreate", hasPermission(ctx, "accounting.payments.create"))));
     }
 
     public void showCreateForm(Context ctx) {
         requireCan(ctx, "accounting.payments.create");
         List<ClientResponseDTO> clients = listClientsUseCase.execute("ACTIVE");
-        ctx.render("accounting/payments/form", buildModel(ctx, Map.of("clients", clients)));
+        ctx.render("accounting/payments/form", buildListModel(ctx, Map.of(
+                "clients", clients,
+                "paymentMethods", listPaymentMethodsUseCase.execute())));
     }
 
     public void createPayment(Context ctx) {
@@ -65,18 +76,19 @@ public class ListPaymentsController extends BaseController {
             ctx.redirect("/accounting/payments");
         } catch (IllegalArgumentException e) {
             List<ClientResponseDTO> clients = listClientsUseCase.execute("ACTIVE");
-            ctx.render("accounting/payments/form", buildModel(ctx, Map.of(
+            ctx.render("accounting/payments/form", buildListModel(ctx, Map.of(
                     "clients", clients,
+                    "paymentMethods", listPaymentMethodsUseCase.execute(),
                     "error", e.getMessage())));
         }
     }
 
-    private Map<String, Object> buildModel(Context ctx, Map<String, Object> extra) {
+    private Map<String, Object> buildListModel(Context ctx, Map<String, Object> extra) {
         var current = currentUser(ctx);
-        List<?> sections = navSections(ctx);
+        List<?> navSections = navSections(ctx);
         Map<String, Object> model = new java.util.LinkedHashMap<>();
         model.put("user", current);
-        model.put("navSections", sections);
+        model.put("navSections", navSections);
         model.putAll(extra);
         return model;
     }

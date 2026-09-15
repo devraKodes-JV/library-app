@@ -1,5 +1,6 @@
 package com.library.books.infrastructure.persistence.entity;
 
+import java.math.BigDecimal;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -44,13 +45,16 @@ public class EditionEntity extends AuditableEntity implements Serializable {
     @Column(name = "edition_number", length = 50)
     private String editionNumber;
 
+    @Column(name = "daily_price", precision = 10, scale = 2)
+    private BigDecimal dailyPrice;
+
     @Column(nullable = false)
     private boolean enabled = true;
 
     @OneToMany(mappedBy = "edition")
     private List<EditionAuthorEntity> editionAuthors = new ArrayList<>();
 
-    public EditionEntity(Long id, Long workId, Long publisherId, Long formatId, Long languageId, String isbn, Integer pages, Integer publicationYear, String editionNumber, boolean enabled) {
+    public EditionEntity(Long id, Long workId, Long publisherId, Long formatId, Long languageId, String isbn, Integer pages, Integer publicationYear, String editionNumber, BigDecimal dailyPrice, boolean enabled) {
         this.id = id;
         this.workId = workId;
         this.publisherId = publisherId;
@@ -60,6 +64,7 @@ public class EditionEntity extends AuditableEntity implements Serializable {
         this.pages = pages;
         this.publicationYear = publicationYear;
         this.editionNumber = editionNumber;
+        this.dailyPrice = dailyPrice;
         this.enabled = enabled;
     }
 
@@ -84,6 +89,8 @@ public class EditionEntity extends AuditableEntity implements Serializable {
     public void setPublicationYear(Integer publicationYear) { this.publicationYear = publicationYear; }
     public String getEditionNumber() { return editionNumber; }
     public void setEditionNumber(String editionNumber) { this.editionNumber = editionNumber; }
+    public BigDecimal getDailyPrice() { return dailyPrice; }
+    public void setDailyPrice(BigDecimal dailyPrice) { this.dailyPrice = dailyPrice; }
     public boolean isEnabled() { return enabled; }
     public void setEnabled(boolean enabled) { this.enabled = enabled; }
     public List<EditionAuthorEntity> getEditionAuthors() { return editionAuthors; }

@@ -10,6 +10,12 @@
     <p class="text-muted">An edition is a specific published manifestation of a work.</p>
 </div>
 
+{% if editionError is defined and editionError %}
+<div class="alert alert-danger bg-dark border-danger text-danger mb-3" role="alert">
+    {{ editionError }}
+</div>
+{% endif %}
+
 <form method="post"
       action="{% if mode == 'edit' %}/books/editions/{{ edition.id }}{% else %}/books/editions{% endif %}"
       class="text-light" novalidate>
@@ -75,6 +81,14 @@
                     <input type="text" id="editionNumber" name="editionNumber" class="form-control bg-dark border-secondary text-light {% if editionNumber is defined and editionNumber %}is-invalid{% else %}{% if edition is not null %}is-valid{% endif %}{% endif %}" required
                            value="{% if edition is not null %}{{ edition.editionNumber }}{% endif %}">
                     <div class="invalid-feedback" id="editionNumberError">{% if editionNumber is defined and editionNumber %}{{ editionNumber }}{% endif %}</div>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label" for="dailyPrice">Daily Price</label>
+                    <input type="number" id="dailyPrice" name="dailyPrice" class="form-control bg-dark border-secondary text-light {% if dailyPrice is defined and dailyPrice %}is-invalid{% endif %}"
+                           step="0.01" min="0"
+                           value="{% if edition is not null %}{{ edition.dailyPrice }}{% else %}10.00{% endif %}">
+                    <div class="invalid-feedback" id="dailyPriceError">{% if dailyPrice is defined and dailyPrice %}{{ dailyPrice }}{% endif %}</div>
+                    <div class="form-text">Price per day for rental. Defaults to 10.00 if left blank.</div>
                 </div>
                 <div class="col-md-4">
                     <label class="form-label" for="isbn">ISBN</label>
@@ -161,6 +175,7 @@ document.addEventListener('DOMContentLoaded', function() {
     var formatId = document.getElementById('formatId');
     var languageId = document.getElementById('languageId');
     var editionNumber = document.getElementById('editionNumber');
+    var dailyPrice = document.getElementById('dailyPrice');
     var isbn = document.getElementById('isbn');
     var publicationYear = document.getElementById('publicationYear');
     var pages = document.getElementById('pages');
@@ -169,6 +184,7 @@ document.addEventListener('DOMContentLoaded', function() {
     var formatIdError = document.getElementById('formatIdError');
     var languageIdError = document.getElementById('languageIdError');
     var editionNumberError = document.getElementById('editionNumberError');
+    var dailyPriceError = document.getElementById('dailyPriceError');
     var isbnError = document.getElementById('isbnError');
     var publicationYearError = document.getElementById('publicationYearError');
     var pagesError = document.getElementById('pagesError');
@@ -195,6 +211,14 @@ document.addEventListener('DOMContentLoaded', function() {
     function isEditionNumberValid() {
         if (!editionNumber.value.trim()) return false;
         if (!alphaRegex.test(editionNumber.value.trim())) return false;
+        return true;
+    }
+    
+    function isDailyPriceValid() {
+        if (!dailyPrice) return true;
+        if (!dailyPrice.value.trim()) return true;
+        var val = parseFloat(dailyPrice.value);
+        if (isNaN(val) || val < 0) return false;
         return true;
     }
     
@@ -278,9 +302,25 @@ document.addEventListener('DOMContentLoaded', function() {
             editionNumber.classList.remove('is-valid');
             return false;
         }
-        editionNumberError.textContent = '';
+         editionNumberError.textContent = '';
         editionNumber.classList.remove('is-invalid');
         editionNumber.classList.add('is-valid');
+        return true;
+    }
+
+    function validateDailyPrice() {
+        if (dailyPrice.value.trim()) {
+            var val = parseFloat(dailyPrice.value);
+            if (isNaN(val) || val < 0) {
+                dailyPriceError.textContent = 'Daily price must be zero or positive.';
+                dailyPrice.classList.add('is-invalid');
+                dailyPrice.classList.remove('is-valid');
+                return false;
+            }
+        }
+        dailyPriceError.textContent = '';
+        dailyPrice.classList.remove('is-invalid');
+        if (dailyPrice.value.trim()) dailyPrice.classList.add('is-valid');
         return true;
     }
     
@@ -386,7 +426,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     function updateSubmitButton() {
         var valid = isWorkValid() && isPublisherValid() && isFormatValid() && isLanguageValid() &&
-                    isEditionNumberValid() && isIsbnValid() && isPublicationYearValid() && isPagesValid() && isAuthorsValid();
+                    isEditionNumberValid() && isDailyPriceValid() && isIsbnValid() && isPublicationYearValid() && isPagesValid() && isAuthorsValid();
         submitBtn.disabled = !valid;
         return valid;
     }
@@ -438,6 +478,16 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         editionNumber.addEventListener('change', function() {
             validateEditionNumber();
+            updateSubmitButton();
+        });
+    }
+    if (dailyPrice) {
+        dailyPrice.addEventListener('input', function() {
+            validateDailyPrice();
+            updateSubmitButton();
+        });
+        dailyPrice.addEventListener('change', function() {
+            validateDailyPrice();
             updateSubmitButton();
         });
     }

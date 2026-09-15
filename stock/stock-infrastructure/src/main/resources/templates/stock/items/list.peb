@@ -47,11 +47,16 @@
                     <td>{{ item.stateLabel }}</td>
                     <td>{{ item.conditionLabel }}</td>
                     <td class="text-end">
-                        {% if canUpdate and status != 'inactive' %}
-                        <a href="/stock/items/{{ item.id }}/edit" class="btn btn-sm btn-outline-secondary" aria-label="Edit {{ item.code }}">
-                            <i class="bi bi-pencil"></i>
-                        </a>
-                        {% endif %}
+                     {% if canUpdate and status != 'inactive' %}
+                         <a href="/stock/items/{{ item.id }}/edit" class="btn btn-sm btn-outline-secondary" aria-label="Edit {{ item.code }}">
+                             <i class="bi bi-pencil"></i>
+                         </a>
+                         <button type="button" class="btn btn-sm btn-outline-info"
+                                 aria-label="Move {{ item.code }}"
+                                 data-bs-toggle="modal" data-bs-target="#moveModal{{ item.id }}">
+                             <i class="bi bi-box-seam"></i>
+                         </button>
+                     {% endif %}
                         {% if status == 'inactive' and canReactivate %}
                         <form method="post" action="/stock/items/{{ item.id }}/reactivate" class="d-inline reactivate-form"
                               data-confirm-title="Reactivate Stock Item"
@@ -80,6 +85,48 @@
     </div>
 </div>
 {% endif %}
+
+{% for item in items %}
+{% if canUpdate and status != 'inactive' %}
+<div class="modal fade" id="moveModal{{ item.id }}" tabindex="-1" aria-labelledby="moveModalLabel{{ item.id }}" aria-hidden="true">
+    <div class="modal-dialog">
+        <form method="post" action="/stock/items/{{ item.id }}/move" class="modal-content bg-dark border-secondary text-light">
+            {{ csrf.token(csrfToken) }}
+            <div class="modal-header">
+                <h5 class="modal-title" id="moveModalLabel{{ item.id }}"><i class="bi bi-box-seam"></i> Move Stock Item</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p><strong>{{ item.code }}</strong> — {{ item.editionName }}</p>
+                <div class="mb-3">
+                    <label class="form-label small">Current Location</label>
+                    <input type="text" class="form-control bg-secondary border-secondary text-light" value="{{ item.locationName }}" readonly>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label small">New Location</label>
+                    <select class="form-select bg-dark border-secondary text-light" name="targetLocationId" required>
+                        <option value="">-- Select destination --</option>
+                        {% for loc in locations %}
+                        {% if loc.id != item.locationId %}
+                        <option value="{{ loc.id }}">{{ loc.code }} — {{ loc.name }}</option>
+                        {% endif %}
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label small">Reason</label>
+                    <input type="text" class="form-control bg-dark border-secondary text-light" name="reason" placeholder="e.g. Rearrangement">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" class="btn btn-sm btn-info text-dark fw-bold">Move Item</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endif %}
+{% endfor %}
 {% endblock %}
 
 {% block scripts %}

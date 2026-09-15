@@ -154,7 +154,14 @@ public class HibernateClientRepository extends AbstractHibernateRepository imple
 
     @Override
     public long countActiveReservations(Long clientId) {
-        return 0;
+        try (Session session = sessionFactory.openSession()) {
+            Long count = session.createQuery(
+                    "select count(r) from ReservationEntity r where r.clientId = :clientId and r.deletedAt is null and r.status in ('DEPOSIT_PENDING', 'ACTIVE', 'OVERDUE')",
+                    Long.class)
+                    .setParameter("clientId", clientId)
+                    .uniqueResult();
+            return count != null ? count : 0;
+        }
     }
 
     public List<Client> findExpiredUnpaidMembers(java.time.LocalDate asOf) {

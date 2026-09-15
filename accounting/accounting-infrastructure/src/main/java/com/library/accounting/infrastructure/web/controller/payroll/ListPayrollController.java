@@ -6,9 +6,12 @@ import java.util.List;
 import java.util.Map;
 
 import com.library.accounting.application.dto.command.payroll.CreatePayrollCommand;
+import com.library.accounting.application.dto.response.payroll.PayrollResponseDTO;
 import com.library.accounting.application.service.payroll.CreatePayrollUseCase;
 import com.library.accounting.application.service.payroll.ListPayrollUseCase;
+import com.library.accounting.application.service.paymentmethod.ListPaymentMethodsUseCase;
 import com.library.accounting.domain.model.payroll.PayrollPayment;
+import com.library.accounting.infrastructure.persistence.mapper.PayrollMapper;
 import com.library.iam.application.dto.UserDTO;
 import com.library.iam.application.service.user.ListActiveUsersUseCase;
 import com.library.kernel.web.BaseController;
@@ -21,29 +24,37 @@ public class ListPayrollController extends BaseController {
     private final ListPayrollUseCase listPayrollUseCase;
     private final ListActiveUsersUseCase listActiveUsersUseCase;
     private final CreatePayrollUseCase createPayrollUseCase;
+    private final ListPaymentMethodsUseCase listPaymentMethodsUseCase;
 
     public ListPayrollController(ListPayrollUseCase listPayrollUseCase,
                                  ListActiveUsersUseCase listActiveUsersUseCase,
                                  CreatePayrollUseCase createPayrollUseCase,
+                                 ListPaymentMethodsUseCase listPaymentMethodsUseCase,
                                  WebControllerContext webContext) {
         super(webContext);
         this.listPayrollUseCase = listPayrollUseCase;
         this.listActiveUsersUseCase = listActiveUsersUseCase;
         this.createPayrollUseCase = createPayrollUseCase;
+        this.listPaymentMethodsUseCase = listPaymentMethodsUseCase;
     }
 
     public void listPayroll(Context ctx) {
         requireCan(ctx, "accounting.payroll.read");
         List<PayrollPayment> payments = listPayrollUseCase.execute();
-        ctx.render("accounting/payroll/list", buildModel(ctx, Map.of(
-                "payrolls", payments,
+        List<PayrollResponseDTO> payrollDTOs = payments.stream()
+                .map(PayrollMapper::toDTO)
+                .toList();
+        ctx.render("accounting/payroll/list", buildListModel(ctx, Map.of(
+                "payrolls", payrollDTOs,
                 "canCreate", hasPermission(ctx, "accounting.payroll.create"))));
     }
 
     public void showCreateForm(Context ctx) {
         requireCan(ctx, "accounting.payroll.create");
         List<UserDTO> employees = listActiveUsersUseCase.execute();
-        ctx.render("accounting/payroll/form", buildModel(ctx, Map.of("employees", employees)));
+        ctx.render("accounting/payroll/form", buildListModel(ctx, Map.of(
+                "employees", employees,
+                "paymentMethods", listPaymentMethodsUseCase.execute())));
     }
 
     public void createPayroll(Context ctx) {
@@ -64,18 +75,19 @@ public class ListPayrollController extends BaseController {
             ctx.redirect("/accounting/payroll");
         } catch (IllegalArgumentException e) {
             List<UserDTO> employees = listActiveUsersUseCase.execute();
-            ctx.render("accounting/payroll/form", buildModel(ctx, Map.of(
+            ctx.render("accounting/payroll/form", buildListModel(ctx, Map.of(
                     "employees", employees,
+                    "paymentMethods", listPaymentMethodsUseCase.execute(),
                     "error", e.getMessage())));
         }
     }
 
-    private Map<String, Object> buildModel(Context ctx, Map<String, Object> extra) {
+    private Map<String, Object> buildListModel(Context ctx, Map<String, Object> extra) {
         var current = currentUser(ctx);
-        List<?> sections = navSections(ctx);
+        List<?> navSections = navSections(ctx);
         Map<String, Object> model = new java.util.LinkedHashMap<>();
         model.put("user", current);
-        model.put("navSections", sections);
+        model.put("navSections", navSections);
         model.putAll(extra);
         return model;
     }

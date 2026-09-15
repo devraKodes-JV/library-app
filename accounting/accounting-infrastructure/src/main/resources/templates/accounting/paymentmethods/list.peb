@@ -1,0 +1,62 @@
+{%- extends "layout" -%}
+
+{% block title %}Payment Methods{% endblock %}
+
+{% block content %}
+<div class="page-header d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <h1 class="mb-0">Payment Methods</h1>
+        <p class="text-muted">Manage available payment methods for the system.</p>
+    </div>
+    {% if canCreate %}
+    <a href="/accounting/payment-methods/new" class="btn btn-sm btn-primary">
+        <i class="bi bi-plus"></i> New
+    </a>
+    {% endif %}
+</div>
+
+<div class="card bg-dark border-secondary">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-dark table-striped mb-0 data-table">
+                <thead>
+                    <tr>
+                        <th>Code</th>
+                        <th>Name</th>
+                        <th>Enabled</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for pm in paymentMethods %}
+                    <tr>
+                        <td>{{ pm.code }}</td>
+                        <td>{{ pm.name }}</td>
+                        <td>
+                            {% if pm.enabled %}
+                            <span class="badge bg-success">Yes</span>
+                            {% else %}
+                            <span class="badge bg-secondary">No</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if canDelete %}
+                            <form method="post" action="/accounting/payment-methods/{{ pm.id }}/delete" class="d-inline"
+                                  data-confirm-title="Delete"
+                                  data-confirm-message="Are you sure you want to delete this payment method?">
+                                <button type="submit" class="btn btn-sm btn-outline-danger">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </form>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="4" class="text-center text-muted py-3">No payment methods.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

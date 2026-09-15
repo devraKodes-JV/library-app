@@ -78,6 +78,7 @@ bin/
 # --------------------------
 .lsp/
 .vscode/
+.kilo/
 !.vscode/settings.json
 !.vscode/tasks.json
 !.vscode/launch.json

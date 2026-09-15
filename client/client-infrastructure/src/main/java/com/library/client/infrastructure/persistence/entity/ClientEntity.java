@@ -31,7 +31,7 @@ public class ClientEntity extends AuditableEntity implements Serializable {
     @Column(nullable = false, length = 20)
     private String dni;
 
-    @Column(name = "full_name", nullable = false, length = 150)
+    @Column(name = "full_name", nullable = true, length = 150)
     private String fullName;
 
     @Column(length = 150)

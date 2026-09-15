@@ -11,8 +11,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public final class RateLimitingFilter {
     
-    private static final int IP_REQUESTS_PER_MINUTE = 20;
-    private static final int USER_REQUESTS_PER_MINUTE = 10;
+    private static final int IP_REQUESTS_PER_MINUTE = 120;
+    private static final int USER_REQUESTS_PER_MINUTE = 30;
     private static final long TIME_WINDOW_SECONDS = 60;
     private static final long CLEANUP_INTERVAL_SECONDS = 300;
     
@@ -41,7 +41,7 @@ public final class RateLimitingFilter {
             }
             
             if (isPublicSensitivePath(method, path)) {
-                if (!checkIpRateLimit(clientIp)) {
+                if ("POST".equalsIgnoreCase(method) && !checkIpRateLimit(clientIp)) {
                     auditService.audit(
                         "RATE_LIMIT_EXCEEDED",
                         null,
@@ -249,7 +249,7 @@ public final class RateLimitingFilter {
         
         void reset(long newWindowStart) {
             this.windowStart = newWindowStart;
-            this.count.set(1);
+            this.count.set(0);
         }
     }
 }

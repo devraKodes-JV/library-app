@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.library</groupId>
+        <artifactId>library-ultimate</artifactId>
+        <version>1.0.0</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+    <artifactId>catalog</artifactId>
+    <packaging>pom</packaging>
+    <name>Catalog Feature</name>
+    <description>
+        Public catalog module for browsing available stock items and editions.
+        This is a presentation/aggregation layer that reads from books and stock
+        modules to provide a public-facing catalog for guest users.
+    </description>
+    <modules>
+        <module>catalog-infrastructure</module>
+    </modules>
+</project>

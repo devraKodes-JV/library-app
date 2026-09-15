@@ -22,7 +22,7 @@ class ListEditionsByWorkUseCaseTest {
         editionRepository.save(edition);
         editionRepository.putDetails(1L, List.of(new EditionWithNamesDTO(
                 edition.getId(), 1L, "The Hobbit", 2L, "Penguin", 3L, "Hardcover", 4L, "English",
-                "1234567890", 300, 2020, "1st"
+                "1234567890", 300, 2020, "1st", null
         )));
 
         List<EditionResponseDTO> result = useCase.execute(1L);

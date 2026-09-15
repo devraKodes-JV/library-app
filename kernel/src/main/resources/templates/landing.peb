@@ -1,0 +1,55 @@
+{%- extends "layout" -%}
+
+{% block title %}Library Ultimate{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row align-items-center min-vh-100">
+        <div class="col-lg-8 mx-auto text-center">
+            <h1 class="display-4 fw-bold text-light">Library Ultimate</h1>
+            <p class="lead text-muted mt-3">
+                Sistema de gestión de biblioteca. Reservas, catálogo, membresías y contabilidad en un solo lugar.
+            </p>
+            <div class="mt-4 d-flex justify-content-center gap-3">
+                <a href="/catalog" class="btn btn-primary btn-lg">
+                    <i class="bi bi-book"></i> Ver Catálogo
+                </a>
+                <a href="/login" class="btn btn-outline-light btn-lg">
+                    <i class="bi bi-person"></i> Iniciar Sesión
+                </a>
+            </div>
+            <div class="mt-5">
+                <div class="row g-4">
+                    <div class="col-md-4">
+                        <div class="card bg-dark border-secondary h-100">
+                            <div class="card-body">
+                                <i class="bi bi-journal-bookmark text-primary fs-1"></i>
+                                <h5 class="card-title text-light mt-3">Catálogo</h5>
+                                <p class="card-text text-muted">Explorá obras, ediciones y ejemplares disponibles para reservar.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card bg-dark border-secondary h-100">
+                            <div class="card-body">
+                                <i class="bi bi-calendar-check text-success fs-1"></i>
+                                <h5 class="card-title text-light mt-3">Reservas</h5>
+                                <p class="card-text text-muted">Reservá, renová y devolvé libros con flujo guiado y pagos registrados.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card bg-dark border-secondary h-100">
+                            <div class="card-body">
+                                <i class="bi bi-bar-chart text-warning fs-1"></i>
+                                <h5 class="card-title text-light mt-3">Contabilidad</h5>
+                                <p class="card-text text-muted">Control de ingresos, gastos, payroll y balance general.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

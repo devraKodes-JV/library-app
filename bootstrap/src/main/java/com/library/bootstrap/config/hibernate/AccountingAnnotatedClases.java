@@ -5,6 +5,7 @@ import org.hibernate.cfg.Configuration;
 import com.library.accounting.infrastructure.persistence.entity.AccountEntity;
 import com.library.accounting.infrastructure.persistence.entity.ExpenseEntity;
 import com.library.accounting.infrastructure.persistence.entity.PaymentEntity;
+import com.library.accounting.infrastructure.persistence.entity.PaymentMethodEntity;
 import com.library.accounting.infrastructure.persistence.entity.PayrollPaymentEntity;
 import com.library.accounting.infrastructure.persistence.entity.RefundEntity;
 
@@ -16,5 +17,6 @@ public class AccountingAnnotatedClases {
         cfg.addAnnotatedClass(RefundEntity.class);
         cfg.addAnnotatedClass(PayrollPaymentEntity.class);
         cfg.addAnnotatedClass(ExpenseEntity.class);
+        cfg.addAnnotatedClass(PaymentMethodEntity.class);
     }
 }

@@ -32,6 +32,10 @@ public class EditionValidator implements Validator<Edition> {
             errors.put("pages", "Pages must be 9999 or less.");
         }
 
+        if (edition.getDailyPrice() != null && edition.getDailyPrice().compareTo(java.math.BigDecimal.ZERO) < 0) {
+            errors.put("dailyPrice", "Daily price must be zero or positive.");
+        }
+
         if (edition.getPublicationYear() != null) {
             int currentYear = java.time.LocalDate.now().getYear();
             if (edition.getPublicationYear() < 1450) {

@@ -20,10 +20,12 @@ public class ClientValidator implements Validator<Client> {
             errors.put("dni", "DNI must be 8 digits followed by a letter.");
         }
 
-        if (client.getFullName() == null || client.getFullName().isBlank()) {
-            errors.put("fullName", "Full name is required.");
-        } else if (!NAME_PATTERN.matcher(client.getFullName()).matches()) {
-            errors.put("fullName", "Full name must contain only letters, spaces, hyphens or apostrophes.");
+        // fullName is optional for minimal client creation (auto-create with DNI only)
+        // but if provided, it must be valid
+        if (client.getFullName() != null && !client.getFullName().isBlank()) {
+            if (!NAME_PATTERN.matcher(client.getFullName()).matches()) {
+                errors.put("fullName", "Full name must contain only letters, spaces, hyphens or apostrophes.");
+            }
         }
 
         if (client.getEmail() != null && !client.getEmail().isBlank()) {

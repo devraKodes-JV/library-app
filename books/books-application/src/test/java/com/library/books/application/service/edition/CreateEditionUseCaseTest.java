@@ -34,7 +34,7 @@ class CreateEditionUseCaseTest {
         bookFormatRepository.save(com.library.books.domain.model.BookFormat.withoutId("HC", "Hardcover", "Hardcover edition"));
         languageRepository.save(com.library.books.domain.model.Language.withoutId("en", "English"));
 
-        CreateEditionCommand command = new CreateEditionCommand(1L, 1L, 1L, 1L, "1234567890", 300, 2020, "1st", List.of("1"), List.of("1"));
+        CreateEditionCommand command = new CreateEditionCommand(1L, 1L, 1L, 1L, "1234567890", 300, 2020, "1st", null, List.of("1"), List.of("1"));
         EditionResponseDTO result = useCase.execute(command);
 
         assertEquals("The Hobbit", result.workTitle());
@@ -59,7 +59,7 @@ class CreateEditionUseCaseTest {
         bookFormatRepository.save(com.library.books.domain.model.BookFormat.withoutId("HC", "Hardcover", "Hardcover edition"));
         languageRepository.save(com.library.books.domain.model.Language.withoutId("en", "English"));
 
-        CreateEditionCommand command = new CreateEditionCommand(1L, 1L, 1L, 1L, "1234567890", 300, 2020, "1st", List.of("1"), List.of("1"));
+        CreateEditionCommand command = new CreateEditionCommand(1L, 1L, 1L, 1L, "1234567890", 300, 2020, "1st", null, List.of("1"), List.of("1"));
         EditionResponseDTO result = useCase.execute(command);
 
         assertTrue(result.id() > 0);
@@ -77,7 +77,7 @@ class CreateEditionUseCaseTest {
         FakeEditionAuthorRepository editionAuthorRepository = new FakeEditionAuthorRepository();
         CreateEditionUseCase useCase = new CreateEditionUseCase(editionRepository, validator, transactional, workRepository, publisherRepository, bookFormatRepository, languageRepository, editionAuthorRepository);
 
-        CreateEditionCommand command = new CreateEditionCommand(1L, 1L, 1L, 1L, "INVALID", 0, 1400, null, List.of("1"), List.of("1"));
+        CreateEditionCommand command = new CreateEditionCommand(1L, 1L, 1L, 1L, "INVALID", 0, 1400, null, null, List.of("1"), List.of("1"));
 
         ValidationException ex = assertThrows(ValidationException.class, () -> useCase.execute(command));
         assertTrue(ex.getFieldErrors().containsKey("editionNumber"));
@@ -103,7 +103,7 @@ class CreateEditionUseCaseTest {
         bookFormatRepository.save(com.library.books.domain.model.BookFormat.withoutId("HC", "Hardcover", "Hardcover edition"));
         languageRepository.save(com.library.books.domain.model.Language.withoutId("en", "English"));
 
-        CreateEditionCommand command = new CreateEditionCommand(1L, 1L, 1L, 1L, "INVALID", 300, 2020, "1st", List.of("1"), List.of("1"));
+        CreateEditionCommand command = new CreateEditionCommand(1L, 1L, 1L, 1L, "INVALID", 300, 2020, "1st", null, List.of("1"), List.of("1"));
 
         ValidationException ex = assertThrows(ValidationException.class, () -> useCase.execute(command));
         assertTrue(ex.getFieldErrors().containsKey("isbn"));
@@ -121,7 +121,7 @@ class CreateEditionUseCaseTest {
         FakeEditionAuthorRepository editionAuthorRepository = new FakeEditionAuthorRepository();
         CreateEditionUseCase useCase = new CreateEditionUseCase(editionRepository, validator, transactional, workRepository, publisherRepository, bookFormatRepository, languageRepository, editionAuthorRepository);
 
-        CreateEditionCommand command = new CreateEditionCommand(null, 1L, 1L, 1L, "1234567890", 300, 2020, "1st", List.of("1"), List.of("1"));
+        CreateEditionCommand command = new CreateEditionCommand(null, 1L, 1L, 1L, "1234567890", 300, 2020, "1st", null, List.of("1"), List.of("1"));
 
         assertThrows(WorkNotFoundException.class, () -> useCase.execute(command));
     }

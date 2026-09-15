@@ -3,6 +3,7 @@ package com.library.stock.application.service.stockitem;
 import java.math.BigDecimal;
 import java.util.Map;
 
+import com.library.books.domain.port.out.EditionRepository;
 import com.library.kernel.generation.CodeGenerationService;
 import com.library.stock.application.dto.StockItemDTO;
 import com.library.stock.application.dto.command.stockitem.CreateStockItemCommand;
@@ -16,11 +17,14 @@ public class CreateStockItemUseCase {
 
     private final StockItemRepository stockItemRepository;
     private final CodeGenerationService codeGenerationService;
+    private final EditionRepository editionRepository;
 
     public CreateStockItemUseCase(StockItemRepository stockItemRepository,
-                                  CodeGenerationService codeGenerationService) {
+                                  CodeGenerationService codeGenerationService,
+                                  EditionRepository editionRepository) {
         this.stockItemRepository = stockItemRepository;
         this.codeGenerationService = codeGenerationService;
+        this.editionRepository = editionRepository;
     }
 
     public StockItemDTO execute(CreateStockItemCommand command) {
@@ -38,7 +42,11 @@ public class CreateStockItemUseCase {
 
         StockItemState state = command.state() != null ? StockItemState.valueOf(command.state()) : StockItemState.AVAILABLE;
         StockItemCondition condition = command.condition() != null ? StockItemCondition.fromLabel(command.condition()) : StockItemCondition.GOOD;
-        BigDecimal dailyPrice = command.dailyPrice() != null ? command.dailyPrice() : BigDecimal.TEN;
+        BigDecimal dailyPrice = command.dailyPrice() != null
+                ? command.dailyPrice()
+                : editionRepository.findById(command.editionId())
+                    .map(e -> e.getDailyPrice() != null ? e.getDailyPrice() : BigDecimal.TEN)
+                    .orElse(BigDecimal.TEN);
 
         StockItem stockItem = StockItem.withoutId(code, command.editionId(), command.locationId(), state, condition, dailyPrice);
         StockItem saved = stockItemRepository.save(stockItem);

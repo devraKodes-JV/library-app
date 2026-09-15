@@ -29,7 +29,7 @@ class UpdateEditionUseCaseTest {
 
         Edition saved = editionRepository.save(Edition.withoutId(1L, 2L, 3L, 4L, "1234567890", 300, 2020, "1st"));
         saved.setEditionAuthors(List.of(new com.library.books.domain.model.EditionAuthor(null, saved.getId(), 1L, 1L, null, null)));
-        UpdateEditionCommand command = new UpdateEditionCommand(saved.getId(), 1L, 2L, 3L, 4L, "1234567890123", 350, 2021, "2nd", List.of("1"), List.of("1"));
+        UpdateEditionCommand command = new UpdateEditionCommand(saved.getId(), 1L, 2L, 3L, 4L, "1234567890123", 350, 2021, "2nd", null, List.of("1"), List.of("1"));
         EditionResponseDTO result = useCase.execute(command);
 
         assertEquals(350, result.pages());
@@ -47,7 +47,7 @@ class UpdateEditionUseCaseTest {
         FakeEditionAuthorRepository editionAuthorRepository = new FakeEditionAuthorRepository();
         UpdateEditionUseCase useCase = new UpdateEditionUseCase(editionRepository, validator, publisherRepository, bookFormatRepository, languageRepository, editionAuthorRepository);
 
-        UpdateEditionCommand command = new UpdateEditionCommand(999L, 1L, 2L, 3L, 4L, "1234567890", 300, 2020, "1st", List.of("1"), List.of("1"));
+        UpdateEditionCommand command = new UpdateEditionCommand(999L, 1L, 2L, 3L, 4L, "1234567890", 300, 2020, "1st", null, List.of("1"), List.of("1"));
 
         assertThrows(EditionNotFoundException.class, () -> useCase.execute(command));
     }
@@ -64,7 +64,7 @@ class UpdateEditionUseCaseTest {
 
         Edition saved = editionRepository.save(Edition.withoutId(1L, 2L, 3L, 4L, "1234567890", 300, 2020, "1st"));
         saved.setEditionAuthors(List.of(new com.library.books.domain.model.EditionAuthor(null, saved.getId(), 1L, 1L, null, null)));
-        UpdateEditionCommand command = new UpdateEditionCommand(saved.getId(), 1L, 2L, 3L, 4L, "INVALID", 0, 1400, null, List.of("1"), List.of("1"));
+        UpdateEditionCommand command = new UpdateEditionCommand(saved.getId(), 1L, 2L, 3L, 4L, "INVALID", 0, 1400, null, null, List.of("1"), List.of("1"));
 
         ValidationException ex = assertThrows(ValidationException.class, () -> useCase.execute(command));
         assertTrue(ex.getFieldErrors().containsKey("editionNumber"));
@@ -85,7 +85,7 @@ class UpdateEditionUseCaseTest {
 
         Edition saved = editionRepository.save(Edition.withoutId(1L, 2L, 3L, 4L, "1234567890", 300, 2020, "1st"));
         saved.setEditionAuthors(List.of(new com.library.books.domain.model.EditionAuthor(null, saved.getId(), 1L, 1L, null, null)));
-        UpdateEditionCommand command = new UpdateEditionCommand(saved.getId(), 1L, 2L, 3L, 4L, "INVALID", 300, 2020, "1st", List.of("1"), List.of("1"));
+        UpdateEditionCommand command = new UpdateEditionCommand(saved.getId(), 1L, 2L, 3L, 4L, "INVALID", 300, 2020, "1st", null, List.of("1"), List.of("1"));
 
         ValidationException ex = assertThrows(ValidationException.class, () -> useCase.execute(command));
         assertTrue(ex.getFieldErrors().containsKey("isbn"));

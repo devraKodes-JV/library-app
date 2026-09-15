@@ -71,10 +71,24 @@
             <version>${project.version}</version>
         </dependency>
 
+        <!-- Catalog infrastructure (public catalog controllers, routes, templates). -->
+        <dependency>
+            <groupId>com.library</groupId>
+            <artifactId>catalog-infrastructure</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
         <!-- Accounting infrastructure (controllers, routes, templates). -->
         <dependency>
             <groupId>com.library</groupId>
             <artifactId>accounting-infrastructure</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <!-- Config infrastructure (controllers, routes, templates). -->
+        <dependency>
+            <groupId>com.library</groupId>
+            <artifactId>config-infrastructure</artifactId>
             <version>${project.version}</version>
         </dependency>
 

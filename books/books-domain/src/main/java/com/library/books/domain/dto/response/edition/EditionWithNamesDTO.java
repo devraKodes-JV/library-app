@@ -1,5 +1,7 @@
 package com.library.books.domain.dto.response.edition;
 
+import java.math.BigDecimal;
+
 public record EditionWithNamesDTO(
         Long id,
         Long workId,
@@ -13,5 +15,6 @@ public record EditionWithNamesDTO(
         String isbn,
         Integer pages,
         Integer publicationYear,
-        String editionNumber) {
+        String editionNumber,
+        BigDecimal dailyPrice) {
 }

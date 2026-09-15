@@ -1,0 +1,22 @@
+{%- extends "layout" -%}
+
+{% block title %}Create Payment Method{% endblock %}
+
+{% block content %}
+<div class="page-header mb-3">
+    <h1 class="mb-0">Create Payment Method</h1>
+</div>
+
+    {% import "_macros/csrf" as csrf %}
+    <form method="post" action="/accounting/payment-methods" class="row g-3">
+        {{ csrf.token(csrfToken) }}
+    <div class="col-md-12">
+        <label class="form-label">Name</label>
+        <input type="text" class="form-control bg-dark border-secondary text-light" name="name" value="{{ paymentMethod.name }}" placeholder="Cash">
+    </div>
+    <div class="col-12">
+        <button type="submit" class="btn btn-sm btn-primary">Create</button>
+        <a href="/accounting/payment-methods" class="btn btn-sm btn-outline-secondary">Cancel</a>
+    </div>
+</form>
+{% endblock %}

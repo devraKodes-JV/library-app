@@ -65,7 +65,8 @@ public class CreateEditionUseCase {
                 command.isbn(),
                 command.pages(),
                 command.publicationYear(),
-                command.editionNumber());
+                command.editionNumber(),
+                command.dailyPrice());
         edition.setEditionAuthors(parsedAuthorIds.stream()
                 .map(authorId -> {
                     Long roleId = parsedAuthorRoleIds.isEmpty() ? null : parsedAuthorRoleIds.get(parsedAuthorIds.indexOf(authorId));

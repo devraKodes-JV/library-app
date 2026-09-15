@@ -8,7 +8,7 @@ public class ClientLoanPolicy implements LoanPolicy {
     private static final int CASUAL_MAX_LOAN_DAYS = 7;
     private static final int MEMBER_MAX_LOAN_DAYS = 21;
 
-    private static final int CASUAL_MAX_ACTIVE_RESERVATIONS = 2;
+    private static final int CASUAL_MAX_ACTIVE_RESERVATIONS = 3;
     private static final int MEMBER_MAX_ACTIVE_RESERVATIONS = 5;
 
     private static final int CASUAL_RENEWAL_MAX_DAYS = 7;

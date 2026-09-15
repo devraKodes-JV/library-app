@@ -183,7 +183,7 @@ public class HibernateEditionRepository extends AbstractHibernateRepository impl
         try (Session session = sessionFactory.openSession()) {
             String sql = """
                     select e.id, e.work_id, w.title, e.publisher_id, p.name, e.format_id, f.name, e.language_id, l.name,
-                           e.isbn, e.pages, e.publication_year, e.edition_number
+                           e.isbn, e.pages, e.publication_year, e.edition_number, e.daily_price
                     from editions e
                     left join works w on e.work_id = w.id and w.deleted_at is null
                     left join publishers p on e.publisher_id = p.id and p.deleted_at is null
@@ -211,7 +211,8 @@ public class HibernateEditionRepository extends AbstractHibernateRepository impl
                             (String) row[9],
                             (Integer) row[10],
                             (Integer) row[11],
-                            (String) row[12]))
+                            (String) row[12],
+                            row[13] != null ? new java.math.BigDecimal(row[13].toString()) : null))
                     .toList();
         }
     }

@@ -20,7 +20,7 @@ public class ShowDashboardController {
     public void showDashboard(Context ctx) {
         User user = ctx.sessionAttribute("user");
         if (user == null) {
-            ctx.redirect("/landing.html");
+            ctx.redirect("/landing");
             return;
         }
         List<NavSection> sections = buildNavigationUseCase.execute(user);

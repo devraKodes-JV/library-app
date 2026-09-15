@@ -11,7 +11,13 @@
     <p class="text-muted">{% if mode == 'create' %}Register a new library client{% else %}Update client details{% endif %}</p>
 </div>
 
-<form method="post" action="{% if mode == 'create' %}/clients{% else %}/clients/{{ client.id }}{% endif %}">
+{% if clientError is defined and clientError %}
+<div class="alert alert-danger bg-dark border-danger text-danger mb-3" role="alert">
+    {{ clientError }}
+</div>
+{% endif %}
+
+<form method="post" action="{% if mode == 'create' %}/clients{% else %}/clients/{{ client.id }}{% endif %}" id="clientForm" novalidate>
     {{ csrf.token(csrfToken) }}
 
     <div class="card bg-dark border-secondary mt-3">
@@ -19,37 +25,36 @@
             <div class="row">
                 <div class="col-md-6 mb-3">
                     <label for="dni" class="form-label">DNI *</label>
-                    <input type="text" class="form-control bg-dark border-secondary text-light {% if validationError and dni %}is-invalid{% endif %}"
+                    <input type="text" class="form-control bg-dark border-secondary text-light {% if dni is defined and dni %}is-invalid{% else %}{% if client is not null %}is-valid{% endif %}{% endif %}"
                            id="dni" name="dni" value="{% if client is not null %}{{ client.dni }}{% endif %}"
                            {% if mode == 'edit' %}readonly{% else %}required{% endif %}>
-                    {% if validationError and dni %}
-                    <div class="invalid-feedback">{{ dni }}</div>
-                    {% endif %}
+                    <div class="invalid-feedback" id="dniError">{% if dni is defined and dni %}{{ dni }}{% else %}Invalid DNI format (e.g., 12345678A){% endif %}</div>
+                    <div class="valid-feedback" id="dniValid">Valid DNI format</div>
                 </div>
                 <div class="col-md-6 mb-3">
                     <label for="fullName" class="form-label">Full Name *</label>
-                    <input type="text" class="form-control bg-dark border-secondary text-light {% if validationError and fullName %}is-invalid{% endif %}"
+                    <input type="text" class="form-control bg-dark border-secondary text-light {% if fullName is defined and fullName %}is-invalid{% else %}{% if client is not null %}is-valid{% endif %}{% endif %}"
                            id="fullName" name="fullName" value="{% if client is not null %}{{ client.fullName }}{% endif %}" required>
-                    {% if validationError and fullName %}
-                    <div class="invalid-feedback">{{ fullName }}</div>
+                    {% if fullName is defined and fullName %}
+                    <div class="invalid-feedback" id="fullNameError">{{ fullName }}</div>
                     {% endif %}
                 </div>
             </div>
             <div class="row">
                 <div class="col-md-6 mb-3">
                     <label for="email" class="form-label">Email</label>
-                    <input type="email" class="form-control bg-dark border-secondary text-light {% if validationError and email %}is-invalid{% endif %}"
+                    <input type="email" class="form-control bg-dark border-secondary text-light {% if email is defined and email %}is-invalid{% else %}{% if client is not null and client.email is not empty %}is-valid{% endif %}{% endif %}"
                            id="email" name="email" value="{% if client is not null %}{{ client.email }}{% endif %}">
-                    {% if validationError and email %}
-                    <div class="invalid-feedback">{{ email }}</div>
+                    {% if email is defined and email %}
+                    <div class="invalid-feedback" id="emailError">{{ email }}</div>
                     {% endif %}
                 </div>
                 <div class="col-md-6 mb-3">
                     <label for="phone" class="form-label">Phone</label>
-                    <input type="text" class="form-control bg-dark border-secondary text-light {% if validationError and phone %}is-invalid{% endif %}"
+                    <input type="text" class="form-control bg-dark border-secondary text-light {% if phone is defined and phone %}is-invalid{% else %}{% if client is not null and client.phone is not empty %}is-valid{% endif %}{% endif %}"
                            id="phone" name="phone" value="{% if client is not null %}{{ client.phone }}{% endif %}">
-                    {% if validationError and phone %}
-                    <div class="invalid-feedback">{{ phone }}</div>
+                    {% if phone is defined and phone %}
+                    <div class="invalid-feedback" id="phoneError">{{ phone }}</div>
                     {% endif %}
                 </div>
             </div>
@@ -85,18 +90,125 @@
             </div>
             <div class="mb-3">
                 <label for="notes" class="form-label">Notes</label>
-                <textarea class="form-control bg-dark border-secondary text-light {% if validationError and notes %}is-invalid{% endif %}"
+                <textarea class="form-control bg-dark border-secondary text-light {% if notes is defined and notes %}is-invalid{% else %}{% if client is not null and client.notes is not empty %}is-valid{% endif %}{% endif %}"
                           id="notes" name="notes" rows="3">{% if client is not null %}{{ client.notes }}{% endif %}</textarea>
-                {% if validationError and notes %}
-                <div class="invalid-feedback">{{ notes }}</div>
+                {% if notes is defined and notes %}
+                <div class="invalid-feedback" id="notesError">{{ notes }}</div>
                 {% endif %}
             </div>
         </div>
     </div>
 
     <div class="mt-4">
-        <button type="submit" class="btn btn-primary">{% if mode == 'create' %}Create{% else %}Save{% endif %}</button>
+        <button type="submit" class="btn btn-primary" id="submitBtn" disabled>{% if mode == 'create' %}Create{% else %}Save{% endif %}</button>
         <a href="/clients" class="btn btn-outline-secondary">Cancel</a>
     </div>
 </form>
+{% endblock %}
+
+{% block scripts %}
+<script nonce="{{ securityNonce }}">
+(function() {
+    'use strict';
+    function ready(fn) {
+        if (document.readyState !== 'loading') fn();
+        else document.addEventListener('DOMContentLoaded', fn);
+    }
+    ready(function() {
+        var form = document.getElementById('clientForm');
+        if (!form) return;
+        var dniInput = document.getElementById('dni');
+        var fullNameInput = document.getElementById('fullName');
+        var emailInput = document.getElementById('email');
+        var phoneInput = document.getElementById('phone');
+        var notesInput = document.getElementById('notes');
+        var submitBtn = document.getElementById('submitBtn');
+
+        var dniError = document.getElementById('dniError');
+        var dniValid = document.getElementById('dniValid');
+
+        // DNI format validation (Spanish DNI: 8 digits + letter)
+        var dniRegex = /^[0-9]{8}[A-Za-z]$/;
+
+        function validateDNI() {
+            var val = dniInput.value.trim();
+            if (!val) {
+                dniInput.setCustomValidity('DNI is required');
+                dniInput.classList.add('is-invalid');
+                dniInput.classList.remove('is-valid');
+                if (dniError) dniError.textContent = 'DNI is required';
+                if (dniValid) dniValid.classList.add('d-none');
+                return false;
+            }
+            if (!dniRegex.test(val.toUpperCase())) {
+                dniInput.setCustomValidity('Invalid DNI format (e.g., 12345678A)');
+                dniInput.classList.add('is-invalid');
+                dniInput.classList.remove('is-valid');
+                if (dniError) dniError.textContent = 'Invalid DNI format (e.g., 12345678A)';
+                if (dniValid) dniValid.classList.add('d-none');
+                return false;
+            }
+            dniInput.setCustomValidity('');
+            dniInput.classList.remove('is-invalid');
+            dniInput.classList.add('is-valid');
+            if (dniError) dniError.textContent = '';
+            if (dniValid) dniValid.classList.remove('d-none');
+            return true;
+        }
+
+        function validateFullName() {
+            var val = fullNameInput.value.trim();
+            if (!val) {
+                fullNameInput.classList.add('is-invalid');
+                fullNameInput.classList.remove('is-valid');
+                return false;
+            }
+            fullNameInput.classList.remove('is-invalid');
+            fullNameInput.classList.add('is-valid');
+            return true;
+        }
+
+        function updateSubmitButton() {
+            var valid = validateDNI() && validateFullName();
+            if (submitBtn) submitBtn.disabled = !valid;
+            return valid;
+        }
+
+        dniInput.addEventListener('input', function() {
+            validateDNI();
+            updateSubmitButton();
+        });
+        dniInput.addEventListener('change', function() {
+            validateDNI();
+            updateSubmitButton();
+        });
+
+        fullNameInput.addEventListener('input', function() {
+            validateFullName();
+            updateSubmitButton();
+        });
+        fullNameInput.addEventListener('change', function() {
+            validateFullName();
+            updateSubmitButton();
+        });
+
+        // Validate on submit
+        form.addEventListener('submit', function(e) {
+            if (!updateSubmitButton()) {
+                e.preventDefault();
+                dniInput.reportValidity();
+            }
+        });
+
+        // Trigger validation on load if there's a server-side error
+        if (dniInput.classList.contains('is-invalid')) {
+            validateDNI();
+        }
+        if (fullNameInput.classList.contains('is-invalid')) {
+            validateFullName();
+        }
+        updateSubmitButton();
+    });
+})();
+</script>
 {% endblock %}

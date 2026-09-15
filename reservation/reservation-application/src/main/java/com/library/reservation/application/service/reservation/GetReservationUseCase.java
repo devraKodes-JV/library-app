@@ -59,7 +59,14 @@ public class GetReservationUseCase {
                 var edition = editionOpt.get();
                 if (edition.getWorkId() != null) {
                     var workOpt = workRepository.findById(edition.getWorkId());
-                    editionName = workOpt.map(w -> w.getTitle()).orElse(null);
+                    String workTitle = workOpt.map(w -> w.getTitle()).orElse(null);
+                    if (workTitle != null && edition.getEditionNumber() != null) {
+                        editionName = workTitle + " - " + edition.getEditionNumber();
+                    } else if (workTitle != null) {
+                        editionName = workTitle;
+                    } else {
+                        editionName = edition.getEditionNumber();
+                    }
                 }
             }
         }

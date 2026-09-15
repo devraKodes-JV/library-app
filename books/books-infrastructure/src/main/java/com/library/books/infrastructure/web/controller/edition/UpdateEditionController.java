@@ -85,6 +85,7 @@ public class UpdateEditionController extends BaseController {
                 parseInt(ctx.formParam("pages")),
                 parseInt(ctx.formParam("publicationYear")),
                 ctx.formParam("editionNumber"),
+                parseBigDecimal(ctx.formParam("dailyPrice")),
                 authorIds,
                 authorRoleIds);
 
@@ -109,6 +110,25 @@ public class UpdateEditionController extends BaseController {
                     "authorList", authors,
                     "authorRoles", authorRoles));
             model.putAll(e.getFieldErrors());
+            ctx.render("books/editions/form", model);
+            return;
+        } catch (Exception e) {
+            EditionResponseDTO edition = getEditionUseCase.execute(command.id());
+            List<WorkResponseDTO> works = listWorksUseCase.execute(0, 100).items();
+            List<PublisherResponseDTO> publishers = listPublishersUseCase.execute();
+            List<BookFormatResponseDTO> formats = listBookFormatsUseCase.execute();
+            List<LanguageResponseDTO> languages = listLanguagesUseCase.execute();
+            List<AuthorResponseDTO> authors = listAuthorsUseCase.execute();
+            List<AuthorRoleResponseDTO> authorRoles = listAuthorRolesUseCase.execute();
+            Map<String, Object> model = buildEditModel(ctx, Map.of(
+                    "edition", edition,
+                    "works", works,
+                    "publishers", publishers,
+                    "formats", formats,
+                    "languages", languages,
+                    "authorList", authors,
+                    "authorRoles", authorRoles));
+            model.put("editionError", e.getMessage());
             ctx.render("books/editions/form", model);
             return;
         }
@@ -143,6 +163,17 @@ public class UpdateEditionController extends BaseController {
         }
         try {
             return Integer.parseInt(value);
+        } catch (NumberFormatException e) {
+            return null;
+        }
+    }
+
+    private java.math.BigDecimal parseBigDecimal(String value) {
+        if (value == null || value.isBlank()) {
+            return null;
+        }
+        try {
+            return new java.math.BigDecimal(value);
         } catch (NumberFormatException e) {
             return null;
         }

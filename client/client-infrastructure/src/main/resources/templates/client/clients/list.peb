@@ -71,6 +71,15 @@
                             </button>
                         </form>
                         {% endif %}
+                        {% if canUpgrade and client.type == 'CASUAL' and status != 'inactive' %}
+                        <button type="button" class="btn btn-sm btn-outline-info"
+                                aria-label="Upgrade {{ client.code }} to Member"
+                                data-bs-toggle="modal" data-bs-target="#upgradeModal{{ client.id }}"
+                                data-client-code="{{ client.code }}"
+                                data-client-name="{{ client.fullName }}">
+                            <i class="bi bi-person-up"></i>
+                        </button>
+                        {% endif %}
                         {% if canDelete and status != 'inactive' %}
                         <form method="post" action="/clients/{{ client.id }}/delete" class="d-inline delete-form"
                               data-confirm-title="Delete Client"
@@ -89,6 +98,69 @@
     </div>
 </div>
 {% endif %}
+
+{% for client in clients %}
+{% if canUpgrade and client.type == 'CASUAL' and status != 'inactive' %}
+<div class="modal fade" id="upgradeModal{{ client.id }}" tabindex="-1" aria-labelledby="upgradeModalLabel{{ client.id }}" aria-hidden="true">
+    <div class="modal-dialog">
+        <form method="post" action="/clients/{{ client.id }}/upgrade" class="modal-content bg-dark text-light border-secondary">
+            {{ csrf.token(csrfToken) }}
+            <div class="modal-header">
+                <h5 class="modal-title" id="upgradeModalLabel{{ client.id }}"><i class="bi bi-person-up"></i> Upgrade to Member</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Upgrade client <strong>{{ client.code }}</strong> to MEMBER status.</p>
+
+                <div class="mb-3">
+                    <label class="form-label small">Payment Period</label>
+                    <div class="d-flex gap-3">
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input period-radio" type="radio" name="months" id="periodYear{{ client.id }}" value="12" checked>
+                            <label class="form-check-label" for="periodYear{{ client.id }}">
+                                1 Year — {{ currency }} {{ membershipFeeYearly }}
+                            </label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input period-radio" type="radio" name="months" id="periodMonth{{ client.id }}" value="1">
+                            <label class="form-check-label" for="periodMonth{{ client.id }}">
+                                1 Month — {{ currency }} {{ membershipFeeMonthly }}
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label small">Payment Method</label>
+                    <select class="form-select form-select-sm bg-dark border-secondary text-light" name="paymentMethod" id="paymentMethod{{ client.id }}">
+                        <option value="CASH">Cash</option>
+                        <option value="CARD">Card</option>
+                        <option value="TRANSFER">Bank Transfer</option>
+                    </select>
+                </div>
+
+                <div class="alert alert-warning bg-dark border-secondary text-warning small mb-2">
+                    <i class="bi bi-info-circle"></i>
+                    You are about to upgrade client <strong>{{ client.code }}</strong> to MEMBER.
+                    Verify the payment has been received before proceeding.
+                </div>
+
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="paymentConfirmed" id="paymentConfirmed{{ client.id }}" value="true" required>
+                    <label class="form-check-label" for="paymentConfirmed{{ client.id }}">
+                        I confirm the payment has been received
+                    </label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" class="btn btn-sm btn-info text-dark fw-bold">Confirm Payment &amp; Upgrade</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endif %}
+{% endfor %}
 {% endblock %}
 
 {% block scripts %}

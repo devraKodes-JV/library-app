@@ -1,5 +1,6 @@
 package com.library.books.application.dto.response.edition;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
 
@@ -20,8 +21,9 @@ public record EditionResponseDTO(
         String isbn,
         Integer pages,
         Integer publicationYear,
-        String editionNumber,
-        Instant createdAt,
+    String editionNumber,
+    BigDecimal dailyPrice,
+    Instant createdAt,
         Instant updatedAt,
         List<EditionAuthor> editionAuthors) {
 
@@ -40,6 +42,7 @@ public record EditionResponseDTO(
                 edition.getPages(),
                 edition.getPublicationYear(),
                 edition.getEditionNumber(),
+                edition.getDailyPrice(),
                 edition.getCreatedAt(),
                 edition.getUpdatedAt(),
                 edition.getEditionAuthors());
@@ -61,6 +64,7 @@ public record EditionResponseDTO(
                 edition.getPages(),
                 edition.getPublicationYear(),
                 edition.getEditionNumber(),
+                edition.getDailyPrice(),
                 edition.getCreatedAt(),
                 edition.getUpdatedAt(),
                 List.of());
@@ -82,6 +86,7 @@ public record EditionResponseDTO(
                 edition.getPages(),
                 edition.getPublicationYear(),
                 edition.getEditionNumber(),
+                edition.getDailyPrice(),
                 edition.getCreatedAt(),
                 edition.getUpdatedAt(),
                 editionAuthors);
@@ -102,6 +107,7 @@ public record EditionResponseDTO(
                 dto.pages(),
                 dto.publicationYear(),
                 dto.editionNumber(),
+                dto.dailyPrice(),
                 null,
                 null,
                 List.of());

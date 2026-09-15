@@ -24,6 +24,7 @@ public class Reservation {
     private Instant returnDate;
     private BigDecimal lateFeePerDay;
     private BigDecimal lateFeeTotal;
+    private BigDecimal dailyPrice;
     private Integer renewalCount;
     private Integer maxRenewals;
     private String notes;
@@ -36,7 +37,8 @@ public class Reservation {
                        boolean depositPaid, BigDecimal totalAmount, BigDecimal totalPaid,
                        Instant reservationDate, LocalDate pickupDeadline, Instant pickupDate,
                        LocalDate dueDate, Instant returnDate, BigDecimal lateFeePerDay,
-                       BigDecimal lateFeeTotal, Integer renewalCount, Integer maxRenewals,
+                       BigDecimal lateFeeTotal, BigDecimal dailyPrice,
+                       Integer renewalCount, Integer maxRenewals,
                        String notes, boolean enabled, Instant createdAt, Instant updatedAt) {
         this.id = id;
         this.code = code;
@@ -56,6 +58,7 @@ public class Reservation {
         this.returnDate = returnDate;
         this.lateFeePerDay = lateFeePerDay;
         this.lateFeeTotal = lateFeeTotal;
+        this.dailyPrice = dailyPrice;
         this.renewalCount = renewalCount;
         this.maxRenewals = maxRenewals;
         this.notes = notes;
@@ -68,11 +71,13 @@ public class Reservation {
                                         ReservationStatus status, Integer depositPercentage,
                                         BigDecimal depositAmount, BigDecimal totalAmount,
                                         LocalDate pickupDeadline, LocalDate dueDate,
-                                        BigDecimal lateFeePerDay, Integer maxRenewals) {
+                                        BigDecimal lateFeePerDay, BigDecimal dailyPrice,
+                                        Integer maxRenewals) {
         return new Reservation(null, code, clientId, editionId, stockItemId, status,
                 depositPercentage, depositAmount, false, totalAmount, BigDecimal.ZERO,
                 null, pickupDeadline, null, dueDate, null, lateFeePerDay,
-                BigDecimal.ZERO, 0, maxRenewals, null, true, null, null);
+                BigDecimal.ZERO, dailyPrice,
+                0, maxRenewals, null, true, null, null);
     }
 
     public Long getId() { return id; }
@@ -126,9 +131,10 @@ public class Reservation {
     public BigDecimal getLateFeePerDay() { return lateFeePerDay; }
     public void setLateFeePerDay(BigDecimal lateFeePerDay) { this.lateFeePerDay = lateFeePerDay; }
 
-    public BigDecimal getLateFeeTotal() { return lateFeeTotal; }
+public BigDecimal getLateFeeTotal() { return lateFeeTotal; }
     public void setLateFeeTotal(BigDecimal lateFeeTotal) { this.lateFeeTotal = lateFeeTotal; }
-
+    public BigDecimal getDailyPrice() { return dailyPrice; }
+    public void setDailyPrice(BigDecimal dailyPrice) { this.dailyPrice = dailyPrice; }
     public Integer getRenewalCount() { return renewalCount; }
     public void setRenewalCount(Integer renewalCount) { this.renewalCount = renewalCount; }
 

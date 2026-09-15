@@ -60,6 +60,7 @@ public class UpdateEditionUseCase {
         existing.setPages(command.pages());
         existing.setPublicationYear(command.publicationYear());
         existing.setEditionNumber(command.editionNumber());
+        existing.setDailyPrice(command.dailyPrice());
         existing.setEditionAuthors(parsedAuthorIds.stream()
                 .map(authorId -> {
                     Long roleId = parsedAuthorRoleIds.isEmpty() ? null : parsedAuthorRoleIds.get(parsedAuthorIds.indexOf(authorId));

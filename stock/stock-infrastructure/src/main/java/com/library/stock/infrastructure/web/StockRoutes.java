@@ -6,9 +6,11 @@ import com.library.stock.infrastructure.web.controller.stockitem.ChangeStockItem
 import com.library.stock.infrastructure.web.controller.stockitem.CreateStockItemController;
 import com.library.stock.infrastructure.web.controller.stockitem.DeleteStockItemController;
 import com.library.stock.infrastructure.web.controller.stockitem.ListStockItemsController;
+import com.library.stock.infrastructure.web.controller.stockitem.MoveStockItemController;
 import com.library.stock.infrastructure.web.controller.stockitem.ReactivateStockItemController;
 import com.library.stock.infrastructure.web.controller.stockitem.ShowStockItemController;
 import com.library.stock.infrastructure.web.controller.stockitem.UpdateStockItemController;
+import com.library.stock.infrastructure.web.controller.stockmovement.ListStockMovementsController;
 import com.library.stock.infrastructure.web.controller.stocklocation.CreateStockLocationController;
 import com.library.stock.infrastructure.web.controller.stocklocation.DeleteStockLocationController;
 import com.library.stock.infrastructure.web.controller.stocklocation.ListStockLocationsController;
@@ -24,14 +26,16 @@ public final class StockRoutes {
     }
 
     public static void register(JavalinConfig config,
-                                ListStockItemsController listStockItemsController,
-                                ShowStockItemController showStockItemController,
-                                CreateStockItemController createStockItemController,
-                                UpdateStockItemController updateStockItemController,
-                                DeleteStockItemController deleteStockItemController,
-                                ReactivateStockItemController reactivateStockItemController,
-                                ChangeStockItemStateController changeStockItemStateController,
-                                ListStockLocationsController listStockLocationsController,
+                                 ListStockItemsController listStockItemsController,
+                                 ShowStockItemController showStockItemController,
+                                 CreateStockItemController createStockItemController,
+                                 UpdateStockItemController updateStockItemController,
+                                 DeleteStockItemController deleteStockItemController,
+                                 ReactivateStockItemController reactivateStockItemController,
+                                 ChangeStockItemStateController changeStockItemStateController,
+                                 MoveStockItemController moveStockItemController,
+                                 ListStockMovementsController listStockMovementsController,
+                                 ListStockLocationsController listStockLocationsController,
                                 ShowStockLocationController showStockLocationController,
                                 CreateStockLocationController createStockLocationController,
                                 UpdateStockLocationController updateStockLocationController,
@@ -49,6 +53,10 @@ public final class StockRoutes {
         config.routes.post("/stock/items/{id}/delete", deleteStockItemController::deleteStockItem);
         config.routes.post("/stock/items/{id}/reactivate", reactivateStockItemController::reactivateStockItem);
         config.routes.post("/stock/items/{id}/change-state", changeStockItemStateController::changeState);
+        config.routes.post("/stock/items/{id}/move", moveStockItemController::move);
+
+        config.routes.get("/stock/movements", listStockMovementsController::listMovements);
+        config.routes.get("/stock-items/movements", ctx -> ctx.redirect("/stock/movements"));
 
         config.routes.get("/stock/locations", listStockLocationsController::listStockLocations);
         config.routes.get("/stock/locations/new", createStockLocationController::showCreateForm);

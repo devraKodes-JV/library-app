@@ -3,6 +3,7 @@ package com.library.bootstrap.config.hibernate;
 import org.hibernate.cfg.Configuration;
 
 import com.library.bootstrap.config.AppConfig;
+import com.library.config.infrastructure.persistence.entity.SettingEntity;
 
 public class HibernateConfiguration {
 
@@ -36,6 +37,7 @@ public class HibernateConfiguration {
         ClientAnnotatedClases.annotate(cfg);
         ReservationAnnotatedClases.annotate(cfg);
         AccountingAnnotatedClases.annotate(cfg);
+        ConfigAnnotatedClases.annotate(cfg);
 
         return cfg;
     }

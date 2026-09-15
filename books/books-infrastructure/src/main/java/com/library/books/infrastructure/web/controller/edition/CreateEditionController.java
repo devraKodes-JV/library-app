@@ -78,6 +78,7 @@ public class CreateEditionController extends BaseController {
                 parseInt(ctx.formParam("pages")),
                 parseInt(ctx.formParam("publicationYear")),
                 ctx.formParam("editionNumber"),
+                parseBigDecimal(ctx.formParam("dailyPrice")),
                 authorIds,
                 authorRoleIds);
 
@@ -139,6 +140,17 @@ public class CreateEditionController extends BaseController {
         }
         try {
             return Integer.parseInt(value);
+        } catch (NumberFormatException e) {
+            return null;
+        }
+    }
+
+    private java.math.BigDecimal parseBigDecimal(String value) {
+        if (value == null || value.isBlank()) {
+            return null;
+        }
+        try {
+            return new java.math.BigDecimal(value);
         } catch (NumberFormatException e) {
             return null;
         }

@@ -109,14 +109,17 @@
             </div>
             <div class="modal-body">
                 <ol class="list-group list-group-numbered list-group-horizontal mb-4" id="fulfillStepper">
+                    {% if showClientModal %}
                     <li class="list-group-item bg-secondary text-light flex-fill active" data-step="1">Client</li>
-                    <li class="list-group-item bg-dark text-muted border-secondary flex-fill" data-step="2">Payment</li>
-                    <li class="list-group-item bg-dark text-muted border-secondary flex-fill" data-step="3">Confirm</li>
+                    {% endif %}
+                    <li class="list-group-item {% if not showClientModal %}bg-secondary text-light flex-fill active{% else %}bg-dark text-muted border-secondary flex-fill{% endif %}" data-step="{% if showClientModal %}2{% else %}1{% endif %}">Payment</li>
+                    <li class="list-group-item bg-dark text-muted border-secondary flex-fill" data-step="{% if showClientModal %}3{% else %}2{% endif %}">Confirm</li>
                 </ol>
 
                 <div id="fulfillError" class="alert alert-danger bg-dark border-danger text-danger d-none" role="alert"></div>
 
-                <section class="fulfill-step" data-step="1">
+                {% if showClientModal %}
+                <section class="fulfill-step active" data-step="1">
                     <h6 class="text-light">Step 1 — Client Information</h6>
                     <p class="text-muted small">Confirm or complete the client data before proceeding.</p>
                     <form id="clientDataForm" autocomplete="off">
@@ -141,9 +144,10 @@
                         </div>
                     </form>
                 </section>
+                {% endif %}
 
-                <section class="fulfill-step d-none" data-step="2">
-                    <h6 class="text-light">Step 2 — Deposit Payment</h6>
+                <section class="fulfill-step {% if not showClientModal %}active{% else %}d-none{% endif %}" data-step="{% if showClientModal %}2{% else %}1{% endif %}">
+                    <h6 class="text-light">Step {% if showClientModal %}2{% else %}1{% endif %} — Deposit Payment</h6>
                     <p class="text-muted small">Select the payment method. The deposit amount is fixed.</p>
                     <form id="paymentForm" autocomplete="off">
                         <div class="row g-3">
@@ -165,13 +169,13 @@
                     </form>
                 </section>
 
-                <section class="fulfill-step d-none" data-step="3">
-                    <h6 class="text-light">Step 3 — Review & Confirm</h6>
+                <section class="fulfill-step d-none" data-step="{% if showClientModal %}3{% else %}2{% endif %}">
+                    <h6 class="text-light">Step {% if showClientModal %}3{% else %}2{% endif %} — Review & Confirm</h6>
                     <p class="text-muted small">Verify the payment has been received and the data is correct before fulfilling.</p>
                     <table class="table table-borderless text-light">
                         <tbody>
                             <tr><th>Reservation</th><td>{{ reservation.code }}</td></tr>
-                            <tr><th>Client</th><td><span id="confirmClientName">—</span></td></tr>
+                            <tr><th>Client</th><td><span id="confirmClientName">{% if showClientModal %}—{% else %}— (already on file) —{% endif %}</span></td></tr>
                             <tr><th>Edition</th><td>{{ reservation.editionName | default("N/A") }}</td></tr>
                             <tr><th>Deposit</th><td>$<span id="confirmAmount">0.00</span></td></tr>
                             <tr><th>Method</th><td><span id="confirmMethod">—</span></td></tr>

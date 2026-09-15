@@ -5,6 +5,7 @@ import com.library.reservation.domain.exception.ReservationNotFoundException;
 import com.library.reservation.domain.model.Reservation;
 import com.library.reservation.domain.model.ReservationStatus;
 import com.library.reservation.domain.port.out.PaymentRecorder;
+import com.library.reservation.domain.port.out.ReservationPolicyProvider;
 import com.library.reservation.domain.port.out.ReservationRepository;
 import com.library.stock.domain.model.StockItemState;
 import com.library.stock.domain.port.out.StockItemRepository;
@@ -17,13 +18,16 @@ public class FulfillReservationUseCase {
     private final ReservationRepository reservationRepository;
     private final StockItemRepository stockItemRepository;
     private final PaymentRecorder paymentRecorder;
+    private final ReservationPolicyProvider policyProvider;
 
     public FulfillReservationUseCase(ReservationRepository reservationRepository,
                                      StockItemRepository stockItemRepository,
-                                     PaymentRecorder paymentRecorder) {
+                                     PaymentRecorder paymentRecorder,
+                                     ReservationPolicyProvider policyProvider) {
         this.reservationRepository = reservationRepository;
         this.stockItemRepository = stockItemRepository;
         this.paymentRecorder = paymentRecorder;
+        this.policyProvider = policyProvider;
     }
 
     public void execute(FulfillReservationCommand command) {

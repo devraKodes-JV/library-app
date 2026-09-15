@@ -9,13 +9,14 @@ import com.library.reservation.application.dto.command.reservation.CreateReserva
 import com.library.reservation.application.dto.response.reservation.ReservationResponseDTO;
 import com.library.reservation.application.service.reservation.CreateReservationUseCase;
 import com.library.reservation.application.service.reservation.ListReservationsUseCase;
+import com.library.reservation.domain.exception.ReservationLimitExceededException;
 import com.library.reservation.domain.exception.ValidationException;
 import com.library.kernel.web.WebControllerContext;
 import com.library.stock.application.dto.StockItemDTO;
 import com.library.stock.application.service.stockitem.ListStockItemsUseCase;
 
 import io.javalin.http.Context;
-import com.library.kernel.web.BaseController;
+import com.library.kernel.web.BaseController;;
 
 public class CreateReservationController extends BaseController {
 
@@ -71,6 +72,15 @@ public class CreateReservationController extends BaseController {
                     "stockItems", stockItems));
             model.putAll(e.getFieldErrors());
             ctx.render("reservation/reservations/form", model);
+            return;
+        } catch (ReservationLimitExceededException e) {
+            flashDanger(ctx, e.getMessage());
+            ctx.redirect("/reservations/new");
+            return;
+        } catch (IllegalStateException e) {
+            flashDanger(ctx, e.getMessage());
+            ctx.redirect("/reservations/new");
+            return;
         }
     }
 

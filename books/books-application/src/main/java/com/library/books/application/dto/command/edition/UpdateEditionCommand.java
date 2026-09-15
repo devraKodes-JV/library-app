@@ -1,5 +1,6 @@
 package com.library.books.application.dto.command.edition;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 public record UpdateEditionCommand(
@@ -12,6 +13,7 @@ public record UpdateEditionCommand(
         Integer pages,
         Integer publicationYear,
         String editionNumber,
+        BigDecimal dailyPrice,
         List<String> authorIds,
         List<String> authorRoleIds) {
 }

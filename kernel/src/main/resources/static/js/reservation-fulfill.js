@@ -58,6 +58,7 @@
             stepEls.forEach(function(s) {
                 var n = parseInt(s.getAttribute('data-step'), 10);
                 s.classList.toggle('d-none', n !== currentStep);
+                s.classList.toggle('active', n === currentStep);
             });
             if (stepper) {
                 stepper.querySelectorAll('li').forEach(function(li) {
@@ -83,12 +84,12 @@
                 var name = nameEl ? nameEl.value.trim() : '';
                 console.log('[fulfill] validate step1 needsClient=true name=', name);
                 if (!name) { showError('Full name is required.'); return false; }
-            } else if (currentStep === 2) {
+            } else if (currentStep === (opts.needsClient ? 2 : 1)) {
                 var amtEl = document.getElementById('depositAmount');
                 var amt = amtEl ? (amtEl.getAttribute('data-raw') || '').trim() : '';
                 var methodEl = document.getElementById('paymentMethod');
                 var method = methodEl ? methodEl.value.trim() : '';
-                console.log('[fulfill] validate step2 amt=', amt, 'method=', method);
+                console.log('[fulfill] validate step', currentStep, 'amt=', amt, 'method=', method);
                 if (amt === '' || isNaN(parseFloat(amt)) || parseFloat(amt) < 0) {
                     showError('Deposit amount is required.'); return false;
                 }
@@ -102,7 +103,10 @@
             var cm = document.getElementById('confirmMethod');
             if (opts.needsClient && cf) cf.textContent = document.getElementById('clientFullName').value.trim();
             if (!opts.needsClient && cf) cf.textContent = '— (already on file) —';
-            if (ca) ca.textContent = parseFloat(document.getElementById('depositAmount').value).toFixed(2);
+            if (ca) {
+                var raw = document.getElementById('depositAmount').getAttribute('data-raw');
+                ca.textContent = raw ? parseFloat(raw).toFixed(2) : '0.00';
+            }
             if (cm) cm.textContent = document.getElementById('paymentMethod').value;
         }
 
@@ -171,6 +175,10 @@
         var clientId = btn.getAttribute('data-client-id');
         var needsClient = btn.getAttribute('data-needs-client') === 'true';
 
+        // Count actual steps in the modal
+        var stepItems = modalEl.querySelectorAll('.fulfill-step');
+        var totalSteps = stepItems.length;
+
         var wizard = bindWizard({
             btn: btn,
             modalEl: modalEl,
@@ -182,7 +190,7 @@
             confirmedCheckbox: document.getElementById('fulfillPaymentConfirmed'),
             reservationId: reservationId,
             needsClient: needsClient,
-            totalSteps: 3,
+            totalSteps: totalSteps,
             shouldAutoOpen: function() {
                 return new URLSearchParams(window.location.search).get('wizard') === 'fulfill';
             }

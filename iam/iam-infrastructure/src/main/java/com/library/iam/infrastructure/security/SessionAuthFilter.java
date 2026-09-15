@@ -54,6 +54,7 @@ public class SessionAuthFilter {
     private static boolean isPublicPath(String path) {
         return path.equals("/")
                 || path.equals("/login")
+                || path.equals("/landing")
                 || path.equals("/landing.html")
                 || path.startsWith("/catalog")
                 || path.startsWith("/css/")

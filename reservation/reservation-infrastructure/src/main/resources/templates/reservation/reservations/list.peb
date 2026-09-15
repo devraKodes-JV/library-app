@@ -47,7 +47,7 @@
                 {% for reservation in reservations %}
                 <tr>
                     <td><strong>{{ reservation.code }}</strong></td>
-                    <td>{{ reservation.clientName | default("N/A") }}</td>
+                    <td>{{ reservation.clientDni | default("N/A") }}</td>
                     <td>{{ reservation.editionName | default("N/A") }}</td>
                     <td>
                         <span class="badge

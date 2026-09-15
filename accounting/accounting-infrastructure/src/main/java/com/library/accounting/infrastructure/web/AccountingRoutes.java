@@ -3,6 +3,7 @@ package com.library.accounting.infrastructure.web;
 import com.library.accounting.infrastructure.web.controller.balance.BalanceController;
 import com.library.accounting.infrastructure.web.controller.expense.ListExpensesController;
 import com.library.accounting.infrastructure.web.controller.payment.ListPaymentsController;
+import com.library.accounting.infrastructure.web.controller.paymentmethod.PaymentMethodController;
 import com.library.accounting.infrastructure.web.controller.payroll.ListPayrollController;
 
 import io.javalin.config.JavalinConfig;
@@ -15,7 +16,8 @@ public final class AccountingRoutes {
                                 ListPaymentsController listPaymentsController,
                                 ListPayrollController listPayrollController,
                                 ListExpensesController listExpensesController,
-                                BalanceController balanceController) {
+                                BalanceController balanceController,
+                                PaymentMethodController paymentMethodController) {
 
         config.routes.get("/accounting/payments", listPaymentsController::listPayments);
         config.routes.get("/accounting/payments/new", listPaymentsController::showCreateForm);
@@ -30,5 +32,10 @@ public final class AccountingRoutes {
         config.routes.post("/accounting/expenses", listExpensesController::createExpense);
 
         config.routes.get("/accounting/balance", balanceController::showBalance);
+
+        config.routes.get("/accounting/payment-methods", paymentMethodController::listPaymentMethods);
+        config.routes.get("/accounting/payment-methods/new", paymentMethodController::showCreateForm);
+        config.routes.post("/accounting/payment-methods", paymentMethodController::createPaymentMethod);
+        config.routes.post("/accounting/payment-methods/{id}/delete", paymentMethodController::deletePaymentMethod);
     }
 }

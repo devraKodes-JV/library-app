@@ -49,6 +49,18 @@
         </dependency>
 
         <dependency>
+            <groupId>com.library</groupId>
+            <artifactId>config-application</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.library</groupId>
+            <artifactId>accounting-application</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
             <groupId>io.javalin</groupId>
             <artifactId>javalin</artifactId>
         </dependency>

@@ -7,6 +7,7 @@ import com.library.kernel.web.BaseController;
 import com.library.kernel.web.WebControllerContext;
 import com.library.stock.application.dto.StockItemDTO;
 import com.library.stock.application.service.stockitem.ListStockItemsUseCase;
+import com.library.stock.domain.port.out.StockLocationRepository;
 import com.library.stock.infrastructure.web.EditionNamesProvider;
 
 import io.javalin.http.Context;
@@ -15,13 +16,16 @@ public class ListStockItemsController extends BaseController {
 
     private final ListStockItemsUseCase listStockItemsUseCase;
     private final EditionNamesProvider editionNamesProvider;
+    private final StockLocationRepository stockLocationRepository;
 
     public ListStockItemsController(ListStockItemsUseCase listStockItemsUseCase,
-                                    EditionNamesProvider editionNamesProvider,
-                                    WebControllerContext webContext) {
+                                     EditionNamesProvider editionNamesProvider,
+                                     StockLocationRepository stockLocationRepository,
+                                     WebControllerContext webContext) {
         super(webContext);
         this.listStockItemsUseCase = listStockItemsUseCase;
         this.editionNamesProvider = editionNamesProvider;
+        this.stockLocationRepository = stockLocationRepository;
     }
 
     public void listStockItems(Context ctx) {
@@ -29,9 +33,11 @@ public class ListStockItemsController extends BaseController {
         String status = ctx.queryParamAsClass("status", String.class).getOrDefault("active");
         Map<Long, String> editionNames = editionNamesProvider.getEditionNames("all");
         List<StockItemDTO> items = listStockItemsUseCase.execute(status, editionNames);
+        List<com.library.stock.domain.model.StockLocation> locations = stockLocationRepository.findAll("active");
         ctx.render("stock/items/list", buildListModel(ctx, Map.of(
                 "items", items,
-                "status", status)));
+                "status", status,
+                "locations", locations)));
     }
 
     private Map<String, Object> buildListModel(Context ctx, Map<String, Object> extra) {

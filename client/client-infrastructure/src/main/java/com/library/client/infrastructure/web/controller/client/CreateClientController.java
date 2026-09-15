@@ -49,11 +49,16 @@ public class CreateClientController extends BaseController {
             createClientUseCase.execute(command);
             flashSuccess(ctx, "Client created successfully.");
             ctx.redirect("/clients");
-        } catch (ValidationException e) {
+} catch (ValidationException e) {
             List<ClientResponseDTO> clients = listClientsUseCase.execute();
             Map<String, Object> model = buildCreateModel(ctx, Map.of("clients", clients));
             model.putAll(e.getFieldErrors());
             ctx.render("client/clients/form", model);
+            return;
+        } catch (RuntimeException e) {
+            flashDanger(ctx, "Could not create client: " + e.getMessage());
+            ctx.redirect("/clients/new");
+            return;
         }
     }
 

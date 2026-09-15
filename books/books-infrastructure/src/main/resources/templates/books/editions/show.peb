@@ -70,6 +70,9 @@
             <dt class="col-sm-3 text-muted">Pages</dt>
             <dd class="col-sm-9">{{ edition.pages }}</dd>
             {% endif %}
+
+            <dt class="col-sm-3 text-muted">Daily Price</dt>
+            <dd class="col-sm-9">${{ edition.dailyPrice }}</dd>
         </dl>
     </div>
 </div>

@@ -30,7 +30,9 @@
         <module>stock</module>
         <module>client</module>
         <module>reservation</module>
+        <module>catalog</module>
         <module>accounting</module>
+        <module>config</module>
         <module>bootstrap</module>
     </modules>
 

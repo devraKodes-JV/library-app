@@ -80,6 +80,9 @@ public class ReservationEntity extends AuditableEntity implements Serializable {
     @Column(name = "late_fee_total", precision = 10, scale = 2)
     private BigDecimal lateFeeTotal;
 
+    @Column(name = "daily_price", precision = 10, scale = 2)
+    private BigDecimal dailyPrice;
+
     @Column(name = "renewal_count")
     private Integer renewalCount;
 
@@ -94,13 +97,14 @@ public class ReservationEntity extends AuditableEntity implements Serializable {
     public ReservationEntity() {
     }
 
-    public ReservationEntity(Long id, String code, Long clientId, Long editionId, Long stockItemId,
-                             ReservationStatus status, Integer depositPercentage, BigDecimal depositAmount,
-                             boolean depositPaid, BigDecimal totalAmount, BigDecimal totalPaid,
-                             Instant reservationDate, LocalDate pickupDeadline, Instant pickupDate,
-                             LocalDate dueDate, Instant returnDate, BigDecimal lateFeePerDay,
-                             BigDecimal lateFeeTotal, Integer renewalCount, Integer maxRenewals,
-                             String notes, boolean enabled) {
+public ReservationEntity(Long id, String code, Long clientId, Long editionId, Long stockItemId,
+                              ReservationStatus status, Integer depositPercentage, BigDecimal depositAmount,
+                              boolean depositPaid, BigDecimal totalAmount, BigDecimal totalPaid,
+                              Instant reservationDate, LocalDate pickupDeadline, Instant pickupDate,
+                              LocalDate dueDate, Instant returnDate, BigDecimal lateFeePerDay,
+                              BigDecimal lateFeeTotal, BigDecimal dailyPrice,
+                              Integer renewalCount, Integer maxRenewals,
+                              String notes, boolean enabled) {
         this.id = id;
         this.code = code;
         this.clientId = clientId;
@@ -119,6 +123,7 @@ public class ReservationEntity extends AuditableEntity implements Serializable {
         this.returnDate = returnDate;
         this.lateFeePerDay = lateFeePerDay;
         this.lateFeeTotal = lateFeeTotal;
+        this.dailyPrice = dailyPrice;
         this.renewalCount = renewalCount;
         this.maxRenewals = maxRenewals;
         this.notes = notes;
@@ -176,9 +181,10 @@ public class ReservationEntity extends AuditableEntity implements Serializable {
     public BigDecimal getLateFeePerDay() { return lateFeePerDay; }
     public void setLateFeePerDay(BigDecimal lateFeePerDay) { this.lateFeePerDay = lateFeePerDay; }
 
-    public BigDecimal getLateFeeTotal() { return lateFeeTotal; }
+public BigDecimal getLateFeeTotal() { return lateFeeTotal; }
     public void setLateFeeTotal(BigDecimal lateFeeTotal) { this.lateFeeTotal = lateFeeTotal; }
-
+    public BigDecimal getDailyPrice() { return dailyPrice; }
+    public void setDailyPrice(BigDecimal dailyPrice) { this.dailyPrice = dailyPrice; }
     public Integer getRenewalCount() { return renewalCount; }
     public void setRenewalCount(Integer renewalCount) { this.renewalCount = renewalCount; }
 

@@ -2,11 +2,16 @@ package com.library.reservation.application.service.reservation;
 
 import com.library.iam.domain.model.NotificationEvent;
 import com.library.iam.domain.port.out.NotificationService;
+import com.library.books.domain.port.out.EditionRepository;
+import com.library.client.domain.model.Client;
+import com.library.client.domain.port.out.ClientRepository;
 import com.library.reservation.application.dto.command.reservation.CreateReservationCommand;
 import com.library.reservation.application.dto.response.reservation.ReservationResponseDTO;
 import com.library.reservation.application.validation.ReservationValidator;
+import com.library.reservation.domain.exception.ReservationLimitExceededException;
 import com.library.reservation.domain.model.Reservation;
 import com.library.reservation.domain.model.ReservationStatus;
+import com.library.reservation.domain.port.out.ReservationPolicyProvider;
 import com.library.reservation.domain.port.out.ReservationRepository;
 import com.library.kernel.generation.CodeGenerationService;
 import com.library.kernel.loan.LoanPolicy;
@@ -27,19 +32,28 @@ public class CreateReservationUseCase {
     private final LoanPolicy loanPolicy;
     private final StockItemRepository stockItemRepository;
     private final NotificationService notificationService;
+    private final ReservationPolicyProvider policyProvider;
+    private final ClientRepository clientRepository;
+    private final EditionRepository editionRepository;
 
     public CreateReservationUseCase(ReservationRepository reservationRepository,
                                     ReservationValidator validator,
                                     CodeGenerationService codeGenerationService,
                                     LoanPolicy loanPolicy,
                                     StockItemRepository stockItemRepository,
-                                    NotificationService notificationService) {
+                                    NotificationService notificationService,
+                                    ReservationPolicyProvider policyProvider,
+                                    ClientRepository clientRepository,
+                                    EditionRepository editionRepository) {
         this.reservationRepository = reservationRepository;
         this.validator = validator;
         this.codeGenerationService = codeGenerationService;
         this.loanPolicy = loanPolicy;
         this.stockItemRepository = stockItemRepository;
         this.notificationService = notificationService;
+        this.policyProvider = policyProvider;
+        this.clientRepository = clientRepository;
+        this.editionRepository = editionRepository;
     }
 
     public ReservationResponseDTO execute(CreateReservationCommand command) {
@@ -47,12 +61,19 @@ public class CreateReservationUseCase {
     }
 
     public ReservationResponseDTO execute(CreateReservationCommand command, Long stockItemId) {
+        Client client = clientRepository.findById(command.clientId())
+                .orElseThrow(() -> new IllegalArgumentException("Client not found"));
+        if (clientRepository.countActiveReservations(command.clientId()) >= loanPolicy.maxActiveReservations(client.getType().name())) {
+            throw new ReservationLimitExceededException(
+                    "Client has reached the maximum number of active reservations for " + client.getType());
+        }
+
         String code = codeGenerationService.generate("RES");
         while (reservationRepository.findByCode(code).isPresent()) {
             code = codeGenerationService.generate("RES");
         }
 
-        int loanDays = command.loanDays() != null ? command.loanDays() : 7;
+        int loanDays = command.loanDays() != null ? command.loanDays() : policyProvider.getDefaultLoanDays();
 
         StockItem selectedItem;
         if (stockItemId != null) {
@@ -69,15 +90,21 @@ public class CreateReservationUseCase {
             selectedItem = availableItems.get(0);
         }
 
-        BigDecimal dailyPrice = selectedItem.getDailyPrice() != null ? selectedItem.getDailyPrice() : BigDecimal.TEN;
+        BigDecimal dailyPrice = editionRepository.findById(selectedItem.getEditionId())
+                .map(edition -> edition.getDailyPrice())
+                .filter(price -> price != null)
+                .orElseGet(() -> selectedItem.getDailyPrice() != null
+                        ? selectedItem.getDailyPrice()
+                        : BigDecimal.TEN);
         BigDecimal totalAmount = dailyPrice.multiply(BigDecimal.valueOf(loanDays));
 
-        int depositPercentage = 50;
+        int depositPercentage = policyProvider.getDefaultDepositPercentage();
         BigDecimal depositAmount = totalAmount
                 .multiply(BigDecimal.valueOf(depositPercentage))
                 .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
 
-        LocalDate pickupDeadline = LocalDate.now().plusDays(3);
+        java.time.LocalDateTime pickupDeadlineDateTime = java.time.LocalDateTime.now().plusHours(policyProvider.getPickupDeadlineHours());
+        LocalDate pickupDeadline = pickupDeadlineDateTime.toLocalDate();
         LocalDate dueDate = LocalDate.now().plusDays(loanDays);
 
         Reservation reservation = Reservation.withoutId(
@@ -91,8 +118,9 @@ public class CreateReservationUseCase {
                 totalAmount,
                 pickupDeadline,
                 dueDate,
+                policyProvider.getDefaultLateFeePerDay(),
                 dailyPrice,
-                loanPolicy.maxRenewals("CASUAL"));
+                policyProvider.getDefaultMaxRenewals());
 
         reservation.setNotes(command.notes());
         reservation.setReservationDate(Instant.now());

@@ -6,10 +6,13 @@ import java.util.List;
 import java.util.Map;
 
 import com.library.accounting.application.dto.command.expense.CreateExpenseCommand;
+import com.library.accounting.application.dto.response.expense.ExpenseResponseDTO;
 import com.library.accounting.application.service.expense.CreateExpenseUseCase;
 import com.library.accounting.application.service.expense.ListExpensesUseCase;
+import com.library.accounting.application.service.paymentmethod.ListPaymentMethodsUseCase;
 import com.library.accounting.domain.model.expense.Expense;
 import com.library.accounting.domain.model.expense.ExpenseCategory;
+import com.library.accounting.infrastructure.persistence.mapper.ExpenseMapper;
 import com.library.kernel.web.BaseController;
 import com.library.kernel.web.WebControllerContext;
 
@@ -19,28 +22,35 @@ public class ListExpensesController extends BaseController {
 
     private final ListExpensesUseCase listExpensesUseCase;
     private final CreateExpenseUseCase createExpenseUseCase;
+    private final ListPaymentMethodsUseCase listPaymentMethodsUseCase;
 
     public ListExpensesController(ListExpensesUseCase listExpensesUseCase,
-                                  CreateExpenseUseCase createExpenseUseCase,
-                                  WebControllerContext webContext) {
+                                   CreateExpenseUseCase createExpenseUseCase,
+                                   ListPaymentMethodsUseCase listPaymentMethodsUseCase,
+                                   WebControllerContext webContext) {
         super(webContext);
         this.listExpensesUseCase = listExpensesUseCase;
         this.createExpenseUseCase = createExpenseUseCase;
+        this.listPaymentMethodsUseCase = listPaymentMethodsUseCase;
     }
 
     public void listExpenses(Context ctx) {
         requireCan(ctx, "accounting.expenses.read");
         List<Expense> expenses = listExpensesUseCase.execute();
-        ctx.render("accounting/expenses/list", buildModel(ctx, Map.of(
-                "expenses", expenses,
+        List<ExpenseResponseDTO> expenseDTOs = expenses.stream()
+                .map(ExpenseMapper::toDTO)
+                .toList();
+        ctx.render("accounting/expenses/list", buildListModel(ctx, Map.of(
+                "expenses", expenseDTOs,
                 "categories", ExpenseCategory.values(),
                 "canCreate", hasPermission(ctx, "accounting.expenses.create"))));
     }
 
     public void showCreateForm(Context ctx) {
         requireCan(ctx, "accounting.expenses.create");
-        ctx.render("accounting/expenses/form", buildModel(ctx, Map.of(
-                "categories", ExpenseCategory.values())));
+        ctx.render("accounting/expenses/form", buildListModel(ctx, Map.of(
+                "categories", ExpenseCategory.values(),
+                "paymentMethods", listPaymentMethodsUseCase.execute())));
     }
 
     public void createExpense(Context ctx) {
@@ -61,18 +71,19 @@ public class ListExpensesController extends BaseController {
             flashSuccess(ctx, "Expense recorded successfully.");
             ctx.redirect("/accounting/expenses");
         } catch (IllegalArgumentException e) {
-            ctx.render("accounting/expenses/form", buildModel(ctx, Map.of(
+            ctx.render("accounting/expenses/form", buildListModel(ctx, Map.of(
                     "categories", ExpenseCategory.values(),
+                    "paymentMethods", listPaymentMethodsUseCase.execute(),
                     "error", e.getMessage())));
         }
     }
 
-    private Map<String, Object> buildModel(Context ctx, Map<String, Object> extra) {
+    private Map<String, Object> buildListModel(Context ctx, Map<String, Object> extra) {
         var current = currentUser(ctx);
-        List<?> sections = navSections(ctx);
+        List<?> navSections = navSections(ctx);
         Map<String, Object> model = new java.util.LinkedHashMap<>();
         model.put("user", current);
-        model.put("navSections", sections);
+        model.put("navSections", navSections);
         model.putAll(extra);
         return model;
     }

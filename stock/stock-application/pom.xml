@@ -29,6 +29,12 @@
 
         <dependency>
             <groupId>com.library</groupId>
+            <artifactId>books-domain</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.library</groupId>
             <artifactId>kernel</artifactId>
             <version>${project.version}</version>
         </dependency>

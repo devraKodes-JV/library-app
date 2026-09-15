@@ -59,9 +59,10 @@
             <div class="mb-3">
                 <label for="paymentMethod" class="form-label">Payment Method</label>
                 <select class="form-select bg-dark border-secondary text-light" id="paymentMethod" name="paymentMethod">
-                    <option value="BANK_TRANSFER">Bank Transfer</option>
-                    <option value="CASH">Cash</option>
-                    <option value="OTHER">Other</option>
+                    <option value="">-- Select --</option>
+                    {% for pm in paymentMethods %}
+                    <option value="{{ pm.code }}">{{ pm.name }}</option>
+                    {% endfor %}
                 </select>
             </div>
             <div class="mb-3">

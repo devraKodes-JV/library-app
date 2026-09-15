@@ -6,6 +6,7 @@ import com.library.client.infrastructure.web.controller.client.DeleteClientContr
 import com.library.client.infrastructure.web.controller.client.ListClientsController;
 import com.library.client.infrastructure.web.controller.client.ReactivateClientController;
 import com.library.client.infrastructure.web.controller.client.ShowClientController;
+import com.library.client.infrastructure.web.controller.client.UpgradeClientController;
 import com.library.client.infrastructure.web.controller.client.UpdateClientController;
 
 import io.javalin.config.JavalinConfig;
@@ -22,6 +23,7 @@ public final class ClientRoutes {
                                 UpdateClientController updateClientController,
                                 DeleteClientController deleteClientController,
                                 ReactivateClientController reactivateClientController,
+                                UpgradeClientController upgradeClientController,
                                 AjaxUpdateClientController ajaxUpdateClientController) {
 
         config.routes.get("/clients", listClientsController::listClients);
@@ -32,6 +34,7 @@ public final class ClientRoutes {
         config.routes.post("/clients/{id}", updateClientController::updateClient);
         config.routes.post("/clients/{id}/delete", deleteClientController::deleteClient);
         config.routes.post("/clients/{id}/reactivate", reactivateClientController::reactivateClient);
+        config.routes.post("/clients/{id}/upgrade", upgradeClientController::upgrade);
 
         config.routes.post("/api/clients/{id}/update", ajaxUpdateClientController::updateClientAjax);
     }

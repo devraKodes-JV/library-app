@@ -36,12 +36,12 @@
             <div class="row">
                 <div class="col-md-6 mb-3">
                     <label for="paymentMethod" class="form-label">Payment Method *</label>
-                    <select class="form-select bg-dark border-secondary text-light" id="paymentMethod" name="paymentMethod" required>
-                        <option value="CASH">Cash</option>
-                        <option value="CARD">Card</option>
-                        <option value="BANK_TRANSFER">Bank Transfer</option>
-                        <option value="OTHER">Other</option>
-                    </select>
+                     <select class="form-select bg-dark border-secondary text-light" id="paymentMethod" name="paymentMethod" required>
+                         <option value="">-- Select --</option>
+                         {% for pm in paymentMethods %}
+                         <option value="{{ pm.code }}">{{ pm.name }}</option>
+                         {% endfor %}
+                     </select>
                 </div>
                 <div class="col-md-6 mb-3">
                     <label for="category" class="form-label">Category</label>
