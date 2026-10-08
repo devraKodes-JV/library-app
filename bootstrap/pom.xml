@@ -15,7 +15,7 @@
     <parent>
         <groupId>com.library</groupId>
         <artifactId>library-ultimate</artifactId>
-        <version>1.0.0</version>
+        <version>0.1.0-beta</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -105,11 +105,26 @@
             <artifactId>slf4j-api</artifactId>
         </dependency>
 
+        <!-- JmDNS: advertises Librora on the local network via mDNS. -->
+        <dependency>
+            <groupId>org.jmdns</groupId>
+            <artifactId>jmdns</artifactId>
+        </dependency>
+
         <!-- SLF4J simple implementation: prints logs to the console. -->
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-simple</artifactId>
             <scope>runtime</scope>
+        </dependency>
+
+        <!--
+            BouncyCastle PKIX/CMS: used by TlsSupport to generate the per-machine
+            self-signed certificate that backs the HTTPS listener.
+        -->
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcpkix-jdk18on</artifactId>
         </dependency>
 
         <!-- JUnit 5 for tests. -->

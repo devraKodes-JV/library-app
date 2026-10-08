@@ -97,6 +97,19 @@ surefire-reports/
 jacoco.exec
 
 # --------------------------
+# Datos locales de ejecución
+# --------------------------
+# Base de datos H2, subidas y el keystore TLS con la clave privada
+# que genera TlsSupport en el primer arranque. Nada de esto va al repo.
+data/
+*.p12
+*.pass
+*.jks
+
+# AppImage extraction/debug leftovers (172 MB each)
+squashfs-root/
+
+# --------------------------
 # Sistema Operativo
 # --------------------------
 .DS_Store

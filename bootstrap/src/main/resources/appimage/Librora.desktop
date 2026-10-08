@@ -1,0 +1,12 @@
+[Desktop Entry]
+Name=Librora
+GenericName=Librería
+Comment=Sistema de gestión bibliotecaria
+Exec=AppRun
+Icon=Librora
+Terminal=false
+Type=Application
+Categories=Office;
+Version=0.1.0-beta
+StartupNotify=true
+X-AppImage-Integrate=true

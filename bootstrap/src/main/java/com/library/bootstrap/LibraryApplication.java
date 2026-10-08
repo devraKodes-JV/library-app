@@ -1,92 +1,95 @@
 package com.library.bootstrap;
 
-import java.awt.Desktop;
+import java.io.IOException;
 import java.net.InetAddress;
-import java.net.URI;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-
-
-import org.hibernate.SessionFactory;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
+import javax.swing.SwingUtilities;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import com.library.bootstrap.config.AppConfig;
-import com.library.bootstrap.config.FlywayMigrations;
-import com.library.bootstrap.config.JavalinStart;
-import com.library.bootstrap.config.hibernate.HibernateConfiguration;
-import com.library.bootstrap.factory.AppFactory;
-import com.library.bootstrap.factory.IamFactory;
-import com.library.bootstrap.scheduler.MembershipExpiryScheduler;
-import com.library.bootstrap.upload.ImageStorage;
-import com.library.iam.domain.port.out.UserPort;
-import com.library.iam.infrastructure.security.BouncyCastleArgon2PasswordHasher;
 
 public class LibraryApplication {
+
+    // Runs before the `log` field below: slf4j-simple reads its configuration on
+    // first use, so the log file has to be configured before any logger exists.
+    static {
+        configureFileLogging();
+    }
 
     private static final Logger log = LoggerFactory.getLogger(LibraryApplication.class);
 
     private LibraryApplication() {
     }
 
-    public static void main(String[] args) throws Exception {
-        ImageStorage.init();
-        FlywayMigrations.run(log);
-
-        SessionFactory sessionFactory
-                = HibernateConfiguration.buildHibernateConfiguration().buildSessionFactory();
-
-        seedDefaultPasswords(sessionFactory);
-
-        JavalinStart.run(sessionFactory, log);
-
-        ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor(r -> {
-            Thread t = new Thread(r, "membership-expiry-scheduler");
-            t.setDaemon(true);
-            return t;
+    public static void main(String[] args) {
+        ensureHostsEntry();
+        SwingUtilities.invokeLater(() -> {
+            new ServerWindow().setVisible(true);
         });
-        scheduler.scheduleAtFixedRate(
-                () -> MembershipExpiryScheduler.run(sessionFactory),
-                1, 60, TimeUnit.MINUTES);
-
-        String host = InetAddress.getLocalHost().getHostAddress();
-        String url = "http://" + host + ":" + AppConfig.PORT + "/login";
-        log.info("Application started at {}", url);
-        openBrowser(url);
     }
 
-    private static void openBrowser(String url) {
+    /**
+     * Mirrors the console output into {@code ./data/librora.log}.
+     *
+     * <p>On Windows and macOS the packaged app has no console window, so without
+     * this there would be no way to diagnose a failed start on the user's
+     * machine.</p>
+     */
+    private static void configureFileLogging() {
         try {
-            if (Desktop.isDesktopSupported()) {
-                Desktop.getDesktop().browse(URI.create(url));
-            } else {
-                log.info("Desktop not supported; open manually: {}", url);
-            }
+            java.nio.file.Path dir = java.nio.file.Path.of("data");
+            java.nio.file.Files.createDirectories(dir);
+            String logFile = dir.resolve("librora.log").toAbsolutePath().toString();
+            System.setProperty("org.slf4j.simpleLogger.logFile", logFile);
+            System.setProperty("org.slf4j.simpleLogger.dateTimeFormat", "yyyy-MM-dd HH:mm:ss");
+            System.setProperty("org.slf4j.simpleLogger.showThreadName", "false");
         } catch (Exception e) {
-            log.warn("Could not open browser automatically: {}", e.getMessage());
+            // Non-fatal: console output still works.
+            System.err.println("Could not configure file logging: " + e.getMessage());
         }
     }
 
-    private static void seedDefaultPasswords(SessionFactory sessionFactory) {
+    private static void ensureHostsEntry() {
+        // When launched from the AppImage the AppRun script already performs the
+        // full DNS/mDNS setup (avahi *and* the /etc/hosts fallback), so the Java
+        // side must not repeat it.
+        if (System.getenv("APPIMAGE") != null) {
+            log.info("Running inside AppImage: DNS handled by AppRun.");
+            return;
+        }
         try {
-            UserPort userPort = IamFactory.userPort(sessionFactory);
-            BouncyCastleArgon2PasswordHasher hasher = new BouncyCastleArgon2PasswordHasher();
-
-            java.util.Map<String, String> defaults = java.util.Map.of(
-                    "admin", "admin123",
-                    "employee", "employee123"
-            );
-
-            for (java.util.Map.Entry<String, String> entry : defaults.entrySet()) {
-                userPort.findByUsername(entry.getKey()).ifPresent(user -> {
-                    String newHash = hasher.hash(entry.getValue());
-                    userPort.updatePassword(entry.getKey(), newHash);
-                    log.info("Default password reset for user={}", entry.getKey());
-                });
+            String localhost = InetAddress.getLocalHost().getHostAddress();
+            Path hosts = Path.of("/etc/hosts");
+            String content = Files.readString(hosts);
+            if (content.contains("librora.local")) {
+                log.info("Hosts entry already exists for librora.local");
+                return;
             }
-        } catch (Exception e) {
-            log.error("Failed to seed default passwords: {}", e.getMessage(), e);
+            // Fall back to /etc/hosts (via sudo) when avahi/sudo is unavailable.
+            List<String> cmd = new ArrayList<>();
+            cmd.add("sudo");
+            cmd.add("-n");
+            cmd.add("bash");
+            cmd.add("-c");
+            cmd.add("printf '%s librora.local\n' '" + localhost + "' >> /etc/hosts");
+            ProcessBuilder pb = new ProcessBuilder(cmd);
+            pb.redirectErrorStream(true);
+            Process proc = pb.start();
+            int rc = proc.waitFor();
+            if (rc == 0) {
+                log.info("Added hosts entry: {} librora.local", localhost);
+            } else {
+                log.warn("Cannot write /etc/hosts without sudo. Run manually: sudo sh -c \"echo '{} librora.local' >> /etc/hosts\". Access via localhost:{} instead.",
+                        localhost, AppConfig.PORT);
+            }
+        } catch (IOException e) {
+            log.warn("Could not determine localhost address: {}", e.getMessage());
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            log.warn("Interrupted while writing hosts entry.");
         }
     }
 }

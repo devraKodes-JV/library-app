@@ -6,7 +6,7 @@
     <parent>
         <groupId>com.library</groupId>
         <artifactId>library-ultimate</artifactId>
-        <version>1.0.0</version>
+        <version>0.1.0-beta</version>
     </parent>
     <artifactId>config-application</artifactId>
     <name>Config Application</name>

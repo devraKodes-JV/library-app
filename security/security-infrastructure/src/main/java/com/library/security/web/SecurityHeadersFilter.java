@@ -34,6 +34,7 @@ public final class SecurityHeadersFilter {
             }
             
             String nonce = ctx.attribute("securityNonce");
+            boolean isHttps = isHttps(ctx);
             
             ctx.header("X-Content-Type-Options", "nosniff");
             ctx.header("X-Frame-Options", "DENY");
@@ -50,8 +51,7 @@ public final class SecurityHeadersFilter {
                 "accelerometer=(), " +
                 "display-capture=()");
             
-            ctx.header("Content-Security-Policy", 
-                "default-src 'none'; " +
+            String csp = "default-src 'none'; " +
                 "script-src 'self' 'nonce-" + nonce + "'; " +
                 "style-src 'self' 'nonce-" + nonce + "'; " +
                 "img-src 'self' data:; " +
@@ -59,10 +59,15 @@ public final class SecurityHeadersFilter {
                 "connect-src 'self' " + getAllowedApiOrigins() + "; " +
                 "frame-ancestors 'none'; " +
                 "form-action 'self'; " +
-                "base-uri 'self'; " +
-                "upgrade-insecure-requests");
+                "base-uri 'self'";
             
-            if (isHttps(ctx)) {
+            if (isHttps) {
+                csp += "; upgrade-insecure-requests";
+            }
+            
+            ctx.header("Content-Security-Policy", csp);
+            
+            if (isHttps) {
                 ctx.header("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload");
             }
             

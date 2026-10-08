@@ -1,0 +1,90 @@
+#!/bin/bash
+# Librora AppRun - application image entry point.
+#
+# Local mDNS setup so http://librora.local resolves from other devices on the
+# LAN, then launches the bundled JVM.
+#
+#   1. Detect if avahi-daemon is running; start it: sudo -n systemctl start avahi-daemon
+#   2. sudo -n avahi-set-host-name librora  (so librora.local => this machine, network-wide)
+#   3. avahi-publish-service -s Librora _http._tcp <port> path=/  (HTTP service)
+#   4. Fallback (sudo): /etc/hosts entry for host-only access.
+#
+# When passwordless sudo is unavailable, steps 2-4 cannot run as root, so the
+# Java app takes over (LIBRORA_DNS=jmix) and advertises librora.local via the
+# bundled pure-Java JmDNS responder (no root required).
+HERE="$(cd "$(dirname "$(readlink -f "$0")")" && pwd)"
+export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:${PATH:-}"
+
+PORT="${LIBRORA_PORT:-8080}"
+export LIBRORA_PORT
+
+# HTTPS port. The app generates a per-machine self-signed certificate on first
+# run and listens here as well, so credentials are never sent in clear text.
+HTTPS_PORT="${LIBRORA_HTTPS_PORT:-8443}"
+export LIBRORA_HTTPS_PORT
+
+# Whether the java side should (jmix) or should not (avahi/hosts) run its own
+# mDNS advertisement. AppRun owns it when avahi succeeded.
+export LIBRORA_DNS="${LIBRORA_DNS:-unset}"
+# Set when passwordless sudo is unavailable but avahi is, so the Java side can
+# offer to run the interactive privileged setup in a terminal.
+export LIBRORA_PRIV_SETUP=0
+
+if [ "$(uname -s)" = "Linux" ] && command -v systemctl >/dev/null 2>&1; then
+    # 1. Detect if avahi-daemon is running; start it with sudo if it is not.
+    if ! pgrep -x avahi-daemon >/dev/null 2>&1; then
+        echo "[Librora] avahi-daemon not running, running: sudo -n systemctl start avahi-daemon"
+        if sudo -n systemctl start avahi-daemon >/dev/null 2>&1; then
+            sleep 2
+        else
+            echo "[Librora] sudo -n systemctl start avahi-daemon failed (passwordless sudo required)."
+        fi
+    fi
+
+    AVAHI_UP=1
+    pgrep -x avahi-daemon >/dev/null 2>&1 || AVAHI_UP=0
+    command -v avahi-publish-service >/dev/null 2>&1 || AVAHI_UP=0
+
+    if [ "$AVAHI_UP" = "1" ]; then
+        # 2. Set the mDNS hostname so librora.local resolves on all devices.
+        if sudo -n avahi-set-host-name librora >/dev/null 2>&1; then
+            echo "[Librora] sudo -n avahi-set-host-name librora: ok - librora.local resolves via mDNS."
+            HOST_OK=1
+        else
+            echo "[Librora] sudo -n avahi-set-host-name librora failed (passwordless sudo required); will use JmDNS instead."
+            HOST_OK=0
+        fi
+
+        if [ "$HOST_OK" = "1" ]; then
+            # 3. Publish the HTTP and HTTPS services via the system avahi daemon (non-root).
+            pkill -f "avahi-publish-service -s Librora" >/dev/null 2>&1 || true
+            nohup avahi-publish-service -s Librora _http._tcp "$PORT" path=/ >/dev/null 2>&1 &
+            nohup avahi-publish-service -s Librora _https._tcp "$HTTPS_PORT" path=/ >/dev/null 2>&1 &
+            echo "[Librora] mDNS services published via avahi - https://librora.local:$HTTPS_PORT (http on $PORT)"
+            export LIBRORA_DNS=avahi
+        else
+            # sudo unavailable: let Java advertise librora.local via JmDNS (no root),
+            # and flag that the interactive privileged setup should be offered.
+            export LIBRORA_DNS=jmix
+            export LIBRORA_PRIV_SETUP=1
+            echo "[Librora] Falling back to JmDNS (sudo-free) for librora.local."
+            echo "[Librora] Tip: run 'librora-avahi-setup.sh' in a terminal (with sudo)"
+            echo "[Librora] to configure librora.local network-wide and persistently."
+        fi
+    else
+        # 4. avahi daemon/tools unavailable: /etc/hosts (via sudo) host-only fallback.
+        echo "[Librora] avahi unavailable; falling back to /etc/hosts entry."
+        ip="$(hostname -I 2>/dev/null | awk '{print $1}')"
+        [ -z "$ip" ] && ip="127.0.0.1"
+        if ! grep -q "librora\.local" /etc/hosts 2>/dev/null; then
+            if sudo -n bash -c "printf '%s librora.local\n' '$ip' >> /etc/hosts" >/dev/null 2>&1; then
+                echo "[Librora] Added /etc/hosts entry: $ip librora.local"
+            else
+                echo "[Librora] sudo needed. Run manually: sudo sh -c \"echo '$ip librora.local' >> /etc/hosts\""
+            fi
+        fi
+        export LIBRORA_DNS=hosts
+    fi
+fi
+
+exec "$HERE/bin/Librora" "$@"

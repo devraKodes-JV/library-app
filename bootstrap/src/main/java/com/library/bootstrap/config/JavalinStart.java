@@ -25,6 +25,7 @@ public class JavalinStart {
     
     public static void run(SessionFactory sessionFactory, Logger log){
         Javalin.create(config -> {
+            config.jetty.host = "0.0.0.0";
             config.staticFiles.add(staticConfig -> {
                 staticConfig.hostedPath = "/";
                 staticConfig.directory = "static";
@@ -51,6 +52,10 @@ public class JavalinStart {
             });
             
             AppFactory.create(sessionFactory, config);
+
+            // Optional HTTPS listener (self-signed, per-machine cert). Falls back to
+            // HTTP-only if the certificate cannot be created.
+            TlsSupport.install(config, log);
 
             config.routes.post("/upload", ctx -> UploadController.uploadImage(ctx));
             config.routes.get("/uploads/{filename}", ctx -> UploadController.serveImage(ctx));
